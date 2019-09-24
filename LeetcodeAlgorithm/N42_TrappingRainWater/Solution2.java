@@ -10,8 +10,8 @@ package LeetcodeAlgorithm.N42_TrappingRainWater;
  *结论：对于每一列，我们求它左边最高的墙和右边最高的墙，都是重新遍历一遍所有高度，这里我们可以优化一下
  *
  * 解法二 解题思路：
- * 1.max_left[i]、 max_right[i]分别代表第 i 列左边和右边最高的墙的高度
- * 2.max_left[i] = Max(max_left[i-1],height[i-1]) 、max_right[i] = Max(max_right[i+1] , height[i+1])
+ * 1.max_left[i]、max_right[i]分别代表第 i 列左边和右边最高的墙的高度
+ * 2.max_left[i] = Max(max_left[i-1],height[i-1])、max_right[i] = Max(max_right[i+1],height[i+1])
  * 3.扫描求水量之和
  *
  * 时间复杂度：三次扫描 3*n，所以是 o（n）          空间复杂度：o(n)
