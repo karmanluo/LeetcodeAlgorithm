@@ -23,6 +23,9 @@ import java.util.*;
 * 1.遍历整个字符串数组
 * 2.每一个字符串排一个序
 * 3.在2中一样的序列，对应的string存进同一个List
+*  假设 N 为strs的长度，str[i]的长度为 K
+ * 时间复杂度分析：O(NKlogK)    排序的时间复杂度为KlogK
+ * 空间复杂度分析：O(NK)
 * */
 class Solution {
     public List<List<String>> groupAnagrams(String[] strs) {
