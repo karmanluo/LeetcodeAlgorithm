@@ -6,6 +6,7 @@ package LeetcodeAlgorithm.N53_MaximumSubarray;
 * */
 public class Solution2 {
     public int maxSubArray(int[] nums) {
+        if(nums == null || nums.length == 0) return 0;
         int dp = nums[0];
         int max = dp;
 
