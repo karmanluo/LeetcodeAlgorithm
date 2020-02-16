@@ -24,6 +24,7 @@ import java.util.Queue;
  * 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
  */
 class Solution {
+    //BFS
     public static int movingCount(int m, int n, int k) {
         Queue<int[]> q = new LinkedList<int[]>();
         q.add(new int[]{0,0});
