@@ -25,7 +25,7 @@ import java.util.Queue;
  */
 class Solution {
     //BFS
-    public static int movingCount(int m, int n, int k) {
+    public int movingCount(int m, int n, int k) {
         Queue<int[]> q = new LinkedList<int[]>();
         q.add(new int[]{0,0});
         int[][] visited = new int[m][n];
@@ -56,7 +56,7 @@ class Solution {
         return count;
     }
 
-    public static void main(String[] args) {
+    public void Test(String[] args) {
         System.out.println(movingCount(3, 3, 4));
     }
 }
