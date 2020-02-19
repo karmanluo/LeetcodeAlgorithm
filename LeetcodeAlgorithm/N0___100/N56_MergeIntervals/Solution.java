@@ -1,4 +1,4 @@
-package LeetcodeAlgorithm.N56_MergeIntervals;
+package LeetcodeAlgorithm.N0___100.N56_MergeIntervals;
 //Given a collection of intervals间隔, merge all overlapping intervals.
 //
 // Example 1:
@@ -18,12 +18,18 @@ package LeetcodeAlgorithm.N56_MergeIntervals;
 * */
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 class Solution {
     public int[][] merge(int[][] intervals) {
         if (intervals.length <= 1)  return intervals;
-        Arrays.sort(intervals, (i1, i2)->Integer.compare(i1[0], i2[0]));
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return Integer.compare(o1[0], o2[0]);
+            }
+        });
 
         List<int[]> res = new ArrayList<>();
         int[] newInterval = intervals[0];
