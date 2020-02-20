@@ -26,8 +26,8 @@ class Solution {
         if (intervals.length <= 1)  return intervals;
         Arrays.sort(intervals, new Comparator<int[]>() {
             @Override
-            public int compare(int[] o1, int[] o2) {
-                return Integer.compare(o1[0], o2[0]);
+            public int compare(int[] a, int[] b) {
+                return  a[0] < b[0] ? -1 : a[0] == b[0] ? 0 : 1;
             }
         });
 
