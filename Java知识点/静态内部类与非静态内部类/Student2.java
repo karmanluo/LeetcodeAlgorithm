@@ -18,7 +18,7 @@ public class Student2 {
     }
 
     public static void setAge(int age) {
-        Student.age = age;
+        Student2.age = age;
     }
 
 
