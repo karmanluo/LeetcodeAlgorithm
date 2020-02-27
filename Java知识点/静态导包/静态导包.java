@@ -1,5 +1,7 @@
 package Java知识点.静态导包;
 
+import java.util.Collections;
+
 import static java.lang.Math.max;
 
 public class 静态导包 {
