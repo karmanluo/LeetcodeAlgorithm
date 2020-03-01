@@ -2742,4 +2742,73 @@ public class Solution {
 解释: 2 与 7 之和等于目标数 9 。因此 index1 = 1, index2 = 2 。
 ```
 
+```java
+class Solution {
+    public int[] twoSum(int[] numbers, int target) {
+        int[] r = new int[2];
+        if (numbers == null || numbers.length < 2)
+            return r;
+        int left = 0, right = numbers.length - 1;
+
+        while (left < right) {
+            int sum = numbers[left] + numbers[right];
+            if (sum == target) {
+                r[0] = left + 1;
+                r[1] = right + 1;
+                break;
+            } else if (sum > target) right--;
+            else left++;
+        }
+
+        return r;
+    }
+}
+```
+
+#### [15. 三数之和(排序+双指针)](https://leetcode-cn.com/problems/3sum/)
+
+给定一个包含 *n* 个整数的数组 `nums`，判断 `nums` 中是否存在三个元素 *a，b，c ，*使得 *a + b + c =* 0 ？找出所有满足条件且不重复的三元组。
+
+**注意：**答案中不可以包含重复的三元组。
+
+**示例：**
+
+```
+给定数组 nums = [-1, 0, 1, 2, -1, -4]，
+
+满足要求的三元组集合为：
+[
+  [-1, 0, 1],
+  [-1, -1, 2]
+]
+```
+
+
+
+```java
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        if (nums == null || nums.length < 3) return res;
+        Arrays.sort(nums);
+        for (int i = 0; i < nums.length - 2 && nums[i] <= 0; i++) {
+            if (i == 0 || (i > 0 && nums[i] != nums[i - 1])) {
+                int lo = i + 1, hi = nums.length - 1, target = 0 - nums[i];
+                while (lo < hi) {
+                    if (target == nums[lo] + nums[hi]) {
+                        res.add(Arrays.asList(nums[i], nums[lo], nums[hi]));
+                        while (lo < hi && nums[lo] == nums[lo + 1]) lo++;
+                        while (lo < hi && nums[hi] == nums[hi - 1]) hi--;
+                        lo++;
+                        hi--;
+                    } else if (target > nums[lo] + nums[hi]) lo++;
+                    else hi--;
+                }
+            }
+        }
+
+        return res;
+    }
+}
+```
 
