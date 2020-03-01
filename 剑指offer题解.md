@@ -492,6 +492,48 @@ class Solution {
 }
 ```
 
+#### [128. 最长连续序列](https://leetcode-cn.com/problems/longest-consecutive-sequence/)
+
+给定一个未排序的整数数组，找出最长连续序列的长度。
+
+要求算法的**时间复杂度为 O(n)。**
+
+示例:
+
+```
+输入: [100, 4, 200, 1, 3, 2]
+输出: 4
+解释: 最长连续序列是 [1, 2, 3, 4]。它的长度为 4。
+```
+
+```java
+public class Solution {
+    public int longestConsecutive(int[] nums) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        int res = 0;
+        for (int num : nums){
+            if (!map.containsKey(num)){
+                int left = (map.containsKey(num - 1)) ? map.get(num - 1) : 0;
+                int right = (map.containsKey(num + 1)) ? map.get(num + 1) : 0;
+                //sum表示num所在序列的长度
+                int sum = left + right + 1;
+                map.put(num, sum);
+
+                res = Math.max(res, sum);
+
+                //将num数所对应的边界值的  长度  也进行更新
+                //如果没有左右边界，不会产生影响
+                map.put(num - left, sum);
+                map.put(num + right, sum);
+            }else {
+                continue;
+            }
+        }
+        return res;
+    }
+}
+```
+
 
 
 
