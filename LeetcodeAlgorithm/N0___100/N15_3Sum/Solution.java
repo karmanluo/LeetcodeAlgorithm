@@ -21,7 +21,7 @@ import java.util.*;
 //
 //
 public class Solution {
-    public List<List<Integer>> threeSum(int[] nums) {
+    public static List<List<Integer>> threeSum(int[] nums) {
         List<List<Integer>> res = new LinkedList<>();
         if (nums == null || nums.length < 3) return res;
         Arrays.sort(nums);
