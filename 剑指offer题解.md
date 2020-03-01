@@ -1903,7 +1903,6 @@ public class Test
 ```
 
 
-
 ```java
 public class 泛型实现最小值函数 {
     private static <T extends Number & Comparable<? super T>>T min(T[] values){
@@ -1922,6 +1921,129 @@ public class 泛型实现最小值函数 {
     }
 }	
 ```
+
+#### [225. 用队列实现栈](https://leetcode-cn.com/problems/implement-stack-using-queues/)
+
+使用队列实现栈的下列操作：
+
+```
+push(x) -- 元素 x 入栈
+pop() -- 移除栈顶元素
+top() -- 获取栈顶元素
+empty() -- 返回栈是否为空
+```
+
+
+注意:
+
+- 你只能使用队列的基本操作-- 也就是 push to back, peek/pop from front, size, 和 is empty 这些操作是合法的。
+- 你所使用的语言也许不支持队列。 你可以使用 list 或者 deque（双端队列）来模拟一个队列 , 只要是标准的队列操作即可。
+- 你可以假设所有操作都是有效的（例如, 对一个空的栈不会调用 pop 或者 top 操作）。
+
+```java
+class MyStack {
+
+    /** Initialize your data structure here. */
+    public MyStack() {
+
+    }
+    
+    /** Push element x onto stack. */
+    public void push(int x) {
+
+    }
+    
+    /** Removes the element on top of the stack and returns that element. */
+    public int pop() {
+
+    }
+    
+    /** Get the top element. */
+    public int top() {
+        
+    }
+    
+    /** Returns whether the stack is empty. */
+    public boolean empty() {
+
+    }
+}
+
+/**
+ * Your MyStack object will be instantiated and called as such:
+ * MyStack obj = new MyStack();
+ * obj.push(x);
+ * int param_2 = obj.pop();
+ * int param_3 = obj.top();
+ * boolean param_4 = obj.empty();
+ */
+```
+
+#### [面试题09. 用两个栈实现队列](https://leetcode-cn.com/problems/yong-liang-ge-zhan-shi-xian-dui-lie-lcof/)
+
+用两个栈实现一个队列。队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1 )
+
+示例 1：
+
+```
+输入：
+["CQueue","appendTail","deleteHead","deleteHead"]
+[[],[3],[],[]]
+输出：[null,null,3,-1]
+```
+
+
+示例 2：
+
+```
+输入：
+["CQueue","deleteHead","appendTail","appendTail","deleteHead","deleteHead"]
+[[],[],[5],[2],[],[]]
+输出：[null,-1,null,null,5,2]
+```
+
+
+提示：
+
+- 1 <= values <= 10000
+- 最多会对 appendTail、deleteHead 进行 10000 次调用
+
+```java
+class CQueue {
+    Stack<Integer> stack1;
+    Stack<Integer> stack2;
+
+    public CQueue() {
+        stack1 = new Stack<>();
+        stack2 = new Stack<>();
+    }
+
+    public void appendTail(int value) {
+        stack1.push(value);
+    }
+
+    public int deleteHead() {
+        if (!stack2.isEmpty()) return stack2.pop();
+        else while (!stack1.isEmpty()) stack2.push(stack1.pop());
+        if (!stack2.isEmpty()) return stack2.pop();
+        else return -1;
+    }
+}
+
+/**
+ * Your CQueue object will be instantiated and called as such:
+ * CQueue obj = new CQueue();
+ * obj.appendTail(value);
+ * int param_2 = obj.deleteHead();
+ */
+```
+
+
+
+
+
+
+
 
 # 中位数/滑动窗口
 
