@@ -3056,6 +3056,7 @@ public class Solution2 {
 
 ```java
 //最优
+//两个指针往中间走，走一个位置算一个位置，走到正中间就结束
 public class Solution3 {
     public int trap(int[] height) {
         int res = 0, max_left = 0, max_right = 0, left = 0, right = height.length - 1;
@@ -3081,3 +3082,88 @@ public class Solution3 {
     }
 }
 ```
+
+# 链表
+
+#### [206. 反转链表](https://leetcode-cn.com/problems/reverse-linked-list/)
+
+反转一个单链表。
+
+**示例:**
+
+```
+输入: 1->2->3->4->5->NULL
+输出: 5->4->3->2->1->NULL
+```
+
+**进阶:**
+你可以迭代或递归地反转链表。你能否用两种方法解决这道题？
+
+```java
+//迭代
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        ListNode curr = head;
+        ListNode pre = null;
+        while(curr != null){
+            ListNode nextNode = curr.next;
+            curr.next = pre;
+            pre = curr;
+            curr = nextNode;
+        }
+        return pre;
+    }
+}
+//递归
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        if(head == null || head.next == null) return head;
+        ListNode p = reverseList(head.next);
+        //注意reverse后的头就是p，p和这里的head.next是不一样的
+        head.next.next = head;
+        head.next = null;
+        return p;
+    }
+}
+```
+
+#### [92. 反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
+
+反转从位置 *m* 到 *n* 的链表。请使用一趟扫描完成反转。
+
+**说明:**
+1 ≤ *m* ≤ *n* ≤ 链表长度。
+
+**示例:**
+
+```
+输入: 1->2->3->4->5->NULL, m = 2, n = 4
+输出: 1->4->3->2->5->NULL
+```
+
+```java
+class Solution {
+     public ListNode reverseBetween(ListNode head, int m, int n) {
+         //必须用dummy，否则会出现pre指向为空的情况，m为1的时候
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        ListNode curr = dummy, pre = null;
+        for (int i = 0; i < m; i++) {
+            pre = curr;
+            curr = curr.next;
+        }
+        ListNode firstTail = pre;
+        ListNode reverseTail = curr;
+        for (int i = m; i <= n; i++) {
+            ListNode nextNode = curr.next;
+            curr.next = pre;
+            pre = curr;
+            curr = nextNode;
+        }
+        firstTail.next = pre;
+        reverseTail.next = curr;
+        return dummy.next;
+    }
+}
+```
+
