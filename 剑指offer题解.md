@@ -3222,13 +3222,21 @@ class Solution {
 
 ![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test3.png)
 
+
+
+Is this diagram help you understand?
+
+- When fast and slow meet at point p, the length they have run are 'a+2b+c' and 'a+b'.
+- Since the fast is 2 times faster than the slow. So a+2b+c == 2(a+b), then we get 'a==c'.
+- So when another slow2 pointer run from head to 'q', at the same time, previous slow pointer will run from 'p' to 'q', so they meet at the pointer 'q' together.
+  ![enter image description here](https://farm6.staticflickr.com/5758/22715587283_bdb4ba8434.jpg)
+
 ```java
 public class Solution {
     public boolean hasCycle(ListNode head) {
-        if (head == null) return false;
 
         ListNode fast = head, slow = head;
-        while (fast.next != null && fast.next.next != null){
+        while (fast != null && fast.next != null){
             slow = slow.next;
             fast = fast.next.next;
             if (fast == slow) return true;
@@ -3239,7 +3247,71 @@ public class Solution {
 }
 ```
 
+#### [142. 环形链表 II(双指针)](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
 
+难度中等376收藏分享切换为英文关注反馈
+
+给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回 `null`。
+
+为了表示给定链表中的环，我们使用整数 `pos` 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 `pos` 是 `-1`，则在该链表中没有环。
+
+**说明：**不允许修改给定的链表。
+
+ 
+
+**示例 1：**
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：tail connects to node index 1
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist.png)
+
+**示例 2：**
+
+```
+输入：head = [1,2], pos = 0
+输出：tail connects to node index 0
+解释：链表中有一个环，其尾部连接到第一个节点。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test2.png)
+
+**示例 3：**
+
+```
+输入：head = [1], pos = -1
+输出：no cycle
+解释：链表中没有环。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test3.png)
+
+**进阶：**
+你是否可以不用额外空间解决此题？
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode fast = head, slow = head;
+        while (fast != null && fast.next != null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if (fast == slow) {
+                while(head != slow){
+                    slow = slow.next;
+                    head = head.next;
+                }    
+                return slow;
+            }
+        }
+        
+        return null;
+    }
+}
+```
 
 
 
