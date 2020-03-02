@@ -1,6 +1,7 @@
-# 剑指offer题解
 
 [TOC]
+# 剑指offer题解
+
 #### [面试题03. 数组中重复的数字](https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/)
 
 找出数组中重复的数字。
@@ -26,7 +27,10 @@
 
 
 ```java
-//很容易想到先排序然后比较相邻两个数的方法，时间复杂度得0(nlgn)
+//方法一：很容易想到先排序然后比较相邻两个数的方法，时间复杂度得0(nlgn)
+
+//方法二：数字都在0~n-1的范围，利用数组本身的空间长度即可
+//空间复杂度o(n)
 public class Solution{
     public int findRepeatNumber(int[] nums) {
         int[] arr = new int[nums.length];
@@ -39,13 +43,7 @@ public class Solution{
 }
 ```
 
-
-
-
-
-
-
-#### [面试题22. 删除链表中倒数第k个节点](https://leetcode-cn.com/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
+#### [面试题22. 删除链表中倒数第k个节点(快慢指针)](https://leetcode-cn.com/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
 
 输入一个链表，输出该链表中倒数第k个节点。为了符合大多数人的习惯，本题从1开始计数，即链表的尾节点是倒数第1个节点。例如，一个链表有6个节点，从头节点开始，它们的值依次是1、2、3、4、5、6。这个链表的倒数第3个节点是值为4的节点。
 
@@ -117,12 +115,14 @@ B是A的子结构， 即 A中有出现和B相同的结构和节点值。
 0 <= 节点个数 <= 10000
 
 ```java
+//这道题存在问题的地方：A和B中默认没有重复的数字
 class Solution {
     //思路，找到和B根节点值相同的位置
    public boolean isSubStructure(TreeNode A, TreeNode B) {
         if (A == null || B == null) return false;
 
         if (A != null && B != null && A.val == B.val){
+            //helper用来判断两个树是否相等
             return helper(A, B);
         }
 
@@ -244,79 +244,6 @@ public class Solution {
 ```
 
 
-
-
-
-
-
-
-
-
-
-#### [面试题30. 包含min函数的栈](https://leetcode-cn.com/problems/bao-han-minhan-shu-de-zhan-lcof/)
-
-定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的 min 函数在该栈中，调用 min、push 及 pop 的时间复杂度都是 O(1)。
-
- 
-
-示例:
-```
-MinStack minStack = new MinStack();
-minStack.push(-2);
-minStack.push(0);
-minStack.push(-3);
-minStack.min();   --> 返回 -3.
-minStack.pop();
-minStack.top();      --> 返回 0.
-minStack.min();   --> 返回 -2.
-```
-----
-
-
-
-```java
-class MinStack {
-
-    Stack<Integer> stack;
-    Stack<Integer> minStack;
-    /** initialize your data structure here. */
-    public MinStack() {
-        this.stack = new Stack<>();
-        this.minStack = new Stack<>();
-    }
-
-    public void push(int x) {
-        stack.push(x);
-        if (minStack.isEmpty() || minStack.peek() > x){
-            minStack.push(x);
-        }else {
-            minStack.push(minStack.peek());
-        }
-    }
-
-    public void pop() {
-        stack.pop();
-        minStack.pop();
-    }
-
-    public int top() {
-        return stack.peek();
-    }
-
-    public int min() {
-        return minStack.peek();
-    }
-}
-
-/**
- * Your MinStack object will be instantiated and called as such:
- * MinStack obj = new MinStack();
- * obj.push(x);
- * obj.pop();
- * int param_3 = obj.top();
- * int param_4 = obj.min();
- */
-```
 
 
 
@@ -2122,6 +2049,69 @@ class CQueue {
  */
 ```
 
+#### [面试题30. 包含min函数的栈](https://leetcode-cn.com/problems/bao-han-minhan-shu-de-zhan-lcof/)
+
+定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的 min 函数在该栈中，调用 min、push 及 pop 的时间复杂度都是 O(1)。
+
+
+
+示例:
+
+```
+MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.min();   --> 返回 -3.
+minStack.pop();
+minStack.top();      --> 返回 0.
+minStack.min();   --> 返回 -2.
+```
+
+```java
+class MinStack {
+
+    Stack<Integer> stack;
+    Stack<Integer> minStack;
+    /** initialize your data structure here. */
+    public MinStack() {
+        this.stack = new Stack<>();
+        this.minStack = new Stack<>();
+    }
+
+    public void push(int x) {
+        stack.push(x);
+        if (minStack.isEmpty() || minStack.peek() > x){
+            minStack.push(x);
+        }else {
+            minStack.push(minStack.peek());
+        }
+    }
+
+    public void pop() {
+        stack.pop();
+        minStack.pop();
+    }
+
+    public int top() {
+        return stack.peek();
+    }
+
+    public int min() {
+        return minStack.peek();
+    }
+}
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack obj = new MinStack();
+ * obj.push(x);
+ * obj.pop();
+ * int param_3 = obj.top();
+ * int param_4 = obj.min();
+ */
+```
+
 
 
 
@@ -2974,3 +2964,120 @@ class Solution {
 }
 ```
 
+#### [42. 接雨水（双指针）](https://leetcode-cn.com/problems/trapping-rain-water/)
+
+给定 *n* 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/22/rainwatertrap.png)
+
+上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 
+
+**示例:**
+
+```
+输入: [0,1,0,2,1,0,1,3,2,1,2,1]
+输出: 6
+```
+```
+解题的核心思想：一个index一个水量，然后求和(首尾位置没有水)
+```
+
+```java
+//常规方法
+
+/*
+* 解题思路：从左到右按列求水量
+* 1.从左往右进行扫描（第一个位置和最后一个位置不可能有水）
+* 2.扫描到的位置，求出左边最高柱left_max和右边最高柱right_max
+* 3.左右left_max、right_max求出最小的min.
+* 4.当前位置的水量为min-height[i]
+* 5.计算水量之和
+*
+* 时间复杂度：o(n^2) 空间复杂度o(1)
+* */
+
+class Solution {
+    public int trap(int[] height) {
+        int res = 0;
+        //从左往右进行扫描（第一个位置和最后一个位置不可能有水）
+        for (int i = 1; i < height.length - 1; i++) {
+            //求出左边最高柱left_max
+            int left_max = 0;
+            for (int j = i - 1; j >= 0 ; j--) {
+                if (height[j] > left_max)   left_max = height[j];
+            }
+            //右边最高柱right_max
+            int right_max = 0;
+            for (int j = i + 1; j < height.length; j++) {
+                if (height[j] > right_max)  right_max = height[j];
+            }
+            //左右left_max、right_max求出最小的min.
+            int min = left_max < right_max ? left_max : right_max;
+            if (min > height[i]) res += min - height[i];
+        }
+        return res;
+    }
+}
+```
+
+```java
+/ * 解法二 解题思路：实际上是方法一的改进---空间换时间
+
+ *   
+ * 1.max_left[i]、max_right[i]分别代表第 i 列左边和右边最高的墙的高度
+ * 2.max_left[i] = Max(max_left[i-1],height[i-1])、max_right[i] = Max(max_right[i+1],height[i+1])
+ * 3.扫描求水量之和
+ *
+ * 时间复杂度：三次扫描 3*n，所以是 o（n）          空间复杂度：o(n)
+ * */
+public class Solution2 {
+    public int trap(int[] height) {
+        int res = 0;
+        int[] left_max = new int[height.length];
+        int[] right_max = new int[height.length];
+        //每个位置，确定左边最大
+        for (int i = 1; i < height.length - 1; i++) {
+            left_max[i] = Math.max(left_max[i - 1], height[i - 1]);
+        }
+        //每个位置，确定右边最大
+        for (int i = height.length - 2; i > 0; i--) {
+            right_max[i] = Math.max(right_max[i + 1] ,height[i + 1]);
+        }
+        //计算水量和
+        for (int i = 1; i < height.length - 1; i++) {
+            int min = Math.min(left_max[i], right_max[i]);
+            if (min > height[i]) res += min - height[i];
+        }
+        return res;
+    }
+}
+```
+
+
+```java
+//最优
+public class Solution3 {
+    public int trap(int[] height) {
+        int res = 0, max_left = 0, max_right = 0, left = 0, right = height.length - 1;
+        while(left < right){
+            //最开始的时候进行一次比较可以确定在哪一边去更新，左边更小，去左边更新判断
+            if (height[left] < height[right]){//水量最多和max_left一样多
+                if (height[left] >= max_left)
+                     max_left = height[left];
+                else
+                    res += max_left - height[left];
+                left++;
+            }
+            //右边更小，去右边判断
+            else {
+                if (height[right] >= max_right)
+                    max_right = height[right];
+                else
+                    res += max_right - height[right];
+                right--;
+            }
+        }
+        return res;
+    }
+}
+```
