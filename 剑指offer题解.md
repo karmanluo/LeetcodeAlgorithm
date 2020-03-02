@@ -3083,6 +3083,111 @@ public class Solution3 {
 }
 ```
 
+#### [82. 删除排序链表中的重复元素 II](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list-ii/)
+
+给定一个排序链表，删除所有含有重复数字的节点，只保留原始链表中 *没有重复出现* 的数字。
+
+**示例 1:**
+
+```
+输入: 1->2->3->3->4->4->5
+输出: 1->2->5
+```
+
+**示例 2:**
+
+```
+输入: 1->1->1->2->3
+输出: 2->3
+```
+
+```java
+class Solution { 
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode dummy = new ListNode(0);
+        //use two pointers, slow - track the node before the dup nodes,
+        // fast - to find the last node of dups.
+        ListNode slow = dummy, fast = head;
+        slow.next = fast;
+        while (fast != null) {
+            while (fast.next != null && fast.val == fast.next.val)
+                fast = fast.next;
+            //不等说明有重
+            if (slow.next != fast) {
+                slow.next = fast.next;
+                //fast到新的位置去看看新的元素是否有问题
+                fast = slow.next;
+            }else{
+                slow = slow.next;
+                fast = fast.next;
+            }
+        }
+        return dummy.next;
+    }
+}
+```
+
+#### [234. 回文链表（双指针）](https://leetcode-cn.com/problems/palindrome-linked-list/)
+
+请判断一个链表是否为回文链表。
+
+**示例 1:**
+
+```
+输入: 1->2
+输出: false
+```
+
+**示例 2:**
+
+```
+输入: 1->2->2->1
+输出: true
+```
+
+**进阶：**
+你能否用 O(n) 时间复杂度和 O(1) 空间复杂度解决此题？
+
+```java
+class Solution {
+   public boolean isPalindrome(ListNode head) {
+        ListNode fast = head, slow = head;
+        while (fast != null && fast.next != null){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        //奇数的时候需要将slow指针右移
+        if (fast != null){
+            slow = slow.next;
+        }
+        //翻转少的一半
+        slow = reverse(slow);
+        fast = head;
+
+        while (slow != null){
+            if (slow.val != fast.val)
+                return false;
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return true;
+    }
+
+    private ListNode reverse(ListNode head) {
+        ListNode pre = null;
+        while (head != null){
+            ListNode next = head.next;
+            head.next = pre;
+            pre = head;
+            head = next;
+        }
+        return pre;
+    }
+}
+```
+
+
+
 # 链表
 
 #### [206. 反转链表](https://leetcode-cn.com/problems/reverse-linked-list/)
@@ -3199,6 +3304,147 @@ class Solution {
         curr2.next = null;
         curr1.next = dummy2.next;
         return dummy1.next;
+    }
+}
+```
+
+#### [61. 旋转链表](https://leetcode-cn.com/problems/rotate-list/)
+
+给定一个链表，旋转链表，将链表每个节点向右移动 *k* 个位置，其中 *k* 是非负数。
+
+**示例 1:**
+
+```
+输入: 1->2->3->4->5->NULL, k = 2
+输出: 4->5->1->2->3->NULL
+解释:
+向右旋转 1 步: 5->1->2->3->4->NULL
+向右旋转 2 步: 4->5->1->2->3->NULL
+```
+
+**示例 2:**
+
+```
+输入: 0->1->2->NULL, k = 4
+输出: 2->0->1->NULL
+解释:
+向右旋转 1 步: 2->0->1->NULL
+向右旋转 2 步: 1->2->0->NULL
+向右旋转 3 步: 0->1->2->NULL
+向右旋转 4 步: 2->0->1->NULL
+```
+
+```java
+public ListNode rotateRight(ListNode head, int k) {
+    if(head == null || k == 0) {
+        return head;
+    }
+    ListNode p = head;
+    int len = 1;
+    while(p.next != null) {
+        p = p.next;
+        len++;
+    }
+    p.next = head;
+    k %= len;
+    for(int i = 0; i < len - k; i++) {
+        p = p.next;
+    }
+    head = p.next;
+    p.next = null;
+    return head;
+}
+```
+
+
+
+
+
+#### [2. 两数相加](https://leetcode-cn.com/problems/add-two-numbers/)
+
+给出两个 **非空** 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 **逆序** 的方式存储的，并且它们的每个节点只能存储 **一位** 数字。
+
+如果，我们将这两个数相加起来，则会返回一个新的链表来表示它们的和。
+
+您可以假设除了数字 0 之外，这两个数都不会以 0 开头。
+
+**示例：**
+
+```
+输入：(2 -> 4 -> 3) + (5 -> 6 -> 4)
+输出：7 -> 0 -> 8
+原因：342 + 465 = 807
+```
+
+```java
+public static ListNode addTwoNumbers(ListNode l1, ListNode l2){
+        ListNode dummyHead = new ListNode(0);
+        ListNode p = l1, q = l2, curr = dummyHead;
+        int carry = 0;
+        while (p != null || q != null) {
+            int x = (p != null) ? p.val : 0;
+            int y = (q != null) ? q.val : 0;
+            int sum = carry + x + y;
+            carry = sum / 10;
+            curr.next = new ListNode(sum % 10);
+            curr = curr.next;
+            if (p != null) p = p.next;
+            if (q != null) q = q.next;
+        }
+        if (carry > 0) {
+            curr.next = new ListNode(carry);
+        }
+        return dummyHead.next;
+    }
+```
+
+
+
+#### [445. 两数相加 II](https://leetcode-cn.com/problems/add-two-numbers-ii/)
+
+给定两个**非空**链表来代表两个非负整数。数字最高位位于链表开始位置。它们的每个节点只存储单个数字。将这两数相加会返回一个新的链表。
+
+你可以假设除了数字 0 之外，这两个数字都不会以零开头。
+
+**进阶:**
+
+如果输入链表不能修改该如何处理？换句话说，你不能对列表中的节点进行翻转。
+
+**示例:**
+
+```
+输入: (7 -> 2 -> 4 -> 3) + (5 -> 6 -> 4)
+输出: 7 -> 8 -> 0 -> 7
+```
+
+```java
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        Stack<Integer> s1 = new Stack<Integer>();
+        Stack<Integer> s2 = new Stack<Integer>();
+        
+        while(l1 != null) {
+            s1.push(l1.val);
+            l1 = l1.next;
+        }
+        while(l2 != null) {
+            s2.push(l2.val);
+            l2 = l2.next;
+        }
+        
+        int sum = 0;
+        ListNode list = new ListNode(0);
+        while (!s1.empty() || !s2.empty()) {
+            if (!s1.empty()) sum += s1.pop();
+            if (!s2.empty()) sum += s2.pop();
+            list.val = sum % 10;
+            ListNode head = new ListNode(sum / 10);
+            head.next = list;
+            list = head;
+            sum /= 10;
+        }
+        
+        return list.val == 0 ? list.next : list;
     }
 }
 ```
