@@ -43,7 +43,7 @@ public class Solution{
 }
 ```
 
-#### [面试题22. 删除链表中倒数第k个节点(快慢指针)](https://leetcode-cn.com/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
+#### [面试题22. 链表中倒数第k个节点(快慢指针)](https://leetcode-cn.com/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
 
 输入一个链表，输出该链表中倒数第k个节点。为了符合大多数人的习惯，本题从1开始计数，即链表的尾节点是倒数第1个节点。例如，一个链表有6个节点，从头节点开始，它们的值依次是1、2、3、4、5、6。这个链表的倒数第3个节点是值为4的节点。
 
@@ -3127,7 +3127,7 @@ class Solution {
 }
 ```
 
-#### [234. 回文链表（双指针）](https://leetcode-cn.com/problems/palindrome-linked-list/)
+#### [234. 回文链表（快慢双指针）](https://leetcode-cn.com/problems/palindrome-linked-list/)
 
 请判断一个链表是否为回文链表。
 
@@ -3184,6 +3184,151 @@ class Solution {
         return pre;
     }
 }
+```
+
+#### [141. 环形链表（链表中是否有环）（快慢双指针）](https://leetcode-cn.com/problems/linked-list-cycle/)
+
+给定一个链表，判断链表中是否有环。
+
+为了表示给定链表中的环，我们使用整数 `pos` 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 `pos` 是 `-1`，则在该链表中没有环。
+
+**示例 1：**
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：true
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist.png)
+
+**示例 2：**
+
+```
+输入：head = [1,2], pos = 0
+输出：true
+解释：链表中有一个环，其尾部连接到第一个节点。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test2.png)
+
+**示例 3：**
+
+```
+输入：head = [1], pos = -1
+输出：false
+解释：链表中没有环。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test3.png)
+
+
+
+Is this diagram help you understand?
+
+- When fast and slow meet at point p, the length they have run are 'a+2b+c' and 'a+b'.
+- Since the fast is 2 times faster than the slow. So a+2b+c == 2(a+b), then we get 'a==c'.
+- So when another slow2 pointer run from head to 'q', at the same time, previous slow pointer will run from 'p' to 'q', so they meet at the pointer 'q' together.
+  ![enter image description here](https://farm6.staticflickr.com/5758/22715587283_bdb4ba8434.jpg)
+
+```java
+public class Solution {
+    public boolean hasCycle(ListNode head) {
+
+        ListNode fast = head, slow = head;
+        while (fast != null && fast.next != null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if (fast == slow) return true;
+        }
+        
+        return false;
+    }
+}
+```
+
+#### [142. 环形链表 II(双指针)](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
+
+难度中等376收藏分享切换为英文关注反馈
+
+给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回 `null`。
+
+为了表示给定链表中的环，我们使用整数 `pos` 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 `pos` 是 `-1`，则在该链表中没有环。
+
+**说明：**不允许修改给定的链表。
+
+ 
+
+**示例 1：**
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：tail connects to node index 1
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist.png)
+
+**示例 2：**
+
+```
+输入：head = [1,2], pos = 0
+输出：tail connects to node index 0
+解释：链表中有一个环，其尾部连接到第一个节点。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test2.png)
+
+**示例 3：**
+
+```
+输入：head = [1], pos = -1
+输出：no cycle
+解释：链表中没有环。
+```
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test3.png)
+
+**进阶：**
+你是否可以不用额外空间解决此题？
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode fast = head, slow = head;
+        while (fast != null && fast.next != null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if (fast == slow) {
+                while(head != slow){
+                    slow = slow.next;
+                    head = head.next;
+                }    
+                return slow;
+            }
+        }
+        
+        return null;
+    }
+}
+```
+
+
+
+#### [23. 合并K个排序链表](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
+
+合并 *k* 个排序链表，返回合并后的排序链表。请分析和描述算法的复杂度。
+
+**示例:**
+
+```
+输入:
+[
+  1->4->5,
+  1->3->4,
+  2->6
+]
+输出: 1->1->2->3->4->4->5->6
 ```
 
 
@@ -3491,5 +3636,87 @@ public class Solution2 {
         return dummy.next;
     }
 }
+```
+
+#### [160. 相交链表](https://leetcode-cn.com/problems/intersection-of-two-linked-lists/)
+
+编写一个程序，找到两个单链表相交的起始节点。
+
+如下面的两个链表**：**
+
+[![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_statement.png)](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_statement.png)
+
+在节点 c1 开始相交。
+
+ 
+
+**示例 1：**
+
+[![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_1.png)](https://assets.leetcode.com/uploads/2018/12/13/160_example_1.png)
+
+```
+输入：intersectVal = 8, listA = [4,1,8,4,5], listB = [5,0,1,8,4,5], skipA = 2, skipB = 3
+输出：Reference of the node with value = 8
+输入解释：相交节点的值为 8 （注意，如果两个列表相交则不能为 0）。从各自的表头开始算起，链表 A 为 [4,1,8,4,5]，链表 B 为 [5,0,1,8,4,5]。在 A 中，相交节点前有 2 个节点；在 B 中，相交节点前有 3 个节点。
+```
+
+ 
+
+**示例 2：**
+
+[![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_2.png)](https://assets.leetcode.com/uploads/2018/12/13/160_example_2.png)
+
+```
+输入：intersectVal = 2, listA = [0,9,1,2,4], listB = [3,2,4], skipA = 3, skipB = 1
+输出：Reference of the node with value = 2
+输入解释：相交节点的值为 2 （注意，如果两个列表相交则不能为 0）。从各自的表头开始算起，链表 A 为 [0,9,1,2,4]，链表 B 为 [3,2,4]。在 A 中，相交节点前有 3 个节点；在 B 中，相交节点前有 1 个节点。
+```
+
+ 
+
+**示例 3：**
+
+[![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_3.png)](https://assets.leetcode.com/uploads/2018/12/13/160_example_3.png)
+
+```
+输入：intersectVal = 0, listA = [2,6,4], listB = [1,5], skipA = 3, skipB = 2
+输出：null
+输入解释：从各自的表头开始算起，链表 A 为 [2,6,4]，链表 B 为 [1,5]。由于这两个链表不相交，所以 intersectVal 必须为 0，而 skipA 和 skipB 可以是任意值。
+解释：这两个链表不相交，因此返回 null。
+```
+
+ 
+
+**注意：**
+
+- 如果两个链表没有交点，返回 `null`.
+- 在返回结果后，两个链表仍须保持原有的结构。
+- 可假定整个链表结构中没有循环。
+- 程序尽量满足 O(*n*) 时间复杂度，且仅用 O(*1*) 内存。
+
+[有疑问，见链接（有图解释）](https://leetcode.com/problems/intersection-of-two-linked-lists/discuss/49785/Java-solution-without-knowing-the-difference-in-len!)
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) return null;
+
+        ListNode a = headA, b = headB;
+
+        while (a != b){
+            a = a == null ? headB : a.next;
+            b = b == null ? headA : b.next;
+        }
+
+        return a;
+    }
+}
+```
+
+
+
+```java
+
+
 ```
 
