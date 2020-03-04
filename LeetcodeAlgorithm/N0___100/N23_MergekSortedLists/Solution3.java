@@ -1,5 +1,7 @@
 package LeetcodeAlgorithm.N23_MergekSortedLists;
 
+import 剑指offer.N18删除链表的节点.ListNode;
+
 public class Solution3 {
     public ListNode mergeKLists(ListNode[] lists) {
         return partition(lists, 0, lists.length - 1);

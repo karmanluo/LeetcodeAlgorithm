@@ -3713,10 +3713,225 @@ public class Solution {
 }
 ```
 
+#### [23. 合并K个排序链表（最小堆、归并）](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
 
+合并 *k* 个排序链表，返回合并后的排序链表。请分析和描述算法的复杂度。
+
+**示例:**
+
+```
+输入:
+[
+  1->4->5,
+  1->3->4,
+  2->6
+]
+输出: 1->1->2->3->4->4->5->6
+```
 
 ```java
+//优先队列的特性
+public class Solution2 {
+    public ListNode mergeKLists(ListNode[] lists) {
+        if(lists == null || lists.length == 0) return null;
+		//lists.length表示初始化优先队列的长度
+        // 依靠自然排序的优先级队列也不允许插入不可比较的对象（这样做可能导致ClassCastException ）。
+        PriorityQueue<ListNode> queue = new PriorityQueue<>(lists.length, new Comparator<ListNode>() {
+            @Override
+            public int compare(ListNode o1, ListNode o2) {
+                return o1.val - o2.val;
+            }
+        });
+        ListNode dummy = new ListNode(0);
+        ListNode tail = dummy;
+        for (ListNode node : lists) {
+            if (node != null)
+                queue.add(node);
+        }
 
+        while (!queue.isEmpty()){
+            //每次取一个最小的元素，并且加入加再tail后面
+            tail.next = queue.poll();
+            tail = tail.next;
+            if (tail.next != null){
+                queue.add(tail.next);
+            }
+        }
+        return dummy.next;
+    }
+}
+```
 
+```java
+//归并排序的思想
+public class Solution3 {
+    public ListNode mergeKLists(ListNode[] lists) {
+        return partition(lists, 0, lists.length - 1);
+    }
+
+    public ListNode partition(ListNode[] lists, int start, int end) {
+        if (start == end) return lists[start];
+        if (start < end) {
+            int mid = (start + end) / 2;
+            ListNode l1 = partition(lists, start, mid);
+            ListNode l2 = partition(lists, mid + 1, end);
+            return merge(l1, l2);
+        } else
+            return null;
+    }
+    public ListNode merge(ListNode l1, ListNode l2){
+        if (l1 == null)return l2;
+        if (l2 == null)return l1;
+        if (l1.val < l2.val){
+            l1.next = merge(l1.next, l2);
+            return l1;
+        }else {
+            l2.next = merge(l1, l2.next);
+            return l2;
+        }
+    }
+
+}
+```
+
+#### [138. 复制带随机指针的链表](https://leetcode-cn.com/problems/copy-list-with-random-pointer/)
+
+给定一个链表，每个节点包含一个额外增加的随机指针，该指针可以指向链表中的任何节点或空节点。
+
+要求返回这个链表的 **[深拷贝](https://baike.baidu.com/item/深拷贝/22785317?fr=aladdin)**。 
+
+我们用一个由 `n` 个节点组成的链表来表示输入/输出中的链表。每个节点用一个 `[val, random_index]` 表示：
+
+- `val`：一个表示 `Node.val` 的整数。
+- `random_index`：随机指针指向的节点索引（范围从 `0` 到 `n-1`）；如果不指向任何节点，则为 `null` 。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e1.png)
+
+```
+输入：head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+输出：[[7,null],[13,0],[11,4],[10,2],[1,0]]
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e2.png)
+
+```
+输入：head = [[1,1],[2,1]]
+输出：[[1,1],[2,1]]
+```
+
+**示例 3：**
+
+**![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e3.png)**
+
+```
+输入：head = [[3,null],[3,0],[3,null]]
+输出：[[3,null],[3,0],[3,null]]
+```
+
+**示例 4：**
+
+```
+输入：head = []
+输出：[]
+解释：给定的链表为空（空指针），因此返回 null。
+```
+
+ 
+
+**提示：**
+
+- `-10000 <= Node.val <= 10000`
+- `Node.random` 为空（null）或指向链表中的节点。
+- 节点数目不超过 1000 。
+
+```java
+class Solution {
+     /**
+    思路：用hashmap来存储原始链表和关系
+    **/
+    public Node copyRandomList(Node head) {
+        Map<Node,Node> hashmap = new HashMap<>();
+        Node cur = head;
+        while(cur!=null){
+            hashmap.put(cur,new Node(cur.val));
+            cur = cur.next;
+        }
+        //先构建next指针
+        Node newHead = new Node(0);
+        cur = head;
+        Node newcur = newHead;
+        while(cur != null){
+            newcur.next = hashmap.get(cur);
+            newcur = newcur.next;
+            cur =cur.next;
+        }
+        
+        //构建random指针
+        cur =head;
+        newcur = newHead.next;
+        while(cur != null){
+            newcur.random = hashmap.get(cur.random);
+            newcur=newcur.next;
+            cur = cur.next;
+        }
+        return newHead.next;
+    }
+}
+```
+
+```java
+//leetcode 官方题解，vip答案
+public class Solution {
+    public Node copyRandomList(Node head) {
+
+        if (head == null) {
+            return null;
+        }
+
+        // Creating a new weaved list of original and copied nodes.
+        Node ptr = head;
+        while (ptr != null) {
+
+            // Cloned node
+            Node newNode = new Node(ptr.val);
+
+            // Inserting the cloned node just next to the original node.
+            // If A->B->C is the original linked list,
+            // Linked list after weaving cloned nodes would be A->A'->B->B'->C->C'
+            newNode.next = ptr.next;
+            ptr.next = newNode;
+            ptr = newNode.next;
+        }
+
+        ptr = head;
+
+        // Now link the random pointers of the new nodes created.
+        // Iterate the newly created list and use the original nodes' random pointers,
+        // to assign references to random pointers for cloned nodes.
+        while (ptr != null) {
+            ptr.next.random = (ptr.random != null) ? ptr.random.next : null;
+            ptr = ptr.next.next;
+        }
+
+        // Unweave the linked list to get back the original linked list and the cloned list.
+        // i.e. A->A'->B->B'->C->C' would be broken to A->B->C and A'->B'->C'
+        Node ptr_old_list = head; // A->B->C
+        Node ptr_new_list = head.next; // A'->B'->C'
+        Node head_old = head.next;
+        while (ptr_old_list != null) {
+            ptr_old_list.next = ptr_old_list.next.next;
+            ptr_new_list.next = (ptr_new_list.next != null) ? ptr_new_list.next.next : null;
+            ptr_old_list = ptr_old_list.next;
+            ptr_new_list = ptr_new_list.next;
+        }
+        return head_old;
+    }
+}
 ```
 

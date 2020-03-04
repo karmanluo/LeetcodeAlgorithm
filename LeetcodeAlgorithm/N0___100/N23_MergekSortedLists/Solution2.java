@@ -1,5 +1,7 @@
 package LeetcodeAlgorithm.N23_MergekSortedLists;
 
+import 剑指offer.N18删除链表的节点.ListNode;
+
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
