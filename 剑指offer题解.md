@@ -2112,7 +2112,64 @@ class MinStack {
  */
 ```
 
+#### [146. LRU缓存机制(双链表+hashmap)（**LinkedHashMap**）](https://leetcode-cn.com/problems/lru-cache/)
 
+运用你所掌握的数据结构，设计和实现一个 [LRU (最近最少使用) 缓存机制](https://baike.baidu.com/item/LRU)。它应该支持以下操作： 获取数据 `get` 和 写入数据 `put` 。
+
+获取数据 `get(key)` - 如果密钥 (key) 存在于缓存中，则获取密钥的值（总是正数），否则返回 -1。
+写入数据 `put(key, value)` - 如果密钥不存在，则写入其数据值。当缓存容量达到上限时，它应该在写入新数据之前删除最近最少使用的数据值，从而为新的数据值留出空间。
+
+**进阶:**
+
+你是否可以在 **O(1)** 时间复杂度内完成这两种操作？
+
+**示例:**
+
+```
+LRUCache cache = new LRUCache( 2 /* 缓存容量 */ );
+
+cache.put(1, 1);
+cache.put(2, 2);
+cache.get(1);       // 返回  1
+cache.put(3, 3);    // 该操作会使得密钥 2 作废
+cache.get(2);       // 返回 -1 (未找到)
+cache.put(4, 4);    // 该操作会使得密钥 1 作废
+cache.get(1);       // 返回 -1 (未找到)
+cache.get(3);       // 返回  3
+cache.get(4);       // 返回  4
+```
+
+```java
+class LRUCache {
+
+    //LinkedHashMap插入是有顺序的
+    private LinkedHashMap<Integer, Integer> map;
+    private int SIZE;
+
+    public LRUCache(int capacity) {
+        map = new LinkedHashMap<>();
+        SIZE = capacity;
+    }
+
+    public int get(int key) {
+        if (map.containsKey(key)) {
+            int value = map.remove(key);
+            map.put(key, value);
+            return value;
+        }
+        return -1;
+    }
+
+    public void put(int key, int value) {
+        if (map.containsKey(key)) {
+            map.remove(key);
+        } else if (map.size() + 1 > SIZE) {
+            map.remove(map.keySet().iterator().next());
+        }
+        map.put(key, value);
+    }
+}
+```
 
 
 
@@ -3935,3 +3992,170 @@ public class Solution {
 }
 ```
 
+
+
+#### [25. K 个一组翻转链表](https://leetcode-cn.com/problems/reverse-nodes-in-k-group/)
+
+给你一个链表，每 *k* 个节点一组进行翻转，请你返回翻转后的链表。
+
+*k* 是一个正整数，它的值小于或等于链表的长度。
+
+如果节点总数不是 *k* 的整数倍，那么请将最后剩余的节点保持原有顺序。
+
+**示例 :**
+
+给定这个链表：`1->2->3->4->5`
+
+当 *k* = 2 时，应当返回: `2->1->4->3->5`
+
+当 *k* = 3 时，应当返回: `3->2->1->4->5`
+
+**说明 :**
+
+- 你的算法只能使用常数的额外空间。
+- **你不能只是单纯的改变节点内部的值**，而是需要实际的进行节点交换。
+
+```java
+public class Solution {
+
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (head == null || head.next == null || k == 1)
+            return head;
+
+        ListNode dummyHead = new ListNode(-1);
+        dummyHead.next = head;
+        ListNode begin = dummyHead;
+        int i = 0;
+        while (head != null) {
+            i++;
+            if (i % k == 0) {
+                begin = reverse(begin, head.next);
+                head = begin.next;
+            } else {
+                head = head.next;
+            }
+        }
+        return dummyHead.next;
+    }
+
+    public ListNode reverse(ListNode begin, ListNode end) {
+        ListNode curr = begin.next;
+        ListNode prev = begin;
+        ListNode first = curr;
+        ListNode next;
+        while (curr != end) {
+            next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+        first.next = end;
+        begin.next = prev;
+        return first;
+    }
+}
+```
+
+#### [143. 重排链表(双指针)](https://leetcode-cn.com/problems/reorder-list/)
+
+给定一个单链表 *L*：*L*0→*L*1→…→*L**n*-1→*L*n ，
+将其重新排列后变为： *L*0→*L**n*→*L*1→*L**n*-1→*L*2→*L**n*-2→…
+
+你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。
+
+**示例 1:**
+
+```
+给定链表 1->2->3->4, 重新排列为 1->4->2->3.
+```
+
+**示例 2:**
+
+```
+给定链表 1->2->3->4->5, 重新排列为 1->5->2->4->3.
+```
+
+```java
+class Solution {
+    public void reorderList(ListNode head) {
+        if (head == null || head.next == null) return;
+        
+        // Find the middle node
+        ListNode slow = head, fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        
+        // Reverse the second half
+        ListNode head2 = reverse(slow.next);
+        slow.next = null;
+        
+        // Intertwine the two halves
+        merge(head, head2);
+    }
+    
+    private ListNode reverse(ListNode n) {
+        ListNode prev = null, cur = n;
+        while (cur != null) {
+            ListNode tmp = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = tmp;
+        }
+        return prev;
+    }
+    
+      public void merge(ListNode left, ListNode right){
+        ListNode leftTemp;
+        ListNode rightTemp;
+        while (left.next != null && right!= null) {
+            //1. 保存next节点
+            leftTemp = left.next;
+            rightTemp = right.next;
+
+            //2. 将右链表的第一个节点插入到左链表中
+            // 左链表：1->2->3 右链表：5->4 
+            // 合并后的左链表：1->5->2->3 
+            left.next = right;
+            right.next = leftTemp;
+
+            //3. 移动left和right指针
+            //左链表变为：2->3 右链表变为：4
+            left = leftTemp;
+            right = rightTemp;
+        }
+    }
+}
+```
+
+```java
+//双端队列
+class Solution {
+    public void reorderList(ListNode head) {
+        LinkedList<ListNode> queue = new LinkedList<>();
+        ListNode cur = head;
+        //全部放到队列里
+        while (cur != null) {
+            queue.addLast(cur);
+            cur = cur.next;
+        }
+        
+        //每次选两端的加入
+        while (!queue.isEmpty()) {
+            if (cur == null) {
+                cur = queue.pollFirst();
+            } else {
+                cur.next = queue.pollFirst();
+                cur = cur.next;
+            }
+            cur.next = queue.pollLast();
+            cur = cur.next;
+        }
+        
+        if (cur != null) {
+            cur.next = null;
+        }
+    }
+}
+```
