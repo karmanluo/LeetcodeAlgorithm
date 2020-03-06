@@ -1865,6 +1865,235 @@ class Solution {
 }
 ```
 
+# 二分
+
+#### [35. 搜索插入位置](https://leetcode-cn.com/problems/search-insert-position/)
+
+给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
+
+你可以假设数组中无重复元素。
+
+**示例 1:**
+
+```
+输入: [1,3,5,6], 5
+输出: 2
+```
+
+**示例 2:**
+
+```
+输入: [1,3,5,6], 2
+输出: 1
+```
+
+**示例 3:**
+
+```
+输入: [1,3,5,6], 7
+输出: 4
+```
+
+**示例 4:**
+
+```
+输入: [1,3,5,6], 0
+输出: 0
+```
+
+
+
+```java
+class Solution {
+    public int searchInsert(int[] nums, int target) {
+        int start = 0, end = nums.length - 1;
+        
+        while(start <= end){
+            int mid = start + ((end - start) >>> 1);
+
+            if(nums[mid] == target)		return mid;
+            else if(nums[mid] > target)		end = mid - 1;
+            else	 start = mid + 1;
+        }
+		
+        return start;
+    }
+}
+```
+
+
+
+#### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+给定一个按照升序排列的整数数组 `nums`，和一个目标值 `target`。找出给定目标值在数组中的开始位置和结束位置。
+
+你的算法时间复杂度必须是 *O*(log *n*) 级别。
+
+如果数组中不存在目标值，返回 `[-1, -1]`。
+
+**示例 1:**
+
+```
+输入: nums = [5,7,7,8,8,10], target = 8
+输出: [3,4]
+```
+
+**示例 2:**
+
+```
+输入: nums = [5,7,7,8,8,10], target = 6
+输出: [-1,-1]
+```
+
+```java
+class Solution {
+    // returns leftmost (or rightmost) index at which `target` should be
+    // inserted in sorted array `nums` via binary search.
+    private int extremeInsertionIndex(int[] nums, int target, boolean left) {
+        int lo = 0;
+        int hi = nums.length;
+
+        while (lo < hi) {
+            int mid = (lo + hi) / 2;
+            if (nums[mid] > target || (left && target == nums[mid])) {
+                hi = mid;
+            }
+            else {
+                lo = mid+1;
+            }
+        }
+
+        return lo;
+    }
+
+    public int[] searchRange(int[] nums, int target) {
+        int[] targetRange = {-1, -1};
+
+        int leftIdx = extremeInsertionIndex(nums, target, true);
+
+        // assert that `leftIdx` is within the array bounds and that `target`
+        // is actually in `nums`.
+        if (leftIdx == nums.length || nums[leftIdx] != target) {
+            return targetRange;
+        }
+
+        targetRange[0] = leftIdx;
+        targetRange[1] = extremeInsertionIndex(nums, target, false)-1;
+
+        return targetRange;
+    }
+}
+```
+
+#### [162. 寻找峰值](https://leetcode-cn.com/problems/find-peak-element/)
+
+峰值元素是指其值大于左右相邻值的元素。
+
+给定一个输入数组 `nums`，其中 `nums[i] ≠ nums[i+1]`，找到峰值元素并返回其索引。
+
+数组可能包含多个峰值，在这种情况下，返回任何一个峰值所在位置即可。
+
+你可以假设 `nums[-1] = nums[n] = -∞`。
+
+**示例 1:**
+
+```
+输入: nums = [1,2,3,1]
+输出: 2
+解释: 3 是峰值元素，你的函数应该返回其索引 2。
+```
+
+**示例 2:**
+
+```
+输入: nums = [1,2,1,3,5,6,4]
+输出: 1 或 5 
+解释: 你的函数可以返回索引 1，其峰值元素为 2；
+     或者返回索引 5， 其峰值元素为 6。
+```
+
+**说明:**
+
+你的解法应该是 *O*(*logN*) 时间复杂度的。
+
+
+
+```java
+public class Solution {
+    public int findPeakElement(int[] nums) {
+        int l = 0, r = nums.length - 1;
+        while (l < r) {
+            int mid = (l + r) / 2;
+            //哪个大，就把边界放在哪边，每次mid都是为了缩小边界
+            if (nums[mid] > nums[mid + 1])
+                r = mid;
+            else
+                l = mid + 1;
+        }
+        return l;
+    }
+}
+```
+
+#### [74. 搜索二维矩阵](https://leetcode-cn.com/problems/search-a-2d-matrix/)
+
+编写一个高效的算法来判断 *m* x *n* 矩阵中，是否存在一个目标值。该矩阵具有如下特性：
+
+- 每行中的整数从左到右按升序排列。
+- 每行的第一个整数大于前一行的最后一个整数。
+
+**示例 1:**
+
+```
+输入:
+matrix = [
+  [1,   3,  5,  7],
+  [10, 11, 16, 20],
+  [23, 30, 34, 50]
+]
+target = 3
+输出: true
+```
+
+**示例 2:**
+
+```
+输入:
+matrix = [
+  [1,   3,  5,  7],
+  [10, 11, 16, 20],
+  [23, 30, 34, 50]
+]
+target = 13
+输出: false
+```
+
+```java
+//把整个二维数组看成一个有序的数组就可以了
+class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        if(matrix == null || matrix.length == 0)    return false;
+
+        int rows = matrix.length, cols = matrix[0].length;
+        int start = 0, end = rows * cols - 1;
+
+        while(start <= end){
+            int mid = start + ((end - start) >>> 1);
+            
+            if(target == matrix[mid / cols][mid % cols])    return true;
+            else if(target < matrix[mid / cols][mid % cols])    end = mid - 1;
+            else    start = mid + 1;
+        }
+
+        return false;
+    }
+}
+```
+
+
+
+
+
 # JAVA程序设计题目
 
 #### 设计一个泛型的获取数组最小值的函数.
@@ -2172,70 +2401,82 @@ class LRUCache {
 ```
 
 ```java
-class LRUCache {
-    
+//双向链表+HashMap的方法
+import java.util.HashMap;
+import java.util.Map;
+
+public class LRU缓存 {
+
+    //head 与 tail 都不能存值，方便检索，新来的值放在头，老的自然就在尾巴侧
     final Node head = new Node(0, 0);
     final Node tail = new Node(0, 0);
-    final Map<Integer, Node> map;
+    final Map<Integer, Node> map; //map存的是键值与节点信息
     final int capacity;
-    
-    public LRUCache(int capacity) {
+
+    public LRU缓存(int capacity) {
         this.capacity = capacity;
         map = new HashMap(capacity);
         head.next = tail;
         tail.prev = head;
     }
-    
+
     public int get(int key) {
-      int res = -1;
-      if(map.containsKey(key)){
-        Node n = map.get(key);
-        remove(n);
-        insertToHead(n);
-        res = n.value;
-      }
-      return res;   
+        int res = -1;
+        if (map.containsKey(key)) {
+            Node n = map.get(key);
+            remove(n);
+            insertToHead(n);
+            res = n.value;
+        }
+        return res;
     }
-    
+
+    //之前出现过，插入到链表头
+    //之前未出现过，但是容量已满，map删尾巴前面一个对应的最久未使用的节点
+    //将节点放入双向链表，并且放进hashmap
     public void put(int key, int value) {
-      if(map.containsKey(key)){
-        Node n = map.get(key);
-        remove(n);
-        n.value = value;
-        insertToHead(n);
-      } else {
-        
-        if(map.size() == capacity){
-           map.remove(tail.prev.key); 
-           remove(tail.prev);
-        } 
-        
-        Node n = new Node(key, value);
-        insertToHead(n);
-        map.put(key, n);
-      }  
+        if (map.containsKey(key)) {
+            Node n = map.get(key);
+            remove(n);
+            n.value = value;
+            insertToHead(n);
+        } else {
+
+            if (map.size() == capacity) {
+                map.remove(tail.prev.key);
+                remove(tail.prev);
+            }
+
+            Node n = new Node(key, value);
+            insertToHead(n);
+            map.put(key, n);
+        }
     }
-    
-    private void remove(Node n){
-      n.prev.next = n.next;
-      n.next.prev = n.prev;
+
+    //将双向链表中当前节点删除
+    private void remove(Node n) {
+        n.prev.next = n.next;
+        n.next.prev = n.prev;
     }
-    
-    private void insertToHead(Node n){
-      Node headNext = head.next;
-      head.next = n;
-      headNext.prev = n;
-      n.prev = head;
-      n.next = headNext;
+
+    //将n节点插在头结点的后面
+    private void insertToHead(Node n) {
+        Node headNext = head.next;
+        head.next = n;
+        headNext.prev = n;
+        n.prev = head;
+        n.next = headNext;
     }
-    
-    class Node{
-      Node prev, next;
-      int key, value;
-      Node(int k, int v){
-        key = k;
-        value = v;
-      }
+
+    //子类定义出Node的格式
+    class Node {
+        Node prev, next;
+        int key, value;
+
+        Node(int k, int v) {
+            key = k;
+            value = v;
+        }
     }
 }
 ```
