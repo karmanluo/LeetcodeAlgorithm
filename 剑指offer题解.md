@@ -3613,6 +3613,109 @@ public class Solution {
 输出: 3
 ```
 
+```java
+public class Solution {
+    private int m;//行数
+    private int n;//列数
+    public int numIslands(char[][] grid) {
+        m = grid.length;
+        if (m == 0) return 0;
+        n = grid[0].length;
+
+        int count = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1'){
+                    dfs(grid, i, j);
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    private void dfs(char[][] grid, int i, int j) {
+        if (i < 0 || j < 0 || i >= m || j >= n || grid[i][j] != '1') return;
+
+        grid[i][j] = '0';
+
+        dfs(grid, i - 1, j);
+        dfs(grid, i + 1, j);
+        dfs(grid, i, j - 1);
+        dfs(grid, i, j + 1);
+    }
+    
+}
+```
+
+#### [144. 二叉树的前序遍历](https://leetcode-cn.com/problems/binary-tree-preorder-traversal/)
+
+难度中等213
+
+给定一个二叉树，返回它的 *前序* 遍历。
+
+ **示例:**
+
+```
+输入: [1,null,2,3]  
+   1
+    \
+     2
+    /
+   3 
+
+输出: [1,2,3]
+```
+
+```java
+//递归
+class Solution {
+    List<Integer> res = new ArrayList<>();
+    public List<Integer> preorderTraversal(TreeNode root) {
+        if(root == null) return res;
+
+        res.add(root.val);
+        preorderTraversal(root.left);
+        preorderTraversal(root.right);
+
+        return res;
+    }
+}
+```
+
+```java
+//迭代
+
+//其他知识：stack是类不需要实现类就可以，queue是接口需要实现类
+//java中Deque双端队列中实现了栈的方法
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        //Stack<TreeNode> stack = new Stack<>(); 
+        Deque<TreeNode> stack = new LinkedList<>();
+        TreeNode node = root;
+        while(node != null || !stack.isEmpty()){
+            if(node != null){
+                res.add(node.val);
+                stack.push(node.right);
+                node = node.left;
+            }else{
+                node = stack.pop();
+            }
+        }
+        
+        return res;
+    }
+}
+```
+
+
+
+
+
+
+
 
 
 # DP解法
