@@ -2465,6 +2465,74 @@ public class 泛型实现最小值函数 {
 }	
 ```
 
+#### [面试题59 - II. 队列的最大值](https://leetcode-cn.com/problems/dui-lie-de-zui-da-zhi-lcof/)
+
+请定义一个队列并实现函数 `max_value` 得到队列里的最大值，要求函数`max_value`、`push_back` 和 `pop_front` 的**均摊**时间复杂度都是O(1)。
+
+若队列为空，`pop_front` 和 `max_value` 需要返回 -1
+
+**示例 1：**
+
+```
+输入: 
+["MaxQueue","push_back","push_back","max_value","pop_front","max_value"]
+[[],[1],[2],[],[],[]]
+输出: [null,null,null,2,1,2]
+```
+
+**示例 2：**
+
+```
+输入: 
+["MaxQueue","pop_front","max_value"]
+[[],[],[]]
+输出: [null,-1,-1]
+```
+
+ 
+
+**限制：**
+
+- `1 <= push_back,pop_front,max_value的总操作数 <= 10000`
+- `1 <= value <= 10^5`
+
+```java
+class MaxQueue {
+
+    private Queue<Integer> q;   //q用来进出栈
+    private Deque<Integer> helpDq; //helpDq用来存最大
+    public MaxQueue() {
+        q = new LinkedList<>();
+        helpDq = new LinkedList<>();
+    }
+    
+    //最大值的实现原理，将当前队列中最大的元素放在helpDq的头---
+    //每次队列进来一个元素，在helpDq中从队尾看，前面只能比其值大
+    public int max_value() {
+        return helpDq.isEmpty() ? -1 : helpDq.peek();
+    }
+    
+    public void push_back(int value) {
+        q.offer(value);
+        while(!helpDq.isEmpty() && value > helpDq.peekLast()){
+            helpDq.pollLast();
+        }
+        helpDq.offer(value);
+    }
+    
+    public int pop_front() {
+        if(q.isEmpty()) return -1;
+
+        int val = q.poll();
+        if(helpDq.peek() == val)
+            helpDq.poll();
+        return val;
+    }
+}
+```
+
+
+
 #### [225. 用队列实现栈](https://leetcode-cn.com/problems/implement-stack-using-queues/)
 
 使用队列实现栈的下列操作：
@@ -3247,13 +3315,275 @@ public class Solution {
 }
 ```
 
+# BFS|DFS|
+
+#### [102. 二叉树的层次遍历](https://leetcode-cn.com/problems/binary-tree-level-order-traversal/)
+
+给定一个二叉树，返回其按层次遍历的节点值。 （即逐层地，从左到右访问所有节点）。
+
+例如:
+给定二叉树: `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回其层次遍历结果：
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+```java
+//BFS
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+
+        if(root == null)    return res;
+
+        q.offer(root);
+        while(!q.isEmpty()){
+            int levelCount = q.size();
+            List<Integer> tmp = new ArrayList<>();
+
+            for(int i = 0; i< levelCount; i++){
+                TreeNode node = q.poll();
+                if(node.left != null)   q.offer(node.left);
+                if(node.right != null)  q.offer(node.right);
+                tmp.add(node.val);
+            }
+            res.add(tmp);
+        }
+
+        return res;
+    }
+}
+```
+
+#### [107. 二叉树的层次遍历 II](https://leetcode-cn.com/problems/binary-tree-level-order-traversal-ii/)
+
+给定一个二叉树，返回其节点值自底向上的层次遍历。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+
+例如：
+给定二叉树 `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回其自底向上的层次遍历为：
+
+```
+[
+  [15,7],
+  [9,20],
+  [3]
+]
+```
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+         List<List<Integer>> res = new LinkedList<>();
+         Queue<TreeNode> q = new LinkedList<>();
+
+        if(root == null)    return res;
+
+        q.offer(root);
+        while(!q.isEmpty()){
+            int levelCount = q.size();
+            List<Integer> tmp = new ArrayList<>();
+
+            for(int i = 0; i< levelCount; i++){
+                TreeNode node = q.poll();
+                if(node.left != null)   q.offer(node.left);
+                if(node.right != null)  q.offer(node.right);
+                tmp.add(node.val);
+            }
+            res.add(0, tmp);//和上一题相比只是改变了这里
+        }
+
+        return res;
+    }
+}
+```
+
+#### [103. 二叉树的锯齿形层次遍历](https://leetcode-cn.com/problems/binary-tree-zigzag-level-order-traversal/)
+
+给定一个二叉树，返回其节点值的锯齿形层次遍历。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。
+
+例如：
+给定二叉树 `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回锯齿形层次遍历如下：
+
+```
+[
+  [3],
+  [20,9],
+  [15,7]
+]
+```
+
+```jAVA
+class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+        
+        if(root == null)    return res;
+
+        q.offer(root);
+        boolean order = true;
+        while(!q.isEmpty()){
+            int levelSize = q.size();
+            List<Integer> tmp = new ArrayList<>();
+            for(int i = 0; i < levelSize; i++){
+                TreeNode node = q.poll();
+                if(node.left != null)  q.offer(node.left);
+                if(node.right != null) q.offer(node.right);
+                
+                //只是在这里做了手脚，其他的地方一点没变
+                if(order)   tmp.add(node.val);
+                else    tmp.add(0, node.val);
+            }
+            order = order == true ? false : true;
+            res.add(tmp);
+        }
+
+        return res;
+    }
+}
+```
 
 
 
+#### [987. 二叉树的垂序遍历](https://leetcode-cn.com/problems/vertical-order-traversal-of-a-binary-tree/)
 
+给定二叉树，按***垂序*遍历**返回其结点值。
 
+对位于 `(X, Y)` 的每个结点而言，其左右子结点分别位于 `(X-1, Y-1)` 和 `(X+1, Y-1)`。
 
+把一条垂线从 `X = -infinity` 移动到 `X = +infinity` ，每当该垂线与结点接触时，我们按从上到下的顺序报告结点的值（ `Y` 坐标递减）。
 
+如果两个结点位置相同，则首先报告的结点值较小。
+
+按 `X` 坐标顺序返回非空报告的列表。每个报告都有一个结点值列表。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/02/1236_example_1.PNG)
+
+```
+输入：[3,9,20,null,null,15,7]
+输出：[[9],[3,15],[20],[7]]
+解释： 
+在不丧失其普遍性的情况下，我们可以假设根结点位于 (0, 0)：
+然后，值为 9 的结点出现在 (-1, -1)；
+值为 3 和 15 的两个结点分别出现在 (0, 0) 和 (0, -2)；
+值为 20 的结点出现在 (1, -1)；
+值为 7 的结点出现在 (2, -2)。
+```
+
+**示例 2：**
+
+**![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/23/tree2.png)**
+
+```
+输入：[1,2,3,4,5,6,7]
+输出：[[4],[2],[1,5,6],[3],[7]]
+解释：
+根据给定的方案，值为 5 和 6 的两个结点出现在同一位置。
+然而，在报告 "[1,5,6]" 中，结点值 5 排在前面，因为 5 小于 6。
+```
+
+ 
+
+**提示：**
+
+1. 树的结点数介于 `1` 和 `1000` 之间。
+2. 每个结点值介于 `0` 和 `1000` 之间。
+
+```java
+public class Solution {
+    List<int[]> list = new ArrayList<>();
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        DFS(root, 0, 0);
+
+        list.sort(new Comparator<int[]>() {
+            @Override
+            public int compare(int[] a, int[] b) {
+                if (a[1] != b[1]){
+                    //根据x排序
+                    return a[1] - b[1];
+                }else if (a[2] != b[2]){
+                    //根据y递减的速度
+                    return -a[2] + b[2];
+                }else {
+                    //在同一位置按照值从小到大排序
+                    return a[0] - b[0];
+                }
+            }
+        });
+
+        List<List<Integer>> res = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            int j = i; //找到可以加到一起的边界,i代表左边界，j代表右边界的下一个
+
+            while(j < list.size() && list.get(i)[1] == list.get(j)[1]) j++;
+
+            List<Integer> tmp = new ArrayList<>();
+            for (int k = i; k < j; k++) tmp.add(list.get(k)[0]);
+            res.add(tmp);
+
+            i = j - 1;
+        }
+        
+        return res;
+    }
+
+    private void DFS(TreeNode node, int x, int y){
+        if(node == null)    return;
+        list.add(new int[]{node.val, x, y});
+        DFS(node.left, x - 1, y - 1);
+        DFS(node.right, x + 1, y - 1);
+    }
+}
+```
 
 
 
