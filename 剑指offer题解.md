@@ -249,52 +249,6 @@ public class Solution {
 
 
 
-#### [面试题31. 栈的压入、弹出序列](https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/)
-
-输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如，序列 {1,2,3,4,5} 是某栈的压栈序列，序列 {4,5,3,2,1} 是该压栈序列对应的一个弹出序列，但 {4,3,5,1,2} 就不可能是该压栈序列的弹出序列。
-
-**示例 1：**
-
-```
-输入：pushed = [1,2,3,4,5], popped = [4,5,3,2,1]
-输出：true
-解释：我们可以按以下顺序执行：
-push(1), push(2), push(3), push(4), pop() -> 4,
-push(5), pop() -> 5, pop() -> 3, pop() -> 2, pop() -> 1
-```
-
-**示例 2：**
-
-```
-输入：pushed = [1,2,3,4,5], popped = [4,3,5,1,2]
-输出：false
-解释：1 不能在 2 之前弹出。
-```
-
-
-
-```java
-class Solution {
-    public boolean validateStackSequences(int[] pushed, int[] popped) {
-        if (pushed.length != popped.length) return false;
-        if (pushed.length == 0) return true;
-
-        Stack<Integer> stack = new Stack<>();
-        int index = 0;
-        for (int i = 0; i < pushed.length; i++) {
-            stack.push(pushed[i]);
-            while (!stack.isEmpty() && popped[index] == stack.peek()){
-                stack.pop();
-                index++;
-            }
-        }
-        return stack.isEmpty();
-    }
-}
-```
-
-
-
 # Leetcode 重点题目
 
 #### [54. 螺旋矩阵](https://leetcode-cn.com/problems/spiral-matrix/)
@@ -2328,6 +2282,119 @@ class Solution {
 }
 ```
 
+#### [378. 有序矩阵中第K小的元素](https://leetcode-cn.com/problems/kth-smallest-element-in-a-sorted-matrix/)
+
+给定一个 *n x n* 矩阵，其中每行和每列元素均按升序排序，找到矩阵中第k小的元素。
+请注意，它是排序后的第k小元素，而不是第k个元素。
+
+**示例:**
+
+```
+matrix = [
+   [ 1,  5,  9],
+   [10, 11, 13],
+   [12, 13, 15]
+],
+k = 8,
+
+返回 13。
+```
+
+**说明:**你可以假设 k 的值永远是有效的,  `1 ≤ k ≤ n^2`
+
+```java
+class Solution {
+    public int kthSmallest(int[][] matrix, int k) {
+        int n = matrix.length;
+        int lo = matrix[0][0], hi = matrix[n - 1][n - 1];
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            int count = getLessEqual(matrix, mid);
+            if (count < k) lo = mid + 1;
+            else hi = mid - 1;
+        }
+        return lo;
+    }
+    
+    //从左下的位置出发，找小于目标数的数量
+    private int getLessEqual(int[][] matrix, int val) {
+        int res = 0;
+        int n = matrix.length, i = n - 1, j = 0;
+        while (i >= 0 && j < n) {
+            if (matrix[i][j] > val) i--;
+            else {
+                //关键 
+                res += i + 1;
+                j++;
+            }
+        }
+        return res;
+    }
+}
+```
+
+#### [4. 寻找两个有序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)
+
+给定两个大小为 m 和 n 的有序数组 `nums1` 和 `nums2`。
+
+请你找出这两个有序数组的中位数，并且**要求算法的时间复杂度为 O(log(m + n))**。
+
+你可以假设 `nums1` 和 `nums2` 不会同时为空。
+
+**示例 1:**
+
+```
+nums1 = [1, 3]
+nums2 = [2]
+
+则中位数是 2.0
+```
+
+**示例 2:**
+
+```
+nums1 = [1, 2]
+nums2 = [3, 4]
+
+则中位数是 (2 + 3)/2 = 2.5
+```
+
+[参考链接,看视频解答就可以理解了](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/solution/)
+
+```java
+//时间复杂度要求为o(log(m+n))，只能用二分查找
+public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+    int n = nums1.length;
+    int m = nums2.length;
+    int left = (n + m + 1) / 2;
+    int right = (n + m + 2) / 2;
+    //将偶数和奇数的情况合并，如果是奇数，会求两次同样的 k 。
+    return (getKth(nums1, 0, n - 1, nums2, 0, m - 1, left) + getKth(nums1, 0, n - 1, nums2, 0, m - 1, right)) * 0.5;  
+}
+    
+    private int getKth(int[] nums1, int start1, int end1, int[] nums2, int start2, int end2, int k) {
+        int len1 = end1 - start1 + 1;
+        int len2 = end2 - start2 + 1;
+        //让 len1 的长度小于 len2，这样就能保证如果有数组空了，一定是 len1 
+        if (len1 > len2) return getKth(nums2, start2, end2, nums1, start1, end1, k);
+        if (len1 == 0) return nums2[start2 + k - 1];
+
+        if (k == 1) return Math.min(nums1[start1], nums2[start2]);
+
+        int i = start1 + Math.min(len1, k / 2) - 1;
+        int j = start2 + Math.min(len2, k / 2) - 1;
+
+        if (nums1[i] > nums2[j]) {
+            return getKth(nums1, start1, end1, nums2, j + 1, end2, k - (j - start2 + 1));
+        }
+        else {
+            return getKth(nums1, i + 1, end1, nums2, start2, end2, k - (i - start1 + 1));
+        }
+    }
+```
+
+
+
 
 
 # JAVA程序设计题目
@@ -2419,32 +2486,36 @@ empty() -- 返回栈是否为空
 ```java
 class MyStack {
 
+    Queue<Integer> q;
     /** Initialize your data structure here. */
     public MyStack() {
-
+        q = new LinkedList<>();
     }
-    
+
     /** Push element x onto stack. */
     public void push(int x) {
-
+        q.offer(x);
+        //size - 1 次的交换刚好可以交换顺序
+        for (int i = 1; i < q.size(); i++) {
+            q.add(q.poll());
+        }
     }
-    
+
     /** Removes the element on top of the stack and returns that element. */
     public int pop() {
-
+        return q.poll();
     }
-    
+
     /** Get the top element. */
     public int top() {
-        
+        return q.peek();
     }
-    
+
     /** Returns whether the stack is empty. */
     public boolean empty() {
-
+        return q.isEmpty();
     }
 }
-
 /**
  * Your MyStack object will be instantiated and called as such:
  * MyStack obj = new MyStack();
@@ -2576,6 +2647,219 @@ class MinStack {
  * int param_4 = obj.min();
  */
 ```
+
+#### [面试题31. 栈的压入、弹出序列](https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/)
+
+输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如，序列 {1,2,3,4,5} 是某栈的压栈序列，序列 {4,5,3,2,1} 是该压栈序列对应的一个弹出序列，但 {4,3,5,1,2} 就不可能是该压栈序列的弹出序列。
+
+**示例 1：**
+
+```
+输入：pushed = [1,2,3,4,5], popped = [4,5,3,2,1]
+输出：true
+解释：我们可以按以下顺序执行：
+push(1), push(2), push(3), push(4), pop() -> 4,
+push(5), pop() -> 5, pop() -> 3, pop() -> 2, pop() -> 1
+```
+
+**示例 2：**
+
+```
+输入：pushed = [1,2,3,4,5], popped = [4,3,5,1,2]
+输出：false
+解释：1 不能在 2 之前弹出。
+```
+
+
+
+```java
+class Solution {
+    public boolean validateStackSequences(int[] pushed, int[] popped) {
+        if (pushed.length != popped.length) return false;
+        if (pushed.length == 0) return true;
+
+        Stack<Integer> stack = new Stack<>();
+        int index = 0;
+        for (int i = 0; i < pushed.length; i++) {
+            stack.push(pushed[i]);
+            while (!stack.isEmpty() && popped[index] == stack.peek()){
+                stack.pop();
+                index++;
+            }
+        }
+        return stack.isEmpty();
+    }
+}
+```
+
+#### [84. 柱状图中最大的矩形（栈）](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/)
+
+给定 *n* 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+ 
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/12/histogram.png)
+
+以上是柱状图的示例，其中每个柱子的宽度为 1，给定的高度为 `[2,1,5,6,2,3]`。
+
+ 
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/12/histogram_area.png)
+
+图中阴影部分为所能勾勒出的最大矩形面积，其面积为 `10` 个单位。
+
+ 
+
+**示例:**
+
+```
+输入: [2,1,5,6,2,3]
+输出: 10
+```
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        int len = heights.length;
+        Stack<Integer> s = new Stack<>();
+        int maxArea = 0;
+        s.push(-1);
+        //注意stack中存的值是0——len
+        for (int i = 0; i <= len; i++) {
+            int h = (i == len ? 0 : heights[i]);
+            if (s.peek() == -1 || h >= heights[s.peek()]){
+                s.push(i);
+            }else {
+                if(s.isEmpty()) return maxArea;
+
+                int top = s.pop();
+                //这里计算的是以heightsp[top]为高度，可以得到的最大面积
+                //i - s.peek() - 1 代表满足height是最小值的范围
+                //s.peek()代表上一个小于当前值的位置，只能从其后面开始算
+                //i代表右边第一个不满足的情况
+                maxArea = Math.max(maxArea, heights[top] * (i - 1 - s.peek()));
+                i--;
+            }
+        }
+        return maxArea;
+    }
+}
+```
+
+#### [85. 最大矩形(栈)](https://leetcode-cn.com/problems/maximal-rectangle/)
+
+给定一个仅包含 0 和 1 的二维二进制矩阵，找出只包含 1 的最大矩形，并返回其面积。
+
+**示例:**
+
+```
+输入:
+[
+  ["1","0","1","0","0"],
+  ["1","0","1","1","1"],
+  ["1","1","1","1","1"],
+  ["1","0","0","1","0"]
+]
+输出: 6
+```
+
+```java
+class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        if (matrix == null || matrix.length == 0) return 0;
+
+        int[] height = new int[matrix[0].length];
+        for (int i = 0; i < matrix[0].length; i++) {
+            if (matrix[0][i] == '1')
+                height[i] = 1;
+        }
+        int result = largestInline(height);
+        for (int row = 1; row < matrix.length; row++) {
+            updateHeight(matrix, height, row);
+            result = Math.max(result, largestInline(height));
+        }
+        return result;
+    }
+
+    //如果位置上是0就置为0，如果是1就height + 1
+    private void updateHeight(char[][] matrix, int[] height, int row) {
+        for (int i = 0; i < matrix[0].length; i++) {
+            if (matrix[row][i] == '1')  height[i] += 1;
+            else height[i] = 0;
+        }
+    }
+
+    private int largestInline(int[] heights) {
+        int len = heights.length;
+        Stack<Integer> s = new Stack<>();
+        int maxArea = 0;
+        s.push(-1);
+        for (int i = 0; i <= len; i++) {
+            int h = (i == len ? 0 : heights[i]);
+            if (s.peek() == -1 || h >= heights[s.peek()]){
+                s.push(i);
+            }else {
+                if(s.isEmpty()) return maxArea;
+                int top = s.pop();
+                maxArea = Math.max(maxArea, heights[top] * (i - 1 - s.peek()));
+                i--;
+            }
+        }
+        return maxArea;
+    }
+
+}
+```
+
+#### [394. 字符串解码(栈)](https://leetcode-cn.com/problems/decode-string/)
+
+给定一个经过编码的字符串，返回它解码后的字符串。
+
+编码规则为: `k[encoded_string]`，表示其中方括号内部的 *encoded_string* 正好重复 *k* 次。注意 *k* 保证为正整数。
+
+你可以认为输入字符串总是有效的；输入字符串中没有额外的空格，且输入的方括号总是符合格式要求的。
+
+此外，你可以认为原始数据不包含数字，所有的数字只表示重复的次数 *k* ，例如不会出现像 `3a` 或 `2[4]` 的输入。
+
+**示例:**
+
+```
+s = "3[a]2[bc]", 返回 "aaabcbc".
+s = "3[a2[c]]", 返回 "accaccacc".
+s = "2[abc]3[cd]ef", 返回 "abcabccdcdcdef".
+```
+
+```java
+class Solution {
+    public String decodeString(String s) {
+        Stack<Integer> inStack = new Stack<>();
+        Stack<StringBuilder> strStack = new Stack<>();
+        StringBuilder curr = new StringBuilder();
+        int k = 0;
+
+        for (char ch : s.toCharArray()){
+            if (Character.isDigit(ch)){
+                k = k * 10 + ch - '0';
+            }else if (ch == '['){
+                inStack.push(k);
+                strStack.push(curr);
+                curr = new StringBuilder();
+                k = 0;
+            }else if (ch == ']'){
+                StringBuilder tmp = curr;
+                curr = strStack.pop();
+                for (k = inStack.pop(); k > 0; k--) curr.append(tmp);
+            }else curr.append(ch);
+        }
+
+        return curr.toString();
+    }
+}
+```
+
+
 
 #### [146. LRU缓存机制(双链表+hashmap)（**LinkedHashMap**）](https://leetcode-cn.com/problems/lru-cache/)
 
@@ -4705,3 +4989,6 @@ class Solution {
     }
 }
 ```
+
+# 栈
+
