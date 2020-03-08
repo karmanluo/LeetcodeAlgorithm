@@ -28,7 +28,7 @@ import java.util.Stack;
  */
 class Solution {
     public List<Integer> inorderTraversal(TreeNode root) {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new ArrayList<>();
 
         Stack<TreeNode> stack = new Stack<>();
         TreeNode curr = root;

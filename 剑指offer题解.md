@@ -3694,6 +3694,7 @@ class Solution {
         List<Integer> res = new ArrayList<>();
         //Stack<TreeNode> stack = new Stack<>(); 
         Deque<TreeNode> stack = new LinkedList<>();
+        
         TreeNode node = root;
         while(node != null || !stack.isEmpty()){
             if(node != null){
@@ -3712,9 +3713,132 @@ class Solution {
 
 
 
+#### [94. 二叉树的中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/)
 
+给定一个二叉树，返回它的*中序* 遍历。
 
+**示例:**
 
+```
+输入: [1,null,2,3]
+   1
+    \
+     2
+    /
+   3
+
+输出: [1,3,2]
+```
+
+**进阶:** 递归算法很简单，你可以通过迭代算法完成吗？
+
+```java
+//递归
+class Solution {
+    List<Integer> res = new ArrayList<>();
+    public List<Integer> inorderTraversal(TreeNode root) {
+        if(root == null) return res;
+
+        inorderTraversal(root.left);
+        res.add(root.val);
+        inorderTraversal(root.right);
+
+        return res;
+    }
+}
+```
+
+```java
+//迭代
+class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+       List<Integer> res = new ArrayList<>();
+       Deque<TreeNode> stack = new LinkedList<>();
+
+        if(root == null)    return res;
+
+        TreeNode node = root;
+        //注意不能先将root加入stack
+        while(node != null || !stack.isEmpty()){
+            if(node != null){
+                stack.push(node);
+                node = node.left;
+            }else{
+                node = stack.pop();
+                res.add(node.val);
+                node = node.right;
+            }
+        }
+
+        return res;
+    }
+}
+```
+
+#### [145. 二叉树的后序遍历](https://leetcode-cn.com/problems/binary-tree-postorder-traversal/)
+
+给定一个二叉树，返回它的 *后序* 遍历。
+
+**示例:**
+
+```
+输入: [1,null,2,3]  
+   1
+    \
+     2
+    /
+   3 
+
+输出: [3,2,1]
+```
+
+**进阶:** 递归算法很简单，你可以通过迭代算法完成吗？
+
+```java
+class Solution {
+    
+    public List<Integer> postorderTraversal(TreeNode root) {
+        
+        List<Integer> res = new ArrayList<>();
+        
+        return  postOrder(root, res);
+    }
+
+    private List<Integer> postOrder(TreeNode node, List<Integer> res){
+        if(node == null) return res;
+
+        postOrder(node.left, res);
+        postOrder(node.right, res);
+        res.add(node.val);
+
+        return res;
+    }
+}
+```
+
+```java
+//迭代
+class Solution {
+    public List<Integer> postorderTraversal(TreeNode root) {
+        //List<Integer> res = new LinkedList<>();
+        LinkedList<Integer> res = new LinkedList<>(); //这样才可以使用循环链表的方法
+        Deque<TreeNode> stack = new LinkedList<>();
+
+        if(root == null)   return res;
+
+        TreeNode node = root;
+        stack.push(node);
+        while(!stack.isEmpty()){
+            node = stack.pop();
+            res.addFirst(node.val);
+            if(node.left != null) stack.push(node.left);
+            if(node.right != null) stack.push(node.right);
+        }
+
+        return res;
+    }
+}
+```
 
 
 
