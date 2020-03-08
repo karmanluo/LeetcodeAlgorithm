@@ -4319,9 +4319,26 @@ public class Solution {
 //空间复杂度：O(S)O(S)，我们需要额外开一个长为 SS 的数组来存储计算出来的答案 F(S)F(S) 。
 ```
 
+
+
 ```java
 //自底向上
+public class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int max = amount + 1;
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, max);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++) {
+            for (int j = 0; j < coins.length; j++) {
+                if (coins[j] <= i)
+                    dp[i] = Math.min(dp[i - coins[j]] + 1, dp[i]);
+            }
+        }
 
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+}
 ```
 
 

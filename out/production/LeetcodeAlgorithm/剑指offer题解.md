@@ -249,52 +249,6 @@ public class Solution {
 
 
 
-#### [面试题31. 栈的压入、弹出序列](https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/)
-
-输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如，序列 {1,2,3,4,5} 是某栈的压栈序列，序列 {4,5,3,2,1} 是该压栈序列对应的一个弹出序列，但 {4,3,5,1,2} 就不可能是该压栈序列的弹出序列。
-
-**示例 1：**
-
-```
-输入：pushed = [1,2,3,4,5], popped = [4,5,3,2,1]
-输出：true
-解释：我们可以按以下顺序执行：
-push(1), push(2), push(3), push(4), pop() -> 4,
-push(5), pop() -> 5, pop() -> 3, pop() -> 2, pop() -> 1
-```
-
-**示例 2：**
-
-```
-输入：pushed = [1,2,3,4,5], popped = [4,3,5,1,2]
-输出：false
-解释：1 不能在 2 之前弹出。
-```
-
-
-
-```java
-class Solution {
-    public boolean validateStackSequences(int[] pushed, int[] popped) {
-        if (pushed.length != popped.length) return false;
-        if (pushed.length == 0) return true;
-
-        Stack<Integer> stack = new Stack<>();
-        int index = 0;
-        for (int i = 0; i < pushed.length; i++) {
-            stack.push(pushed[i]);
-            while (!stack.isEmpty() && popped[index] == stack.peek()){
-                stack.pop();
-                index++;
-            }
-        }
-        return stack.isEmpty();
-    }
-}
-```
-
-
-
 # Leetcode 重点题目
 
 #### [54. 螺旋矩阵](https://leetcode-cn.com/problems/spiral-matrix/)
@@ -1865,6 +1819,584 @@ class Solution {
 }
 ```
 
+# 二分
+
+#### [35. 搜索插入位置](https://leetcode-cn.com/problems/search-insert-position/)
+
+给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
+
+你可以假设数组中无重复元素。
+
+**示例 1:**
+
+```
+输入: [1,3,5,6], 5
+输出: 2
+```
+
+**示例 2:**
+
+```
+输入: [1,3,5,6], 2
+输出: 1
+```
+
+**示例 3:**
+
+```
+输入: [1,3,5,6], 7
+输出: 4
+```
+
+**示例 4:**
+
+```
+输入: [1,3,5,6], 0
+输出: 0
+```
+
+
+
+```java
+class Solution {
+    public int searchInsert(int[] nums, int target) {
+        int start = 0, end = nums.length - 1;
+        
+        while(start <= end){
+            int mid = start + ((end - start) >>> 1);
+
+            if(nums[mid] == target)		return mid;
+            else if(nums[mid] > target)		end = mid - 1;
+            else	 start = mid + 1;
+        }
+		
+        return start;
+    }
+}
+```
+
+
+
+#### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+给定一个按照升序排列的整数数组 `nums`，和一个目标值 `target`。找出给定目标值在数组中的开始位置和结束位置。
+
+你的算法时间复杂度必须是 *O*(log *n*) 级别。
+
+如果数组中不存在目标值，返回 `[-1, -1]`。
+
+**示例 1:**
+
+```
+输入: nums = [5,7,7,8,8,10], target = 8
+输出: [3,4]
+```
+
+**示例 2:**
+
+```
+输入: nums = [5,7,7,8,8,10], target = 6
+输出: [-1,-1]
+```
+
+```java
+class Solution {
+    // returns leftmost (or rightmost) index at which `target` should be
+    // inserted in sorted array `nums` via binary search.
+    private int extremeInsertionIndex(int[] nums, int target, boolean left) {
+        int lo = 0;
+        int hi = nums.length;
+
+        while (lo < hi) {
+            int mid = (lo + hi) / 2;
+            if (nums[mid] > target || (left && target == nums[mid])) {
+                hi = mid;
+            }
+            else {
+                lo = mid+1;
+            }
+        }
+
+        return lo;
+    }
+
+    public int[] searchRange(int[] nums, int target) {
+        int[] targetRange = {-1, -1};
+
+        int leftIdx = extremeInsertionIndex(nums, target, true);
+
+        // assert that `leftIdx` is within the array bounds and that `target`
+        // is actually in `nums`.
+        if (leftIdx == nums.length || nums[leftIdx] != target) {
+            return targetRange;
+        }
+
+        targetRange[0] = leftIdx;
+        targetRange[1] = extremeInsertionIndex(nums, target, false)-1;
+
+        return targetRange;
+    }
+}
+```
+
+#### [162. 寻找峰值](https://leetcode-cn.com/problems/find-peak-element/)
+
+峰值元素是指其值大于左右相邻值的元素。
+
+给定一个输入数组 `nums`，其中 `nums[i] ≠ nums[i+1]`，找到峰值元素并返回其索引。
+
+数组可能包含多个峰值，在这种情况下，返回任何一个峰值所在位置即可。
+
+你可以假设 `nums[-1] = nums[n] = -∞`。
+
+**示例 1:**
+
+```
+输入: nums = [1,2,3,1]
+输出: 2
+解释: 3 是峰值元素，你的函数应该返回其索引 2。
+```
+
+**示例 2:**
+
+```
+输入: nums = [1,2,1,3,5,6,4]
+输出: 1 或 5 
+解释: 你的函数可以返回索引 1，其峰值元素为 2；
+     或者返回索引 5， 其峰值元素为 6。
+```
+
+**说明:**
+
+你的解法应该是 *O*(*logN*) 时间复杂度的。
+
+
+
+```java
+public class Solution {
+    public int findPeakElement(int[] nums) {
+        int l = 0, r = nums.length - 1;
+        while (l < r) {
+            int mid = (l + r) / 2;
+            //哪个大，就把边界放在哪边，每次mid都是为了缩小边界
+            if (nums[mid] > nums[mid + 1])
+                r = mid;
+            else
+                l = mid + 1;
+        }
+        return l;
+    }
+}
+```
+
+#### [74. 搜索二维矩阵](https://leetcode-cn.com/problems/search-a-2d-matrix/)
+
+编写一个高效的算法来判断 *m* x *n* 矩阵中，是否存在一个目标值。该矩阵具有如下特性：
+
+- 每行中的整数从左到右按升序排列。
+- 每行的第一个整数大于前一行的最后一个整数。
+
+**示例 1:**
+
+```
+输入:
+matrix = [
+  [1,   3,  5,  7],
+  [10, 11, 16, 20],
+  [23, 30, 34, 50]
+]
+target = 3
+输出: true
+```
+
+**示例 2:**
+
+```
+输入:
+matrix = [
+  [1,   3,  5,  7],
+  [10, 11, 16, 20],
+  [23, 30, 34, 50]
+]
+target = 13
+输出: false
+```
+
+```java
+//把整个二维数组看成一个有序的数组就可以了
+class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        if(matrix == null || matrix.length == 0)    return false;
+
+        int rows = matrix.length, cols = matrix[0].length;
+        int start = 0, end = rows * cols - 1;
+
+        while(start <= end){
+            int mid = start + ((end - start) >>> 1);
+            
+            if(target == matrix[mid / cols][mid % cols])    return true;
+            else if(target < matrix[mid / cols][mid % cols])    end = mid - 1;
+            else    start = mid + 1;
+        }
+
+        return false;
+    }
+}
+```
+
+
+
+#### [240. 搜索二维矩阵 II](https://leetcode-cn.com/problems/search-a-2d-matrix-ii/)
+
+编写一个高效的算法来搜索 *m* x *n* 矩阵 matrix 中的一个目标值 target。该矩阵具有以下特性：
+
+- 每行的元素从左到右升序排列。
+- 每列的元素从上到下升序排列。
+
+**示例:**
+
+现有矩阵 matrix 如下：
+
+```
+[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]
+```
+
+给定 target = `5`，返回 `true`。
+
+给定 target = `20`，返回 `false`。
+
+```java
+//本题从右上、左下开始皆可
+class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        //选择从左下开始
+        int row = matrix.length - 1;
+        int col = 0;
+
+        while (row >= 0 && col <= matrix[0].length - 1){
+            if(target == matrix[row][col]) return true;
+            else if(target < matrix[row][col])  row--;
+            else    col++;
+        }
+        return false;
+    }
+}
+```
+
+#### [153. 寻找旋转排序数组中的最小值](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array/)
+
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+
+( 例如，数组 `[0,1,2,4,5,6,7]` 可能变为 `[4,5,6,7,0,1,2]` )。
+
+请找出其中最小的元素。
+
+你可以假设数组中**不存在重复元素。**
+
+**示例 1:**
+
+```
+输入: [3,4,5,1,2]
+输出: 1
+```
+
+**示例 2:**
+
+```
+输入: [4,5,6,7,0,1,2]
+输出: 0
+```
+
+```java
+public class Solution {
+    public int findMin(int[] nums) {
+        int low = 0, high = nums.length - 1;
+
+        while (low < high){
+            int mid = low + ((high - low) >>> 1);
+
+            //nums[mid] < nums[high]   太妙了
+            if (nums[mid] < nums[high]) high = mid;
+            else low = mid + 1;
+        }
+
+        return nums[low];
+    }
+```
+
+#### [154. 寻找旋转排序数组中的最小值 II](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array-ii/)
+
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+
+( 例如，数组 `[0,1,2,4,5,6,7]` 可能变为 `[4,5,6,7,0,1,2]` )。
+
+请找出其中最小的元素。
+
+注意数组中**可能存在重复的元素。**
+
+**示例 1：**
+
+```
+输入: [1,3,5]
+输出: 1
+```
+
+**示例 2：**
+
+```
+输入: [2,2,2,0,1]
+输出: 0
+```
+
+**说明：**
+
+- 这道题是 [寻找旋转排序数组中的最小值](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array/description/) 的延伸题目。
+- 允许重复会影响算法的时间复杂度吗？会如何影响，为什么？
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        int lo = 0, hi = nums.length - 1;
+
+        while(lo < hi){
+            int mid = lo + ((hi -lo) >>> 1);
+            
+            if(nums[mid] < nums[hi])    hi = mid;
+            else if(nums[mid] > nums[hi])   lo = mid + 1;
+            else    //this case is nums[mid] == nums[hi]
+                hi--;
+        }
+
+        return nums[lo];
+    }
+}
+```
+
+#### [33. 搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+
+( 例如，数组 `[0,1,2,4,5,6,7]` 可能变为 `[4,5,6,7,0,1,2]` )。
+
+搜索一个给定的目标值，如果数组中存在这个目标值，则返回它的索引，否则返回 `-1` 。
+
+你可以假设数组中**不存在重复的元素**。
+
+你的算法**时间复杂度**必须是 ***O*(log *n*)** 级别。
+
+**示例 1:**
+
+```
+输入: nums = [4,5,6,7,0,1,2], target = 0
+输出: 4
+```
+
+**示例 2:**
+
+```
+输入: nums = [4,5,6,7,0,1,2], target = 3
+输出: -1
+```
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int lo = 0, hi = nums.length - 1;
+
+        while(lo <= hi){//可能出现target不在数组中的时候，需要加上等号
+            int mid = lo + ((hi -lo) >>> 1);
+            
+            if(target == nums[mid]) return mid;
+            else if(nums[mid] < nums[hi]) {//中间小于右边，说明右半边有序
+                if(target > nums[mid] && target <= nums[hi])    lo = mid + 1;
+                else    hi = mid - 1;
+            }
+            else{//说明左边有序
+                if(target < nums[mid] && target >= nums[lo])    hi = mid - 1;
+                else    lo = mid + 1;
+            }
+        }
+
+        return -1;
+    }
+}
+```
+
+#### [81. 搜索旋转排序数组 II](https://leetcode-cn.com/problems/search-in-rotated-sorted-array-ii/)
+
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+
+( 例如，数组 `[0,0,1,2,2,5,6]` 可能变为 `[2,5,6,0,0,1,2]` )。
+
+编写一个函数来判断给定的目标值是否存在于数组中。若存在返回 `true`，否则返回 `false`。
+
+**示例 1:**
+
+```
+输入: nums = [2,5,6,0,0,1,2], target = 0
+输出: true
+```
+
+**示例 2:**
+
+```
+输入: nums = [2,5,6,0,0,1,2], target = 3
+输出: false
+```
+
+**进阶:**
+
+- 这是 [搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/description/) 的延伸题目，本题中的 `nums` 可能包含重复元素。
+- 这会影响到程序的时间复杂度吗？会有怎样的影响，为什么？
+
+```java
+class Solution {
+    public boolean search(int[] nums, int target) {
+        int lo = 0, hi = nums.length - 1;
+
+        while(lo <= hi){//可能出现target不在数组中的时候，需要加上等号
+            int mid = lo + ((hi -lo) >>> 1);
+            
+            if(target == nums[mid]) return true;
+            else if(nums[mid] < nums[hi]) {//中间小于右边，说明右半边有序
+                if(target > nums[mid] && target <= nums[hi])    lo = mid + 1;
+                else    hi = mid - 1;
+            }
+            else if(nums[mid] > nums[hi]){//说明左边有序
+                if(target < nums[mid] && target >= nums[lo])    hi = mid - 1;
+                else    lo = mid + 1;
+            }else{
+                //太牛皮了，无法判断的情况转化为可判断的情况即可
+                hi--;
+            }
+        }
+
+        return false;
+    }
+}
+```
+
+#### [378. 有序矩阵中第K小的元素](https://leetcode-cn.com/problems/kth-smallest-element-in-a-sorted-matrix/)
+
+给定一个 *n x n* 矩阵，其中每行和每列元素均按升序排序，找到矩阵中第k小的元素。
+请注意，它是排序后的第k小元素，而不是第k个元素。
+
+**示例:**
+
+```
+matrix = [
+   [ 1,  5,  9],
+   [10, 11, 13],
+   [12, 13, 15]
+],
+k = 8,
+
+返回 13。
+```
+
+**说明:**你可以假设 k 的值永远是有效的,  `1 ≤ k ≤ n^2`
+
+```java
+class Solution {
+    public int kthSmallest(int[][] matrix, int k) {
+        int n = matrix.length;
+        int lo = matrix[0][0], hi = matrix[n - 1][n - 1];
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            int count = getLessEqual(matrix, mid);
+            if (count < k) lo = mid + 1;
+            else hi = mid - 1;
+        }
+        return lo;
+    }
+    
+    //从左下的位置出发，找小于目标数的数量
+    private int getLessEqual(int[][] matrix, int val) {
+        int res = 0;
+        int n = matrix.length, i = n - 1, j = 0;
+        while (i >= 0 && j < n) {
+            if (matrix[i][j] > val) i--;
+            else {
+                //关键 
+                res += i + 1;
+                j++;
+            }
+        }
+        return res;
+    }
+}
+```
+
+#### [4. 寻找两个有序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)
+
+给定两个大小为 m 和 n 的有序数组 `nums1` 和 `nums2`。
+
+请你找出这两个有序数组的中位数，并且**要求算法的时间复杂度为 O(log(m + n))**。
+
+你可以假设 `nums1` 和 `nums2` 不会同时为空。
+
+**示例 1:**
+
+```
+nums1 = [1, 3]
+nums2 = [2]
+
+则中位数是 2.0
+```
+
+**示例 2:**
+
+```
+nums1 = [1, 2]
+nums2 = [3, 4]
+
+则中位数是 (2 + 3)/2 = 2.5
+```
+
+[参考链接,看视频解答就可以理解了](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/solution/)
+
+```java
+//时间复杂度要求为o(log(m+n))，只能用二分查找
+public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+    int n = nums1.length;
+    int m = nums2.length;
+    int left = (n + m + 1) / 2;
+    int right = (n + m + 2) / 2;
+    //将偶数和奇数的情况合并，如果是奇数，会求两次同样的 k 。
+    return (getKth(nums1, 0, n - 1, nums2, 0, m - 1, left) + getKth(nums1, 0, n - 1, nums2, 0, m - 1, right)) * 0.5;  
+}
+    
+    private int getKth(int[] nums1, int start1, int end1, int[] nums2, int start2, int end2, int k) {
+        int len1 = end1 - start1 + 1;
+        int len2 = end2 - start2 + 1;
+        //让 len1 的长度小于 len2，这样就能保证如果有数组空了，一定是 len1 
+        if (len1 > len2) return getKth(nums2, start2, end2, nums1, start1, end1, k);
+        if (len1 == 0) return nums2[start2 + k - 1];
+
+        if (k == 1) return Math.min(nums1[start1], nums2[start2]);
+
+        int i = start1 + Math.min(len1, k / 2) - 1;
+        int j = start2 + Math.min(len2, k / 2) - 1;
+
+        if (nums1[i] > nums2[j]) {
+            return getKth(nums1, start1, end1, nums2, j + 1, end2, k - (j - start2 + 1));
+        }
+        else {
+            return getKth(nums1, i + 1, end1, nums2, start2, end2, k - (i - start1 + 1));
+        }
+    }
+```
+
+
+
+
+
 # JAVA程序设计题目
 
 #### 设计一个泛型的获取数组最小值的函数.
@@ -1933,6 +2465,74 @@ public class 泛型实现最小值函数 {
 }	
 ```
 
+#### [面试题59 - II. 队列的最大值](https://leetcode-cn.com/problems/dui-lie-de-zui-da-zhi-lcof/)
+
+请定义一个队列并实现函数 `max_value` 得到队列里的最大值，要求函数`max_value`、`push_back` 和 `pop_front` 的**均摊**时间复杂度都是O(1)。
+
+若队列为空，`pop_front` 和 `max_value` 需要返回 -1
+
+**示例 1：**
+
+```
+输入: 
+["MaxQueue","push_back","push_back","max_value","pop_front","max_value"]
+[[],[1],[2],[],[],[]]
+输出: [null,null,null,2,1,2]
+```
+
+**示例 2：**
+
+```
+输入: 
+["MaxQueue","pop_front","max_value"]
+[[],[],[]]
+输出: [null,-1,-1]
+```
+
+ 
+
+**限制：**
+
+- `1 <= push_back,pop_front,max_value的总操作数 <= 10000`
+- `1 <= value <= 10^5`
+
+```java
+class MaxQueue {
+
+    private Queue<Integer> q;   //q用来进出栈
+    private Deque<Integer> helpDq; //helpDq用来存最大
+    public MaxQueue() {
+        q = new LinkedList<>();
+        helpDq = new LinkedList<>();
+    }
+    
+    //最大值的实现原理，将当前队列中最大的元素放在helpDq的头---
+    //每次队列进来一个元素，在helpDq中从队尾看，前面只能比其值大
+    public int max_value() {
+        return helpDq.isEmpty() ? -1 : helpDq.peek();
+    }
+    
+    public void push_back(int value) {
+        q.offer(value);
+        while(!helpDq.isEmpty() && value > helpDq.peekLast()){
+            helpDq.pollLast();
+        }
+        helpDq.offer(value);
+    }
+    
+    public int pop_front() {
+        if(q.isEmpty()) return -1;
+
+        int val = q.poll();
+        if(helpDq.peek() == val)
+            helpDq.poll();
+        return val;
+    }
+}
+```
+
+
+
 #### [225. 用队列实现栈](https://leetcode-cn.com/problems/implement-stack-using-queues/)
 
 使用队列实现栈的下列操作：
@@ -1954,32 +2554,36 @@ empty() -- 返回栈是否为空
 ```java
 class MyStack {
 
+    Queue<Integer> q;
     /** Initialize your data structure here. */
     public MyStack() {
-
+        q = new LinkedList<>();
     }
-    
+
     /** Push element x onto stack. */
     public void push(int x) {
-
+        q.offer(x);
+        //size - 1 次的交换刚好可以交换顺序
+        for (int i = 1; i < q.size(); i++) {
+            q.add(q.poll());
+        }
     }
-    
+
     /** Removes the element on top of the stack and returns that element. */
     public int pop() {
-
+        return q.poll();
     }
-    
+
     /** Get the top element. */
     public int top() {
-        
+        return q.peek();
     }
-    
+
     /** Returns whether the stack is empty. */
     public boolean empty() {
-
+        return q.isEmpty();
     }
 }
-
 /**
  * Your MyStack object will be instantiated and called as such:
  * MyStack obj = new MyStack();
@@ -2112,7 +2716,358 @@ class MinStack {
  */
 ```
 
+#### [面试题31. 栈的压入、弹出序列](https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/)
 
+输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如，序列 {1,2,3,4,5} 是某栈的压栈序列，序列 {4,5,3,2,1} 是该压栈序列对应的一个弹出序列，但 {4,3,5,1,2} 就不可能是该压栈序列的弹出序列。
+
+**示例 1：**
+
+```
+输入：pushed = [1,2,3,4,5], popped = [4,5,3,2,1]
+输出：true
+解释：我们可以按以下顺序执行：
+push(1), push(2), push(3), push(4), pop() -> 4,
+push(5), pop() -> 5, pop() -> 3, pop() -> 2, pop() -> 1
+```
+
+**示例 2：**
+
+```
+输入：pushed = [1,2,3,4,5], popped = [4,3,5,1,2]
+输出：false
+解释：1 不能在 2 之前弹出。
+```
+
+
+
+```java
+class Solution {
+    public boolean validateStackSequences(int[] pushed, int[] popped) {
+        if (pushed.length != popped.length) return false;
+        if (pushed.length == 0) return true;
+
+        Stack<Integer> stack = new Stack<>();
+        int index = 0;
+        for (int i = 0; i < pushed.length; i++) {
+            stack.push(pushed[i]);
+            while (!stack.isEmpty() && popped[index] == stack.peek()){
+                stack.pop();
+                index++;
+            }
+        }
+        return stack.isEmpty();
+    }
+}
+```
+
+#### [84. 柱状图中最大的矩形（栈）](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/)
+
+给定 *n* 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+ 
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/12/histogram.png)
+
+以上是柱状图的示例，其中每个柱子的宽度为 1，给定的高度为 `[2,1,5,6,2,3]`。
+
+ 
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/12/histogram_area.png)
+
+图中阴影部分为所能勾勒出的最大矩形面积，其面积为 `10` 个单位。
+
+ 
+
+**示例:**
+
+```
+输入: [2,1,5,6,2,3]
+输出: 10
+```
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        int len = heights.length;
+        Stack<Integer> s = new Stack<>();
+        int maxArea = 0;
+        s.push(-1);
+        //注意stack中存的值是0——len
+        for (int i = 0; i <= len; i++) {
+            int h = (i == len ? 0 : heights[i]);
+            if (s.peek() == -1 || h >= heights[s.peek()]){
+                s.push(i);
+            }else {
+                if(s.isEmpty()) return maxArea;
+
+                int top = s.pop();
+                //这里计算的是以heightsp[top]为高度，可以得到的最大面积
+                //i - s.peek() - 1 代表满足height是最小值的范围
+                //s.peek()代表上一个小于当前值的位置，只能从其后面开始算
+                //i代表右边第一个不满足的情况
+                maxArea = Math.max(maxArea, heights[top] * (i - 1 - s.peek()));
+                i--;
+            }
+        }
+        return maxArea;
+    }
+}
+```
+
+#### [85. 最大矩形(栈)](https://leetcode-cn.com/problems/maximal-rectangle/)
+
+给定一个仅包含 0 和 1 的二维二进制矩阵，找出只包含 1 的最大矩形，并返回其面积。
+
+**示例:**
+
+```
+输入:
+[
+  ["1","0","1","0","0"],
+  ["1","0","1","1","1"],
+  ["1","1","1","1","1"],
+  ["1","0","0","1","0"]
+]
+输出: 6
+```
+
+```java
+class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        if (matrix == null || matrix.length == 0) return 0;
+
+        int[] height = new int[matrix[0].length];
+        for (int i = 0; i < matrix[0].length; i++) {
+            if (matrix[0][i] == '1')
+                height[i] = 1;
+        }
+        int result = largestInline(height);
+        for (int row = 1; row < matrix.length; row++) {
+            updateHeight(matrix, height, row);
+            result = Math.max(result, largestInline(height));
+        }
+        return result;
+    }
+
+    //如果位置上是0就置为0，如果是1就height + 1
+    private void updateHeight(char[][] matrix, int[] height, int row) {
+        for (int i = 0; i < matrix[0].length; i++) {
+            if (matrix[row][i] == '1')  height[i] += 1;
+            else height[i] = 0;
+        }
+    }
+
+    private int largestInline(int[] heights) {
+        int len = heights.length;
+        Stack<Integer> s = new Stack<>();
+        int maxArea = 0;
+        s.push(-1);
+        for (int i = 0; i <= len; i++) {
+            int h = (i == len ? 0 : heights[i]);
+            if (s.peek() == -1 || h >= heights[s.peek()]){
+                s.push(i);
+            }else {
+                if(s.isEmpty()) return maxArea;
+                int top = s.pop();
+                maxArea = Math.max(maxArea, heights[top] * (i - 1 - s.peek()));
+                i--;
+            }
+        }
+        return maxArea;
+    }
+
+}
+```
+
+#### [394. 字符串解码(栈)](https://leetcode-cn.com/problems/decode-string/)
+
+给定一个经过编码的字符串，返回它解码后的字符串。
+
+编码规则为: `k[encoded_string]`，表示其中方括号内部的 *encoded_string* 正好重复 *k* 次。注意 *k* 保证为正整数。
+
+你可以认为输入字符串总是有效的；输入字符串中没有额外的空格，且输入的方括号总是符合格式要求的。
+
+此外，你可以认为原始数据不包含数字，所有的数字只表示重复的次数 *k* ，例如不会出现像 `3a` 或 `2[4]` 的输入。
+
+**示例:**
+
+```
+s = "3[a]2[bc]", 返回 "aaabcbc".
+s = "3[a2[c]]", 返回 "accaccacc".
+s = "2[abc]3[cd]ef", 返回 "abcabccdcdcdef".
+```
+
+```java
+class Solution {
+    public String decodeString(String s) {
+        Stack<Integer> inStack = new Stack<>();
+        Stack<StringBuilder> strStack = new Stack<>();
+        StringBuilder curr = new StringBuilder();
+        int k = 0;
+
+        for (char ch : s.toCharArray()){
+            if (Character.isDigit(ch)){
+                k = k * 10 + ch - '0';
+            }else if (ch == '['){
+                inStack.push(k);
+                strStack.push(curr);
+                curr = new StringBuilder();
+                k = 0;
+            }else if (ch == ']'){
+                StringBuilder tmp = curr;
+                curr = strStack.pop();
+                for (k = inStack.pop(); k > 0; k--) curr.append(tmp);
+            }else curr.append(ch);
+        }
+
+        return curr.toString();
+    }
+}
+```
+
+
+
+#### [146. LRU缓存机制(双链表+hashmap)（**LinkedHashMap**）](https://leetcode-cn.com/problems/lru-cache/)
+
+运用你所掌握的数据结构，设计和实现一个 [LRU (最近最少使用) 缓存机制](https://baike.baidu.com/item/LRU)。它应该支持以下操作： 获取数据 `get` 和 写入数据 `put` 。
+
+获取数据 `get(key)` - 如果密钥 (key) 存在于缓存中，则获取密钥的值（总是正数），否则返回 -1。
+写入数据 `put(key, value)` - 如果密钥不存在，则写入其数据值。当缓存容量达到上限时，它应该在写入新数据之前删除最近最少使用的数据值，从而为新的数据值留出空间。
+
+**进阶:**
+
+你是否可以在 **O(1)** 时间复杂度内完成这两种操作？
+
+**示例:**
+
+```
+LRUCache cache = new LRUCache( 2 /* 缓存容量 */ );
+
+cache.put(1, 1);
+cache.put(2, 2);
+cache.get(1);       // 返回  1
+cache.put(3, 3);    // 该操作会使得密钥 2 作废
+cache.get(2);       // 返回 -1 (未找到)
+cache.put(4, 4);    // 该操作会使得密钥 1 作废
+cache.get(1);       // 返回 -1 (未找到)
+cache.get(3);       // 返回  3
+cache.get(4);       // 返回  4
+```
+
+```java
+class LRUCache {
+
+    //LinkedHashMap插入是有顺序的
+    private LinkedHashMap<Integer, Integer> map;
+    private int SIZE;
+
+    public LRUCache(int capacity) {
+        map = new LinkedHashMap<>();
+        SIZE = capacity;
+    }
+
+    public int get(int key) {
+        if (map.containsKey(key)) {
+            int value = map.remove(key);
+            map.put(key, value);
+            return value;
+        }
+        return -1;
+    }
+
+    public void put(int key, int value) {
+        if (map.containsKey(key)) {
+            map.remove(key);
+        } else if (map.size() + 1 > SIZE) {
+            map.remove(map.keySet().iterator().next());
+        }
+        map.put(key, value);
+    }
+}
+```
+
+```java
+//双向链表+HashMap的方法
+import java.util.HashMap;
+import java.util.Map;
+
+public class LRU缓存 {
+
+    //head 与 tail 都不能存值，方便检索，新来的值放在头，老的自然就在尾巴侧
+    final Node head = new Node(0, 0);
+    final Node tail = new Node(0, 0);
+    final Map<Integer, Node> map; //map存的是键值与节点信息
+    final int capacity;
+
+    public LRU缓存(int capacity) {
+        this.capacity = capacity;
+        map = new HashMap(capacity);
+        head.next = tail;
+        tail.prev = head;
+    }
+
+    public int get(int key) {
+        int res = -1;
+        if (map.containsKey(key)) {
+            Node n = map.get(key);
+            remove(n);
+            insertToHead(n);
+            res = n.value;
+        }
+        return res;
+    }
+
+    //之前出现过，插入到链表头
+    //之前未出现过，但是容量已满，map删尾巴前面一个对应的最久未使用的节点
+    //将节点放入双向链表，并且放进hashmap
+    public void put(int key, int value) {
+        if (map.containsKey(key)) {
+            Node n = map.get(key);
+            remove(n);
+            n.value = value;
+            insertToHead(n);
+        } else {
+
+            if (map.size() == capacity) {
+                map.remove(tail.prev.key);
+                remove(tail.prev);
+            }
+
+            Node n = new Node(key, value);
+            insertToHead(n);
+            map.put(key, n);
+        }
+    }
+
+    //将双向链表中当前节点删除
+    private void remove(Node n) {
+        n.prev.next = n.next;
+        n.next.prev = n.prev;
+    }
+
+    //将n节点插在头结点的后面
+    private void insertToHead(Node n) {
+        Node headNext = head.next;
+        head.next = n;
+        headNext.prev = n;
+        n.prev = head;
+        n.next = headNext;
+    }
+
+    //子类定义出Node的格式
+    class Node {
+        Node prev, next;
+        int key, value;
+
+        Node(int k, int v) {
+            key = k;
+            value = v;
+        }
+    }
+}
+```
 
 
 
@@ -2360,15 +3315,845 @@ public class Solution {
 }
 ```
 
+# BFS|DFS|
+
+#### [102. 二叉树的层次遍历](https://leetcode-cn.com/problems/binary-tree-level-order-traversal/)
+
+给定一个二叉树，返回其按层次遍历的节点值。 （即逐层地，从左到右访问所有节点）。
+
+例如:
+给定二叉树: `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回其层次遍历结果：
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+```java
+//BFS
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+
+        if(root == null)    return res;
+
+        q.offer(root);
+        while(!q.isEmpty()){
+            int levelCount = q.size();
+            List<Integer> tmp = new ArrayList<>();
+
+            for(int i = 0; i< levelCount; i++){
+                TreeNode node = q.poll();
+                if(node.left != null)   q.offer(node.left);
+                if(node.right != null)  q.offer(node.right);
+                tmp.add(node.val);
+            }
+            res.add(tmp);
+        }
+
+        return res;
+    }
+}
+```
+
+#### [107. 二叉树的层次遍历 II](https://leetcode-cn.com/problems/binary-tree-level-order-traversal-ii/)
+
+给定一个二叉树，返回其节点值自底向上的层次遍历。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+
+例如：
+给定二叉树 `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回其自底向上的层次遍历为：
+
+```
+[
+  [15,7],
+  [9,20],
+  [3]
+]
+```
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+         List<List<Integer>> res = new LinkedList<>();
+         Queue<TreeNode> q = new LinkedList<>();
+
+        if(root == null)    return res;
+
+        q.offer(root);
+        while(!q.isEmpty()){
+            int levelCount = q.size();
+            List<Integer> tmp = new ArrayList<>();
+
+            for(int i = 0; i< levelCount; i++){
+                TreeNode node = q.poll();
+                if(node.left != null)   q.offer(node.left);
+                if(node.right != null)  q.offer(node.right);
+                tmp.add(node.val);
+            }
+            res.add(0, tmp);//和上一题相比只是改变了这里
+        }
+
+        return res;
+    }
+}
+```
+
+#### [103. 二叉树的锯齿形层次遍历](https://leetcode-cn.com/problems/binary-tree-zigzag-level-order-traversal/)
+
+给定一个二叉树，返回其节点值的锯齿形层次遍历。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。
+
+例如：
+给定二叉树 `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回锯齿形层次遍历如下：
+
+```
+[
+  [3],
+  [20,9],
+  [15,7]
+]
+```
+
+```jAVA
+class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+        
+        if(root == null)    return res;
+
+        q.offer(root);
+        boolean order = true;
+        while(!q.isEmpty()){
+            int levelSize = q.size();
+            List<Integer> tmp = new ArrayList<>();
+            for(int i = 0; i < levelSize; i++){
+                TreeNode node = q.poll();
+                if(node.left != null)  q.offer(node.left);
+                if(node.right != null) q.offer(node.right);
+                
+                //只是在这里做了手脚，其他的地方一点没变
+                if(order)   tmp.add(node.val);
+                else    tmp.add(0, node.val);
+            }
+            order = order == true ? false : true;
+            res.add(tmp);
+        }
+
+        return res;
+    }
+}
+```
 
 
 
+#### [987. 二叉树的垂序遍历](https://leetcode-cn.com/problems/vertical-order-traversal-of-a-binary-tree/)
+
+给定二叉树，按***垂序*遍历**返回其结点值。
+
+对位于 `(X, Y)` 的每个结点而言，其左右子结点分别位于 `(X-1, Y-1)` 和 `(X+1, Y-1)`。
+
+把一条垂线从 `X = -infinity` 移动到 `X = +infinity` ，每当该垂线与结点接触时，我们按从上到下的顺序报告结点的值（ `Y` 坐标递减）。
+
+如果两个结点位置相同，则首先报告的结点值较小。
+
+按 `X` 坐标顺序返回非空报告的列表。每个报告都有一个结点值列表。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/02/1236_example_1.PNG)
+
+```
+输入：[3,9,20,null,null,15,7]
+输出：[[9],[3,15],[20],[7]]
+解释： 
+在不丧失其普遍性的情况下，我们可以假设根结点位于 (0, 0)：
+然后，值为 9 的结点出现在 (-1, -1)；
+值为 3 和 15 的两个结点分别出现在 (0, 0) 和 (0, -2)；
+值为 20 的结点出现在 (1, -1)；
+值为 7 的结点出现在 (2, -2)。
+```
+
+**示例 2：**
+
+**![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/23/tree2.png)**
+
+```
+输入：[1,2,3,4,5,6,7]
+输出：[[4],[2],[1,5,6],[3],[7]]
+解释：
+根据给定的方案，值为 5 和 6 的两个结点出现在同一位置。
+然而，在报告 "[1,5,6]" 中，结点值 5 排在前面，因为 5 小于 6。
+```
+
+ 
+
+**提示：**
+
+1. 树的结点数介于 `1` 和 `1000` 之间。
+2. 每个结点值介于 `0` 和 `1000` 之间。
+
+```java
+public class Solution {
+    List<int[]> list = new ArrayList<>();
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        DFS(root, 0, 0);
+
+        list.sort(new Comparator<int[]>() {
+            @Override
+            public int compare(int[] a, int[] b) {
+                if (a[1] != b[1]){
+                    //根据x排序
+                    return a[1] - b[1];
+                }else if (a[2] != b[2]){
+                    //根据y递减的速度
+                    return -a[2] + b[2];
+                }else {
+                    //在同一位置按照值从小到大排序
+                    return a[0] - b[0];
+                }
+            }
+        });
+
+        List<List<Integer>> res = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            int j = i; //找到可以加到一起的边界,i代表左边界，j代表右边界的下一个
+
+            while(j < list.size() && list.get(i)[1] == list.get(j)[1]) j++;
+
+            List<Integer> tmp = new ArrayList<>();
+            for (int k = i; k < j; k++) tmp.add(list.get(k)[0]);
+            res.add(tmp);
+
+            i = j - 1;
+        }
+        
+        return res;
+    }
+
+    private void DFS(TreeNode node, int x, int y){
+        if(node == null)    return;
+        list.add(new int[]{node.val, x, y});
+        DFS(node.left, x - 1, y - 1);
+        DFS(node.right, x + 1, y - 1);
+    }
+}
+```
+
+#### [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)
+
+给定一个由 `'1'`（陆地）和 `'0'`（水）组成的的二维网格，计算岛屿的数量。一个岛被水包围，并且它是通过水平方向或垂直方向上相邻的陆地连接而成的。你可以假设网格的四个边均被水包围。
+
+**示例 1:**
+
+```
+输入:
+11110
+11010
+11000
+00000
+
+输出: 1
+```
+
+**示例 2:**
+
+```
+输入:
+11000
+11000
+00100
+00011
+
+输出: 3
+```
+
+```java
+public class Solution {
+    private int m;//行数
+    private int n;//列数
+    public int numIslands(char[][] grid) {
+        m = grid.length;
+        if (m == 0) return 0;
+        n = grid[0].length;
+
+        int count = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1'){
+                    dfs(grid, i, j);
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    private void dfs(char[][] grid, int i, int j) {
+        if (i < 0 || j < 0 || i >= m || j >= n || grid[i][j] != '1') return;
+
+        grid[i][j] = '0';
+
+        dfs(grid, i - 1, j);
+        dfs(grid, i + 1, j);
+        dfs(grid, i, j - 1);
+        dfs(grid, i, j + 1);
+    }
+    
+}
+```
+
+#### [144. 二叉树的前序遍历](https://leetcode-cn.com/problems/binary-tree-preorder-traversal/)
+
+难度中等213
+
+给定一个二叉树，返回它的 *前序* 遍历。
+
+ **示例:**
+
+```
+输入: [1,null,2,3]  
+   1
+    \
+     2
+    /
+   3 
+
+输出: [1,2,3]
+```
+
+```java
+//递归
+class Solution {
+    List<Integer> res = new ArrayList<>();
+    public List<Integer> preorderTraversal(TreeNode root) {
+        if(root == null) return res;
+
+        res.add(root.val);
+        preorderTraversal(root.left);
+        preorderTraversal(root.right);
+
+        return res;
+    }
+}
+```
+
+```java
+//迭代
+
+//其他知识：stack是类不需要实现类就可以，queue是接口需要实现类
+//java中Deque双端队列中实现了栈的方法
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        //Stack<TreeNode> stack = new Stack<>(); 
+        Deque<TreeNode> stack = new LinkedList<>();
+        
+        TreeNode node = root;
+        while(node != null || !stack.isEmpty()){
+            if(node != null){
+                res.add(node.val);
+                stack.push(node.right);
+                node = node.left;
+            }else{
+                node = stack.pop();
+            }
+        }
+        
+        return res;
+    }
+}
+```
 
 
 
+#### [94. 二叉树的中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/)
 
+给定一个二叉树，返回它的*中序* 遍历。
 
+**示例:**
 
+```
+输入: [1,null,2,3]
+   1
+    \
+     2
+    /
+   3
+
+输出: [1,3,2]
+```
+
+**进阶:** 递归算法很简单，你可以通过迭代算法完成吗？
+
+```java
+//递归
+class Solution {
+    List<Integer> res = new ArrayList<>();
+    public List<Integer> inorderTraversal(TreeNode root) {
+        if(root == null) return res;
+
+        inorderTraversal(root.left);
+        res.add(root.val);
+        inorderTraversal(root.right);
+
+        return res;
+    }
+}
+```
+
+```java
+//迭代
+class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+       List<Integer> res = new ArrayList<>();
+       Deque<TreeNode> stack = new LinkedList<>();
+
+        if(root == null)    return res;
+
+        TreeNode node = root;
+        //注意不能先将root加入stack
+        while(node != null || !stack.isEmpty()){
+            if(node != null){
+                stack.push(node);
+                node = node.left;
+            }else{
+                node = stack.pop();
+                res.add(node.val);
+                node = node.right;
+            }
+        }
+
+        return res;
+    }
+}
+```
+
+#### [145. 二叉树的后序遍历](https://leetcode-cn.com/problems/binary-tree-postorder-traversal/)
+
+给定一个二叉树，返回它的 *后序* 遍历。
+
+**示例:**
+
+```
+输入: [1,null,2,3]  
+   1
+    \
+     2
+    /
+   3 
+
+输出: [3,2,1]
+```
+
+**进阶:** 递归算法很简单，你可以通过迭代算法完成吗？
+
+```java
+class Solution {
+    
+    public List<Integer> postorderTraversal(TreeNode root) {
+        
+        List<Integer> res = new ArrayList<>();
+        
+        return  postOrder(root, res);
+    }
+
+    private List<Integer> postOrder(TreeNode node, List<Integer> res){
+        if(node == null) return res;
+
+        postOrder(node.left, res);
+        postOrder(node.right, res);
+        res.add(node.val);
+
+        return res;
+    }
+}
+```
+
+```java
+//迭代
+class Solution {
+    public List<Integer> postorderTraversal(TreeNode root) {
+        //List<Integer> res = new LinkedList<>();
+        LinkedList<Integer> res = new LinkedList<>(); //这样才可以使用循环链表的方法
+        Deque<TreeNode> stack = new LinkedList<>();
+
+        if(root == null)   return res;
+
+        TreeNode node = root;
+        stack.push(node);
+        while(!stack.isEmpty()){
+            node = stack.pop();
+            res.addFirst(node.val);
+            if(node.left != null) stack.push(node.left);
+            if(node.right != null) stack.push(node.right);
+        }
+
+        return res;
+    }
+}
+```
+
+# 动态规划套路详解
+
+[labuladong](https://leetcode-cn.com/u/labuladong/)发布于 9 个月前33.6k动态规划递归记忆化C++
+
+我润色了本文，并添加了更多干货内容，希望本文成为解决动态规划的一部「指导方针」。再说句题外话，我们的公众号开号至今写了起码十几篇文章拆解动态规划问题，我都整理到了公众号菜单的「文章目录」中，**它们都提到了动态规划的解题框架思维，本文就系统总结一下**。这段时间本人也从非科班小白成长到刷通半个 LeetCode，所以我总结的套路可能不适合各路大神，但是应该适合大众，毕竟我自己也是一路摸爬滚打过来的。
+
+算法技巧就那几个套路，如果你心里有数，就会轻松很多，本文就来扒一扒动态规划的裤子，形成一套解决这类问题的思维框架。废话不多说了，上干货。
+
+**动态规划问题的一般形式就是求最值**。动态规划其实是运筹学的一种最优化方法，只不过在计算机问题上应用比较多，比如说让你求**最长**递增子序列呀，**最小**编辑距离呀等等。
+
+既然是要求最值，核心问题是什么呢？**求解动态规划的核心问题是穷举**。因为要求最值，肯定要把所有可行的答案穷举出来，然后在其中找最值呗。
+
+动态规划就这么简单，就是穷举就完事了？我看到的动态规划问题都很难啊！
+
+首先，动态规划的穷举有点特别，因为这类问题**存在「重叠子问题」**，如果暴力穷举的话效率会极其低下，所以需要「备忘录」或者「DP table」来优化穷举过程，避免不必要的计算。
+
+而且，动态规划问题一定会**具备「最优子结构」**，才能通过子问题的最值得到原问题的最值。
+
+另外，虽然动态规划的核心思想就是穷举求最值，但是问题可以千变万化，穷举所有可行解其实并不是一件容易的事，只有列出**正确的「状态转移方程**」才能正确地穷举。
+
+以上提到的重叠子问题、最优子结构、状态转移方程就是动态规划三要素。具体什么意思等会会举例详解，但是在实际的算法问题中，**写出状态转移方程是最困难的**，这也就是为什么很多朋友觉得动态规划问题困难的原因，我来提供我研究出来的一个思维框架，辅助你思考状态转移方程：
+
+明确「状态」 -> 定义 dp 数组/函数的含义 -> 明确「选择」-> 明确 base case。
+
+下面通过斐波那契数列问题和凑零钱问题来详解动态规划的基本原理。前者主要是让你明白什么是重叠子问题（斐波那契数列严格来说不是动态规划问题），后者主要举集中于如何列出状态转移方程。
+
+请读者不要嫌弃这个例子简单，**只有简单的例子才能让你把精力充分集中在算法背后的通用思想和技巧上，而不会被那些隐晦的细节问题搞的莫名其妙**。想要困难的例子，历史文章里有的是。
+
+### 一、斐波那契数列
+
+**1、暴力递归**
+
+斐波那契数列的数学形式就是递归的，写成代码就是这样：
+
+```
+int fib(int N) {
+    if (N == 1 || N == 2) return 1;
+    return fib(N - 1) + fib(N - 2);
+}
+```
+
+这个不用多说了，学校老师讲递归的时候似乎都是拿这个举例。我们也知道这样写代码虽然简洁易懂，但是十分低效，低效在哪里？假设 n = 20，请画出递归树。
+
+PS：但凡遇到需要递归的问题，最好都画出递归树，这对你分析算法的复杂度，寻找算法低效的原因都有巨大帮助。
+
+![img](https://pic.leetcode-cn.com/27c9f7e7b100243c8a0b1e3cb664988cc3f0456abb89d01e5625382c48ac7dd1.jpg)
+
+这个递归树怎么理解？就是说想要计算原问题 `f(20)`，我就得先计算出子问题 `f(19)` 和 `f(18)`，然后要计算 `f(19)`，我就要先算出子问题 `f(18)` 和 `f(17)`，以此类推。最后遇到 `f(1)` 或者 `f(2)` 的时候，结果已知，就能直接返回结果，递归树不再向下生长了。
+
+**递归算法的时间复杂度怎么计算？子问题个数乘以解决一个子问题需要的时间。**
+
+子问题个数，即递归树中节点的总数。显然二叉树节点总数为指数级别，所以子问题个数为 O(2^n)。
+
+解决一个子问题的时间，在本算法中，没有循环，只有 f(n - 1) + f(n - 2) 一个加法操作，时间为 O(1)。
+
+所以，这个算法的时间复杂度为 O(2^n)，指数级别，爆炸。
+
+观察递归树，很明显发现了算法低效的原因：存在大量重复计算，比如 `f(18)` 被计算了两次，而且你可以看到，以 `f(18)` 为根的这个递归树体量巨大，多算一遍，会耗费巨大的时间。更何况，还不止 `f(18)` 这一个节点被重复计算，所以这个算法及其低效。
+
+这就是动态规划问题的第一个性质：**重叠子问题**。下面，我们想办法解决这个问题。
+
+**2、带备忘录的递归解法**
+
+明确了问题，其实就已经把问题解决了一半。即然耗时的原因是重复计算，那么我们可以造一个「备忘录」，每次算出某个子问题的答案后别急着返回，先记到「备忘录」里再返回；每次遇到一个子问题先去「备忘录」里查一查，如果发现之前已经解决过这个问题了，直接把答案拿出来用，不要再耗时去计算了。
+
+一般使用一个数组充当这个「备忘录」，当然你也可以使用哈希表（字典），思想都是一样的。
+
+```
+int fib(int N) {
+    if (N < 1) return 0;
+    // 备忘录全初始化为 0
+    vector<int> memo(N + 1, 0);
+    // 初始化最简情况
+    return helper(memo, N);
+}
+ 
+int helper(vector<int>& memo, int n) {
+    // base case 
+    if (n == 1 || n == 2) return 1;
+    // 已经计算过
+    if (memo[n] != 0) return memo[n];
+    memo[n] = helper(memo, n - 1) + 
+                helper(memo, n - 2);
+    return memo[n];
+}
+```
+
+现在，画出递归树，你就知道「备忘录」到底做了什么。
+
+![img](https://pic.leetcode-cn.com/259446b44cb809bf270ec26b6367ce4d1f32c6c65a30ae9cd0848d471939c886.jpg)
+
+实际上，带「备忘录」的递归算法，把一棵存在巨量冗余的递归树通过「剪枝」，改造成了一幅不存在冗余的递归图，极大减少了子问题（即递归图中节点）的个数。
+
+![img](https://pic.leetcode-cn.com/0a5bcfd19a01f6b310f3933c46ed316e41ec61a5311e24f006be2c22bbbb14cc.jpg)
+
+递归算法的时间复杂度怎么算？子问题个数乘以解决一个子问题需要的时间。
+
+子问题个数，即图中节点的总数，由于本算法不存在冗余计算，子问题就是 `f(1)`, `f(2)`, `f(3)` ... `f(20)`，数量和输入规模 n = 20 成正比，所以子问题个数为 O(n)。
+
+解决一个子问题的时间，同上，没有什么循环，时间为 O(1)。
+
+所以，本算法的时间复杂度是 O(n)。比起暴力算法，是降维打击。
+
+至此，带备忘录的递归解法的效率已经和迭代的动态规划解法一样了。实际上，这种解法和迭代的动态规划已经差不多了，只不过这种方法叫做「自顶向下」，动态规划叫做「自底向上」。
+
+啥叫「自顶向下」？注意我们刚才画的递归树（或者说图），是从上向下延伸，都是从一个规模较大的原问题比如说 `f(20)`，向下逐渐分解规模，直到 `f(1)` 和 `f(2)` 触底，然后逐层返回答案，这就叫「自顶向下」。
+
+啥叫「自底向上」？反过来，我们直接从最底下，最简单，问题规模最小的 `f(1)` 和 `f(2)` 开始往上推，直到推到我们想要的答案 `f(20)`，这就是动态规划的思路，这也是为什么动态规划一般都脱离了递归，而是由循环迭代完成计算。
+
+**3、dp 数组的迭代解法**
+
+有了上一步「备忘录」的启发，我们可以把这个「备忘录」独立出来成为一张表，就叫做 DP table 吧，在这张表上完成「自底向上」的推算岂不美哉！
+
+```
+int fib(int N) {
+    vector<int> dp(N + 1, 0);
+    // base case
+    dp[1] = dp[2] = 1;
+    for (int i = 3; i <= N; i++)
+        dp[i] = dp[i - 1] + dp[i - 2];
+    return dp[N];
+}
+```
+
+![img](https://pic.leetcode-cn.com/1b4485704cf963fd49d597040ffbb3b5d4d2ca923752c8c78d00042df66343a9.jpg)
+
+画个图就很好理解了，而且你发现这个 DP table 特别像之前那个「剪枝」后的结果，只是反过来算而已。实际上，带备忘录的递归解法中的「备忘录」，最终完成后就是这个 DP table，所以说这两种解法其实是差不多的，大部分情况下，效率也基本相同。
+
+这里，引出「状态转移方程」这个名词，实际上就是描述问题结构的数学形式：
+$$
+f(n) = \begin{cases} 1, n = 1, 2 \\ f(n - 1) + f(n - 2), n > 2 \end{cases}
+$$
+为啥叫「状态转移方程」？为了听起来高端。你把 f(n) 想做一个状态 n，这个状态 n 是由状态 n - 1 和状态 n - 2 相加转移而来，这就叫状态转移，仅此而已。
+
+你会发现，上面的几种解法中的所有操作，例如 return f(n - 1) + f(n - 2)，dp[i] = dp[i - 1] + dp[i - 2]，以及对备忘录或 DP table 的初始化操作，都是围绕这个方程式的不同表现形式。可见列出「状态转移方程」的重要性，它是解决问题的核心。很容易发现，其实状态转移方程直接代表着暴力解法。
+
+**千万不要看不起暴力解，动态规划问题最困难的就是写出状态转移方程**，即这个暴力解。优化方法无非是用备忘录或者 DP table，再无奥妙可言。
+
+这个例子的最后，讲一个细节优化。细心的读者会发现，根据斐波那契数列的状态转移方程，当前状态只和之前的两个状态有关，其实并不需要那么长的一个 DP table 来存储所有的状态，只要想办法存储之前的两个状态就行了。所以，可以进一步优化，把空间复杂度降为 O(1)：
+
+```
+int fib(int n) {
+    if (n == 2 || n == 1) 
+        return 1;
+    int prev = 1, curr = 1;
+    for (int i = 3; i <= n; i++) {
+        int sum = prev + curr;
+        prev = curr;
+        curr = sum;
+    }
+    return curr;
+}
+```
+
+有人会问，动态规划的另一个重要特性「最优子结构」，怎么没有涉及？下面会涉及。斐波那契数列的例子严格来说不算动态规划，因为没有涉及求最值，以上旨在演示算法设计螺旋上升的过程。下面，看第二个例子，凑零钱问题。
+
+### 二、凑零钱问题
+
+先看下题目：给你 `k` 种面值的硬币，面值分别为 `c1, c2 ... ck`，每种硬币的数量无限，再给一个总金额 `amount`，问你**最少**需要几枚硬币凑出这个金额，如果不可能凑出，算法返回 -1 。算法的函数签名如下：
+
+```
+// coins 中是可选硬币面值，amount 是目标金额
+int coinChange(int[] coins, int amount);
+```
+
+比如说 `k = 3`，面值分别为 1，2，5，总金额 `amount = 11`。那么最少需要 3 枚硬币凑出，即 11 = 5 + 5 + 1。
+
+你认为计算机应该如何解决这个问题？显然，就是把所有肯能的凑硬币方法都穷举出来，然后找找看最少需要多少枚硬币。
+
+**1、暴力递归**
+
+首先，这个问题是动态规划问题，因为它具有「最优子结构」的。**要符合「最优子结构」，子问题间必须互相独立**。啥叫相互独立？你肯定不想看数学证明，我用一个直观的例子来讲解。
+
+比如说，你的原问题是考出最高的总成绩，那么你的子问题就是要把语文考到最高，数学考到最高…… 为了每门课考到最高，你要把每门课相应的选择题分数拿到最高，填空题分数拿到最高…… 当然，最终就是你每门课都是满分，这就是最高的总成绩。
+
+得到了正确的结果：最高的总成绩就是总分。因为这个过程符合最优子结构，“每门科目考到最高”这些子问题是互相独立，互不干扰的。
+
+但是，如果加一个条件：你的语文成绩和数学成绩会互相制约，此消彼长。这样的话，显然你能考到的最高总成绩就达不到总分了，按刚才那个思路就会得到错误的结果。因为子问题并不独立，语文数学成绩无法同时最优，所以最优子结构被破坏。
+
+回到凑零钱问题，为什么说它符合最优子结构呢？比如你想求 `amount = 11` 时的最少硬币数（原问题），如果你知道凑出 `amount = 10` 的最少硬币数（子问题），你只需要把子问题的答案加一（再选一枚面值为 1 的硬币）就是原问题的答案，因为硬币的数量是没有限制的，子问题之间没有相互制，是互相独立的。
+
+那么，既然知道了这是个动态规划问题，就要思考**如何列出正确的状态转移方程**？
+
+**先确定「状态」**，也就是原问题和子问题中变化的变量。由于硬币数量无限，所以唯一的状态就是目标金额 `amount`。
+
+**然后确定 `dp` 函数的定义**：当前的目标金额是 `n`，至少需要 `dp(n)` 个硬币凑出该金额。
+
+**然后确定「选择」并择优**，也就是对于每个状态，可以做出什么选择改变当前状态。具体到这个问题，无论当的目标金额是多少，选择就是从面额列表 `coins` 中选择一个硬币，然后目标金额就会减少：
+
+```python
+# 伪码框架
+def coinChange(coins: List[int], amount: int):
+    # 定义：要凑出金额 n，至少要 dp(n) 个硬币
+    def dp(n):
+        # 做选择，选择需要硬币最少的那个结果
+        for coin in coins:
+            res = min(res, 1 + dp(n - coin))
+        return res
+    # 我们要求的问题是 dp(amount)
+    return dp(amount)
+```
+
+**最后明确 base case**，显然目标金额为 0 时，所需硬币数量为 0；当目标金额小于 0 时，无解，返回 -1：
+
+```python
+def coinChange(coins: List[int], amount: int):
+
+    def dp(n):
+        # base case
+        if n == 0: return 0
+        if n < 0: return -1
+        # 求最小值，所以初始化为正无穷
+        res = float('INF')
+        for coin in coins:
+            subproblem = dp(n - coin)
+            # 子问题无解，跳过
+            if subproblem == -1: continue
+            res = min(res, 1 + subproblem)
+
+        return res if res != float('INF') else -1
+    
+    return dp(amount)
+```
+
+至此，状态转移方程其实已经完成了，以上算法已经是暴力解法了，以上代码的数学形式就是状态转移方程：
+$$
+dp(n) = \begin{cases} 0, n = 0 \\ -1, n < 0\\ min\{dp(n - coin) + 1 | coin \in coins\}, n > 0 \end{cases}
+$$
+至此，这个问题其实就解决了，只不过需要消除一下重叠子问题，比如 `amount = 11, coins = {1,2,5}` 时画出递归树看看：
+
+![img](https://pic.leetcode-cn.com/7db5a80dbffaf2337c0e0323437442d007987bce16b7fa86affbc5ca0e1132d0.jpg)
+
+**时间复杂度分析：子问题总数 x 每个子问题的时间**。
+
+子问题总数为递归树节点个数，这个比较难看出来，是 O(n^k)，总之是指数级别的。每个子问题中含有一个 for 循环，复杂度为 O(k)。所以总时间复杂度为 O(k * n^k)，指数级别。
+
+**2、带备忘录的递归**
+
+只需要稍加修改，就可以通过备忘录消除子问题：
+
+```python
+def coinChange(coins: List[int], amount: int):
+    # 备忘录
+    memo = dict()
+    def dp(n):
+        # 查备忘录，避免重复计算
+        if n in memo: return memo[n]
+
+        if n == 0: return 0
+        if n < 0: return -1
+        res = float('INF')
+        for coin in coins:
+            subproblem = dp(n - coin)
+            if subproblem == -1: continue
+            res = min(res, 1 + subproblem)
+        
+        # 记入备忘录
+        memo[n] = res if res != float('INF') else -1
+        return memo[n]
+    
+    return dp(amount)
+```
+
+不画图了，很显然「备忘录」大大减小了子问题数目，完全消除了子问题的冗余，所以子问题总数不会超过金额数 n，即子问题数目为 O(n)。处理一个子问题的时间不变，仍是 O(k)，所以总的时间复杂度是 O(kn)。
+
+**3、dp 数组的迭代解法**
+
+当然，我们也可以自底向上使用 dp table 来消除重叠子问题，`dp` 数组的定义和刚才 `dp` 函数类似，定义也是一样的：
+
+**`dp[i] = x` 表示，当目标金额为 `i` 时，至少需要 `x` 枚硬币**。
+
+```java
+int coinChange(vector<int>& coins, int amount) {
+    // 数组大小为 amount + 1，初始值也为 amount + 1
+    vector<int> dp(amount + 1, amount + 1);
+    // base case
+    dp[0] = 0;
+    for (int i = 0; i < dp.size(); i++) {
+        // 内层 for 在求所有子问题 + 1 的最小值
+        for (int coin : coins) {
+            // 子问题无解，跳过
+            if (i - coin < 0) continue;
+            dp[i] = min(dp[i], 1 + dp[i - coin]);
+        }
+    }
+    return (dp[amount] == amount + 1) ? -1 : dp[amount];
+}
+```
+
+![img](https://pic.leetcode-cn.com/b4e6cf1bb8e2284bfc01dfef6c1a60c19f9c78238061b65370ccc01822161e83.jpg)
+
+PS：为啥 `dp` 数组初始化为 `amount + 1` 呢，因为凑成 `amount` 金额的硬币数最多只可能等于 `amount`（全用 1 元面值的硬币），所以初始化为 `amount + 1` 就相当于初始化为正无穷，便于后续取最小值。
+
+### 三、最后总结
+
+第一个斐波那契数列的问题，解释了如何通过「备忘录」或者「dp table」的方法来优化递归树，并且明确了这两种方法本质上是一样的，只是自顶向下和自底向上的不同而已。
+
+第二个凑零钱的问题，展示了如何流程化确定「状态转移方程」，只要通过状态转移方程写出暴力递归解，剩下的也就是优化递归树，消除重叠子问题而已。
+
+如果你不太了解动态规划，还能看到这里，真得给你鼓掌，相信你已经掌握了这个算法的设计技巧。
+
+**计算机解决问题其实没有任何奇技淫巧，它唯一的解决办法就是穷举**，穷举所有可能性。算法设计无非就是先思考“如何穷举”，然后再追求“如何聪明地穷举”。
+
+列出动态转移方程，就是在解决“如何穷举”的问题。之所以说它难，一是因为很多穷举需要递归实现，二是因为有的问题本身的解空间复杂，不那么容易穷举完整。
+
+备忘录、DP table 就是在追求“如何聪明地穷举”。用空间换时间的思路，是降低时间复杂度的不二法门，除此之外，试问，还能玩出啥花活？
+
+最后，点击我的头像可以查看更多详细题解，希望读者多多点赞，让我感受到你的认可～
+
+PS：**我的所有算法文章都已经上传到了 Github 仓库**：[**fucking-algorithm**](https://github.com/labuladong/fucking-algorithm)，共 60 多篇，绝对精品，肯定让你收获满满，**求个 star 不过分吧**～
+
+PPS：我最近精心制作了一份电子书《labuladong的算法小抄》，分为「动态规划」「数据结构」「算法思维」「高频面试」四个章节，目录如下，限时开放下载，如有需要可扫码到我的公众号 **labuladong** 后台回复关键词「pdf」下载：
+
+![目录](https://pic.leetcode-cn.com/66b9e7466b8c493b67a709f3ebd87c88daa7ca0b85d960288dec10aff8c7fc3e.jpg)
 
 # DP解法
 
@@ -2481,6 +4266,86 @@ public class Solution {
     }
 }
 ```
+
+#### [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/)
+
+给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 `-1`。
+
+**示例 1:**
+
+```
+输入: coins = [1, 2, 5], amount = 11
+输出: 3 
+解释: 11 = 5 + 5 + 1
+```
+
+**示例 2:**
+
+```
+输入: coins = [2], amount = 3
+输出: -1
+```
+
+**说明**:
+你可以认为每种硬币的数量是无限的。
+
+```java
+//自顶向下的动态规划
+public class Solution {
+    public int coinChange(int[] coins, int amount) {
+        if (amount < 1) return 0;
+        return coinChange(coins, amount, new int[amount + 1]);
+    }
+
+    private int coinChange(int[] coins, int rem, int[] count) {
+        if (rem < 0) return -1;
+        if (rem == 0)   return 0;
+
+        if (count[rem] != 0)    return count[rem];
+        int min = Integer.MAX_VALUE;
+        for (int coin : coins){
+            int res = coinChange(coins, rem - coin, count);
+            if (res < min && res >= 0)
+                min = 1 + res;
+        }
+        count[rem] = min == Integer.MAX_VALUE ? -1 : min;
+
+        return count[rem];
+    }
+}
+复杂度分析
+
+//时间复杂度：O(Sn)O(Sn)，其中 SS 是金额，nn 是面额数。我们一共需要计算 SS 个状态的答案，且每个状态 F(S)F(S) 由于上面的记忆化的措施只计算了一次，而计算一个状态的答案需要枚举 nn 个面额值，所以一共需要 O(Sn)O(Sn) 的时间复杂度。
+//空间复杂度：O(S)O(S)，我们需要额外开一个长为 SS 的数组来存储计算出来的答案 F(S)F(S) 。
+```
+
+
+
+```java
+//自底向上
+public class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int max = amount + 1;
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, max);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++) {
+            for (int j = 0; j < coins.length; j++) {
+                if (coins[j] <= i)
+                    dp[i] = Math.min(dp[i - coins[j]] + 1, dp[i]);
+            }
+        }
+
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+}
+```
+
+
+
+
+
+
 
 # 位操作、异或
 
@@ -3713,10 +5578,395 @@ public class Solution {
 }
 ```
 
+#### [23. 合并K个排序链表（最小堆、归并）](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
 
+合并 *k* 个排序链表，返回合并后的排序链表。请分析和描述算法的复杂度。
 
-```java
-
+**示例:**
 
 ```
+输入:
+[
+  1->4->5,
+  1->3->4,
+  2->6
+]
+输出: 1->1->2->3->4->4->5->6
+```
+
+```java
+//优先队列的特性
+public class Solution2 {
+    public ListNode mergeKLists(ListNode[] lists) {
+        if(lists == null || lists.length == 0) return null;
+		//lists.length表示初始化优先队列的长度
+        // 依靠自然排序的优先级队列也不允许插入不可比较的对象（这样做可能导致ClassCastException ）。
+        PriorityQueue<ListNode> queue = new PriorityQueue<>(lists.length, new Comparator<ListNode>() {
+            @Override
+            public int compare(ListNode o1, ListNode o2) {
+                return o1.val - o2.val;
+            }
+        });
+        ListNode dummy = new ListNode(0);
+        ListNode tail = dummy;
+        for (ListNode node : lists) {
+            if (node != null)
+                queue.add(node);
+        }
+
+        while (!queue.isEmpty()){
+            //每次取一个最小的元素，并且加入加再tail后面
+            tail.next = queue.poll();
+            tail = tail.next;
+            if (tail.next != null){
+                queue.add(tail.next);
+            }
+        }
+        return dummy.next;
+    }
+}
+```
+
+```java
+//归并排序的思想
+public class Solution3 {
+    public ListNode mergeKLists(ListNode[] lists) {
+        return partition(lists, 0, lists.length - 1);
+    }
+
+    public ListNode partition(ListNode[] lists, int start, int end) {
+        if (start == end) return lists[start];
+        if (start < end) {
+            int mid = (start + end) / 2;
+            ListNode l1 = partition(lists, start, mid);
+            ListNode l2 = partition(lists, mid + 1, end);
+            return merge(l1, l2);
+        } else
+            return null;
+    }
+    public ListNode merge(ListNode l1, ListNode l2){
+        if (l1 == null)return l2;
+        if (l2 == null)return l1;
+        if (l1.val < l2.val){
+            l1.next = merge(l1.next, l2);
+            return l1;
+        }else {
+            l2.next = merge(l1, l2.next);
+            return l2;
+        }
+    }
+
+}
+```
+
+#### [138. 复制带随机指针的链表](https://leetcode-cn.com/problems/copy-list-with-random-pointer/)
+
+给定一个链表，每个节点包含一个额外增加的随机指针，该指针可以指向链表中的任何节点或空节点。
+
+要求返回这个链表的 **[深拷贝](https://baike.baidu.com/item/深拷贝/22785317?fr=aladdin)**。 
+
+我们用一个由 `n` 个节点组成的链表来表示输入/输出中的链表。每个节点用一个 `[val, random_index]` 表示：
+
+- `val`：一个表示 `Node.val` 的整数。
+- `random_index`：随机指针指向的节点索引（范围从 `0` 到 `n-1`）；如果不指向任何节点，则为 `null` 。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e1.png)
+
+```
+输入：head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+输出：[[7,null],[13,0],[11,4],[10,2],[1,0]]
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e2.png)
+
+```
+输入：head = [[1,1],[2,1]]
+输出：[[1,1],[2,1]]
+```
+
+**示例 3：**
+
+**![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e3.png)**
+
+```
+输入：head = [[3,null],[3,0],[3,null]]
+输出：[[3,null],[3,0],[3,null]]
+```
+
+**示例 4：**
+
+```
+输入：head = []
+输出：[]
+解释：给定的链表为空（空指针），因此返回 null。
+```
+
+ 
+
+**提示：**
+
+- `-10000 <= Node.val <= 10000`
+- `Node.random` 为空（null）或指向链表中的节点。
+- 节点数目不超过 1000 。
+
+```java
+class Solution {
+     /**
+    思路：用hashmap来存储原始链表和关系
+    **/
+    public Node copyRandomList(Node head) {
+        Map<Node,Node> hashmap = new HashMap<>();
+        Node cur = head;
+        while(cur!=null){
+            hashmap.put(cur,new Node(cur.val));
+            cur = cur.next;
+        }
+        //先构建next指针
+        Node newHead = new Node(0);
+        cur = head;
+        Node newcur = newHead;
+        while(cur != null){
+            newcur.next = hashmap.get(cur);
+            newcur = newcur.next;
+            cur =cur.next;
+        }
+        
+        //构建random指针
+        cur =head;
+        newcur = newHead.next;
+        while(cur != null){
+            newcur.random = hashmap.get(cur.random);
+            newcur=newcur.next;
+            cur = cur.next;
+        }
+        return newHead.next;
+    }
+}
+```
+
+```java
+//leetcode 官方题解，vip答案
+public class Solution {
+    public Node copyRandomList(Node head) {
+
+        if (head == null) {
+            return null;
+        }
+
+        // Creating a new weaved list of original and copied nodes.
+        Node ptr = head;
+        while (ptr != null) {
+
+            // Cloned node
+            Node newNode = new Node(ptr.val);
+
+            // Inserting the cloned node just next to the original node.
+            // If A->B->C is the original linked list,
+            // Linked list after weaving cloned nodes would be A->A'->B->B'->C->C'
+            newNode.next = ptr.next;
+            ptr.next = newNode;
+            ptr = newNode.next;
+        }
+
+        ptr = head;
+
+        // Now link the random pointers of the new nodes created.
+        // Iterate the newly created list and use the original nodes' random pointers,
+        // to assign references to random pointers for cloned nodes.
+        while (ptr != null) {
+            ptr.next.random = (ptr.random != null) ? ptr.random.next : null;
+            ptr = ptr.next.next;
+        }
+
+        // Unweave the linked list to get back the original linked list and the cloned list.
+        // i.e. A->A'->B->B'->C->C' would be broken to A->B->C and A'->B'->C'
+        Node ptr_old_list = head; // A->B->C
+        Node ptr_new_list = head.next; // A'->B'->C'
+        Node head_old = head.next;
+        while (ptr_old_list != null) {
+            ptr_old_list.next = ptr_old_list.next.next;
+            ptr_new_list.next = (ptr_new_list.next != null) ? ptr_new_list.next.next : null;
+            ptr_old_list = ptr_old_list.next;
+            ptr_new_list = ptr_new_list.next;
+        }
+        return head_old;
+    }
+}
+```
+
+
+
+#### [25. K 个一组翻转链表](https://leetcode-cn.com/problems/reverse-nodes-in-k-group/)
+
+给你一个链表，每 *k* 个节点一组进行翻转，请你返回翻转后的链表。
+
+*k* 是一个正整数，它的值小于或等于链表的长度。
+
+如果节点总数不是 *k* 的整数倍，那么请将最后剩余的节点保持原有顺序。
+
+**示例 :**
+
+给定这个链表：`1->2->3->4->5`
+
+当 *k* = 2 时，应当返回: `2->1->4->3->5`
+
+当 *k* = 3 时，应当返回: `3->2->1->4->5`
+
+**说明 :**
+
+- 你的算法只能使用常数的额外空间。
+- **你不能只是单纯的改变节点内部的值**，而是需要实际的进行节点交换。
+
+```java
+public class Solution {
+
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (head == null || head.next == null || k == 1)
+            return head;
+
+        ListNode dummyHead = new ListNode(-1);
+        dummyHead.next = head;
+        ListNode begin = dummyHead;
+        int i = 0;
+        while (head != null) {
+            i++;
+            if (i % k == 0) {
+                begin = reverse(begin, head.next);
+                head = begin.next;
+            } else {
+                head = head.next;
+            }
+        }
+        return dummyHead.next;
+    }
+
+    public ListNode reverse(ListNode begin, ListNode end) {
+        ListNode curr = begin.next;
+        ListNode prev = begin;
+        ListNode first = curr;
+        ListNode next;
+        while (curr != end) {
+            next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+        first.next = end;
+        begin.next = prev;
+        return first;
+    }
+}
+```
+
+#### [143. 重排链表(双指针)](https://leetcode-cn.com/problems/reorder-list/)
+
+给定一个单链表 *L*：*L*0→*L*1→…→*L**n*-1→*L*n ，
+将其重新排列后变为： *L*0→*L**n*→*L*1→*L**n*-1→*L*2→*L**n*-2→…
+
+你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。
+
+**示例 1:**
+
+```
+给定链表 1->2->3->4, 重新排列为 1->4->2->3.
+```
+
+**示例 2:**
+
+```
+给定链表 1->2->3->4->5, 重新排列为 1->5->2->4->3.
+```
+
+```java
+class Solution {
+    public void reorderList(ListNode head) {
+        if (head == null || head.next == null) return;
+        
+        // Find the middle node
+        ListNode slow = head, fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        
+        // Reverse the second half
+        ListNode head2 = reverse(slow.next);
+        slow.next = null;
+        
+        // Intertwine the two halves
+        merge(head, head2);
+    }
+    
+    private ListNode reverse(ListNode n) {
+        ListNode prev = null, cur = n;
+        while (cur != null) {
+            ListNode tmp = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = tmp;
+        }
+        return prev;
+    }
+    
+      public void merge(ListNode left, ListNode right){
+        ListNode leftTemp;
+        ListNode rightTemp;
+        while (left.next != null && right!= null) {
+            //1. 保存next节点
+            leftTemp = left.next;
+            rightTemp = right.next;
+
+            //2. 将右链表的第一个节点插入到左链表中
+            // 左链表：1->2->3 右链表：5->4 
+            // 合并后的左链表：1->5->2->3 
+            left.next = right;
+            right.next = leftTemp;
+
+            //3. 移动left和right指针
+            //左链表变为：2->3 右链表变为：4
+            left = leftTemp;
+            right = rightTemp;
+        }
+    }
+}
+```
+
+```java
+//双端队列
+class Solution {
+    public void reorderList(ListNode head) {
+        LinkedList<ListNode> queue = new LinkedList<>();
+        ListNode cur = head;
+        //全部放到队列里
+        while (cur != null) {
+            queue.addLast(cur);
+            cur = cur.next;
+        }
+        
+        //每次选两端的加入
+        while (!queue.isEmpty()) {
+            if (cur == null) {
+                cur = queue.pollFirst();
+            } else {
+                cur.next = queue.pollFirst();
+                cur = cur.next;
+            }
+            cur.next = queue.pollLast();
+            cur = cur.next;
+        }
+        
+        if (cur != null) {
+            cur.next = null;
+        }
+    }
+}
+```
+
+# 栈
 
