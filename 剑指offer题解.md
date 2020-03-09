@@ -3840,7 +3840,388 @@ class Solution {
 }
 ```
 
-# 动态规划套路详解
+
+
+####  [255. 验证前序遍历序列二叉搜索树](https://leetcode-cn.com/problems/verify-preorder-sequence-in-binary-search-tree/)
+
+难度中等21收藏分享切换为英文关注反馈
+
+给定一个整数数组，你需要验证它是否是一个二叉搜索树正确的先序遍历序列。
+
+你可以假定该序列中的数都是不相同的。
+
+参考以下这颗二叉搜索树：
+
+```
+     5
+    / \
+   2   6
+  / \
+ 1   3
+```
+
+**示例 1：**
+
+```
+输入: [5,2,6,1,3]
+输出: false
+```
+
+**示例 2：**
+
+```
+输入: [5,2,1,3,6]
+输出: true
+```
+
+**进阶挑战：**
+
+您能否使用恒定的空间复杂度来完成此题？
+
+这个题需要理解如下知识点：
+
+- 先序遍历，如果递减，一定是左子树；
+- 如果出现非递减的值，意味着到了某个节点的右子树；
+- 利用栈来寻找该节点，最后一个比当前元素小的从栈弹出的元素即为该节点的父亲节点，而且当前元素父节点即为新的下限值；
+- 后续的元素一定是比当前的下限值要大的，否则return false；
+
+```java
+class Solution {
+    public boolean verifyPreorder(int[] preorder) {
+        Stack<Integer> stack = new Stack();
+        int min = Integer.MIN_VALUE;
+        for (int i = 0; i < preorder.length; i++) {
+            if (preorder[i] < min) return false;
+            while (!stack.isEmpty() && preorder[i]>stack.peek()){
+                min = stack.pop();
+            }
+            stack.push(preorder[i]);
+        }
+        return true;
+    }
+}
+```
+
+#### [面试题33. 二叉搜索树的后序遍历序列](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie-lcof/)
+
+输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回 `true`，否则返回 `false`。假设输入的数组的任意两个数字都互不相同。
+
+ 
+
+参考以下这颗二叉搜索树：
+
+```
+     5
+    / \
+   2   6
+  / \
+ 1   3
+```
+
+**示例 1：**
+
+```
+输入: [1,6,3,2,5]
+输出: false
+```
+
+**示例 2：**
+
+```
+输入: [1,3,2,6,5]
+输出: true
+```
+
+```java
+class Solution {
+    public boolean verifyPostorder(int[] postorder) {
+        // 单调栈使用，单调递增的单调栈
+        Deque<Integer> stack = new LinkedList<>();
+        int pervElem = Integer.MAX_VALUE;
+        // 逆向遍历，就是翻转的先序遍历
+        for (int i = postorder.length - 1;i>=0;i--){
+            // 左子树元素必须要小于递增栈被peek访问的元素，否则就不是二叉搜索树
+            if (postorder[i] > pervElem){
+                return false;
+            }
+            while (!stack.isEmpty() && postorder[i] < stack.peek()){
+                // 数组元素小于单调栈的元素了，表示往左子树走了，记录下上个根节点
+                // 找到这个左子树对应的根节点，之前右子树全部弹出，不再记录，因为不可能在往根节点的右子树走了
+                pervElem = stack.pop();
+            }
+            // 这个新元素入栈
+            stack.push(postorder[i]);
+        }
+        return true;
+    }
+}
+
+
+
+
+
+
+//解题思路
+//后序遍历，最后一个为根节点，遍历数组找到第一个大于根节点的，然后判断后面的全部都是大于根节点的，然后分为两部分，左右子树，左子树为lefr到temp-1，右子树为temp到right-1，递归。
+class Solution {
+    public boolean verifyPostorder(int[] postorder) {
+        if(postorder.length == 1){
+            return true;
+        }
+        if(postorder.length == 0){
+            return true;
+        }
+        boolean flag = verify(postorder,0,postorder.length-1);
+        return flag;
+
+    }
+    public boolean verify(int [] postorder,int left, int right){
+        if(right <= left){
+            return true;
+        }
+        int temp = left;
+        //找到第一个大于根节点的值
+        while((temp < right)&&(postorder[temp] < postorder[right])){
+            temp++;
+        }
+        //判断后面是否都大于根节点
+        for(int i = temp; i < right; i++){
+            if(postorder[i] < postorder[right]){
+                return false;
+            }
+        }
+        
+        return verify(postorder,left,temp - 1) && verify(postorder,temp,right - 1);
+    }
+}
+```
+
+#### [面试题07. 重建二叉树](https://leetcode-cn.com/problems/zhong-jian-er-cha-shu-lcof/)
+
+输入某二叉树的前序遍历和中序遍历的结果，请重建该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+
+ 例如，给出
+
+```
+前序遍历 preorder = [3,9,20,15,7]
+中序遍历 inorder = [9,3,15,20,7]
+```
+
+返回如下的二叉树：
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+```java
+package 剑指offer.N07根据前序中序重建二叉树;
+
+public class Solution {
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return helper(0, 0, inorder.length - 1, preorder, inorder);
+    }
+
+    public TreeNode helper(int preStart, int inStart, int inEnd, int[] preorder, int[] inorder) {
+        if (preStart > inorder.length - 1 || inStart > inEnd) return null;
+
+        TreeNode root = new TreeNode(preorder[preStart]);
+        int inIndex = 0;
+        for (int i = 0; i <= inEnd; i++) {
+            if (preorder[preStart] == inorder[i])
+                inIndex = i;
+        }
+
+        root.left = helper(preStart + 1, inStart, inIndex - 1, preorder, inorder);
+        root.right = helper(preStart + inIndex - inStart + 1, inIndex + 1, inEnd,preorder, inorder);
+        return root;
+    }
+}
+
+```
+
+#### [297. 二叉树的序列化与反序列化](https://leetcode-cn.com/problems/serialize-and-deserialize-binary-tree/)
+
+序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
+
+请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+**示例:** 
+
+```
+你可以将以下二叉树：
+
+    1
+   / \
+  2   3
+     / \
+    4   5
+
+序列化为 "[1,2,3,null,null,4,5]"
+```
+
+**提示:** 这与 LeetCode 目前使用的方式一致，详情请参阅 [LeetCode 序列化二叉树的格式](https://leetcode-cn.com/faq/#binary-tree)。你并非必须采取这种方式，你也可以采用其他的方法解决这个问题。
+
+**说明:** 不要使用类的成员 / 全局 / 静态变量来存储状态，你的序列化和反序列化算法应该是无状态的。动态规划套路详解
+
+```java
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        return serial(new StringBuilder(), root).toString();
+    }
+    
+    // Generate preorder string
+    private StringBuilder serial(StringBuilder str, TreeNode root) {
+        if (root == null) return str.append("#");
+        str.append(root.val).append(",");
+        serial(str, root.left).append(",");
+        serial(str, root.right);
+        return str;
+    }
+
+    public TreeNode deserialize(String data) {
+        return deserial(new LinkedList<>(Arrays.asList(data.split(","))));
+    }
+    
+    // Use queue to simplify position move
+    private TreeNode deserial(Queue<String> q) {
+        String val = q.poll();
+        if ("#".equals(val)) return null;
+        TreeNode root = new TreeNode(Integer.valueOf(val));
+        root.left = deserial(q);
+        root.right = deserial(q);
+        return root;
+    }
+}
+```
+
+
+
+#### [110. 平衡二叉树](https://leetcode-cn.com/problems/balanced-binary-tree/)
+
+给定一个二叉树，判断它是否是高度平衡的二叉树。
+
+本题中，一棵高度平衡二叉树定义为：
+
+> 一个二叉树*每个节点* 的左右两个子树的高度差的绝对值不超过1。
+
+**示例 1:**
+
+给定二叉树 `[3,9,20,null,null,15,7]`
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回 `true` 。
+
+**示例 2:**
+
+给定二叉树 `[1,2,2,3,3,null,null,4,4]`
+
+```
+       1
+      / \
+     2   2
+    / \
+   3   3
+  / \
+ 4   4
+```
+
+返回 `false` 。
+
+```java
+class Solution {
+    public boolean isBalanced(TreeNode root) {
+        return dfs(root) != -1;
+    }
+
+    private int dfs(TreeNode node){
+        if(node == null)    return 0;
+
+        int left = dfs(node.left);
+        int right = dfs(node.right);
+
+        if(left == -1 || right == -1 || Math.abs(left - right) > 1) 
+            return -1;
+        
+        return Math.max(left, right) + 1;
+    }
+}
+```
+
+#### [98. 验证二叉搜索树](https://leetcode-cn.com/problems/validate-binary-search-tree/)
+
+给定一个二叉树，判断其是否是一个有效的二叉搜索树。
+
+假设一个二叉搜索树具有如下特征：
+
+- 节点的左子树只包含**小于**当前节点的数。
+- 节点的右子树只包含**大于**当前节点的数。
+- 所有左子树和右子树自身必须也是二叉搜索树。
+
+**示例 1:**
+
+```
+输入:
+    2
+   / \
+  1   3
+输出: true
+```
+
+**示例 2:**
+
+```
+输入:
+    5
+   / \
+  1   4
+     / \
+    3   6
+输出: false
+解释: 输入为: [5,1,4,null,null,3,6]。
+     根节点的值为 5 ，但是其右子节点值为 4 。
+```
+
+```java
+class Solution {
+    public boolean isValidBST(TreeNode root) {
+        return helper(root, null, null);
+    }
+
+    private boolean helper(TreeNode root, TreeNode min, TreeNode max){
+        if(root == null)    return true;
+
+        if((min != null && root.val <= min.val) || (max != null && root.val >= max.val))
+            return  false;
+
+        return  helper(root.left, min, root) && helper(root.right, root, max);
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+# 动态规划
 
 [labuladong](https://leetcode-cn.com/u/labuladong/)发布于 9 个月前33.6k动态规划递归记忆化C++
 
