@@ -4155,6 +4155,199 @@ PPS：我最近精心制作了一份电子书《labuladong的算法小抄》，�
 
 ![目录](https://pic.leetcode-cn.com/66b9e7466b8c493b67a709f3ebd87c88daa7ca0b85d960288dec10aff8c7fc3e.jpg)
 
+# 买卖股票（dp）
+
+二、状态转移框架
+现在，我们完成了「状态」的穷举，我们开始思考每种「状态」有哪些「选择」，应该如何更新「状态」。只看「持有状态」，可以画个状态转移图。
+
+通过这个图可以很清楚地看到，每种状态（0 和 1）是如何转移而来的。根据这个图，我们来写一下状态转移方程：
+
+```
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+              max(   选择 rest  ,           选择 sell      )
+
+解释：今天我没有持有股票，有两种可能：
+要么是我昨天就没有持有，然后今天选择 rest，所以我今天还是没有持有；
+要么是我昨天持有股票，但是今天我 sell 了，所以我今天没有持有股票了。
+
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+              max(   选择 rest  ,           选择 buy         )
+
+解释：今天我持有着股票，有两种可能：
+要么我昨天就持有着股票，然后今天选择 rest，所以我今天还持有着股票；
+要么我昨天本没有持有，但今天我选择 buy，所以今天我就持有股票了。
+```
+
+
+这个解释应该很清楚了，如果 buy，就要从利润中减去 prices[i]，如果 sell，就要给利润增加 prices[i]。今天的最大利润就是这两种可能选择中较大的那个。而且注意 k 的限制，我们在选择 buy 的时候，把 k 减小了 1，很好理解吧，当然你也可以在 sell 的时候减 1，一样的。
+
+现在，我们已经完成了动态规划中最困难的一步：状态转移方程。如果之前的内容你都可以理解，那么你已经可以秒杀所有问题了，只要套这个框架就行了。不过还差最后一点点，就是定义 base case，即最简单的情况。
+
+```
+dp[-1][k][0] = 0
+解释：因为 i 是从 0 开始的，所以 i = -1 意味着还没有开始，这时候的利润当然是 0 。
+dp[-1][k][1] = -infinity
+解释：还没开始的时候，是不可能持有股票的，用负无穷表示这种不可能。
+dp[i][0][0] = 0
+解释：因为 k 是从 1 开始的，所以 k = 0 意味着根本不允许交易，这时候利润当然是 0 。
+dp[i][0][1] = -infinity
+解释：不允许交易的情况下，是不可能持有股票的，用负无穷表示这种不可能。
+```
+
+
+把上面的状态转移方程总结一下：
+
+```
+base case：
+dp[-1][k][0] = dp[i][0][0] = 0
+dp[-1][k][1] = dp[i][0][1] = -infinity
+
+状态转移方程：
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+```
+
+
+读者可能会问，这个数组索引是 -1 怎么编程表示出来呢，负无穷怎么表示呢？这都是细节问题，有很多方法实现。现在完整的框架已经完成，下面开始具体化。
+
+#### [121. 买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/)
+
+给定一个数组，它的第 *i* 个元素是一支给定股票第 *i* 天的价格。
+
+如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。
+
+注意你不能在买入股票前卖出股票。
+
+**示例 1:**
+
+```
+输入: [7,1,5,3,6,4]
+输出: 5
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
+     注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格。
+```
+
+**示例 2:**
+
+```
+输入: [7,6,4,3,1]
+输出: 0
+解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。
+```
+
+```java
+//普通解法  推荐
+public class Solution {
+    public int maxProfit(int[] prices) {
+        int minPrice = Integer.MAX_VALUE;
+        int maxprofit = 0;
+
+        for (int i = 0; i < prices.length; i++) {
+            if (prices[i] < minPrice)
+                minPrice = prices[i];
+            else if (prices[i] - minPrice > maxprofit) {
+                maxprofit = prices[i] - minPrice;
+            }
+        }
+        return maxprofit;
+    }
+}
+```
+
+```java
+//dp解法
+public class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        if(n == 0)  return 0;
+        int[][] dp = new int[n][2];
+
+        for (int i = 0; i < n; i++) {
+            if (i - 1 == -1){
+                dp[i][0] = 0;
+                dp[i][1] = -prices[i];
+                continue;
+            }
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], -prices[i]);
+        }
+        
+        return dp[n - 1][0];
+    }
+}
+
+//dp解法优化
+public class Solution {
+     public int maxProfit(int[] prices) {
+        int n = prices.length;
+        if(n == 0)  return 0;
+        int dp_i_0 = 0, dp_i_1 = -prices[0];
+
+        for (int i = 1; i < n; i++) {
+            dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+            dp_i_1 = Math.max(dp_i_1, -prices[i]);
+        }
+
+        return dp_i_0;
+    }
+}
+```
+
+#### [122. 买卖股票的最佳时机 II](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/)
+
+给定一个数组，它的第 *i* 个元素是一支给定股票第 *i* 天的价格。
+
+设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票）。
+
+**注意：**你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+
+**示例 1:**
+
+```
+输入: [7,1,5,3,6,4]
+输出: 7
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 3 天（股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     随后，在第 4 天（股票价格 = 3）的时候买入，在第 5 天（股票价格 = 6）的时候卖出, 这笔交易所能获得利润 = 6-3 = 3 。
+```
+
+**示例 2:**
+
+```
+输入: [1,2,3,4,5]
+输出: 4
+解释: 在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。
+     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。
+```
+
+**示例 3:**
+
+```
+输入: [7,6,4,3,1]
+输出: 0
+解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。
+```
+
+```java
+//推荐普通解法
+class Solution {
+    public int maxProfit(int[] prices) {
+        int maxProfit = 0;
+
+        for(int i = 0; i < prices.length - 1; i++){
+            if(prices[i + 1] > prices[i])
+                maxProfit += prices[i + 1] - prices[i];
+        }
+
+        return maxProfit;
+    }
+}
+```
+
+
+
+
+
 # DP解法
 
 #### [53. 最大子序和](https://leetcode-cn.com/problems/maximum-subarray/)
@@ -6242,6 +6435,316 @@ public class FooBarCAS {
             }
         }
 
+}
+```
+
+#### [1116. 打印零与奇偶数](https://leetcode-cn.com/problems/print-zero-even-odd/)
+
+假设有这么一个类：
+
+```
+class ZeroEvenOdd {
+  public ZeroEvenOdd(int n) { ... }      // 构造函数
+  public void zero(printNumber) { ... }  // 仅打印出 0
+  public void even(printNumber) { ... }  // 仅打印出 偶数
+  public void odd(printNumber) { ... }   // 仅打印出 奇数
+}
+```
+
+相同的一个 `ZeroEvenOdd` 类实例将会传递给三个不同的线程：
+
+1. 线程 A 将调用 `zero()`，它只输出 0 。
+2. 线程 B 将调用 `even()`，它只输出偶数。
+3. 线程 C 将调用 `odd()`，它只输出奇数。
+
+每个线程都有一个 `printNumber` 方法来输出一个整数。请修改给出的代码以输出整数序列 `010203040506`... ，其中序列的长度必须为 2*n*。
+
+ 
+
+**示例 1：**
+
+```
+输入：n = 2
+输出："0102"
+说明：三条线程异步执行，其中一个调用 zero()，另一个线程调用 even()，最后一个线程调用odd()。正确的输出为 "0102"。
+```
+
+**示例 2：**
+
+```
+输入：n = 5
+输出："0102030405"
+```
+
+```java
+public class ZeroEvenOdd {
+    private int n;
+
+    Semaphore zero = new Semaphore(1);
+    Semaphore even = new Semaphore(0);
+    Semaphore odd = new Semaphore(0);
+
+    public ZeroEvenOdd(int n) {
+        this.n = n;
+    }
+
+    // printNumber.accept(x) outputs "x", where x is an integer.
+    public void zero(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            zero.acquire();
+            printNumber.accept(0);
+            if (i % 2 == 1)
+                odd.release();
+            else 
+                even.release();
+        }
+    }
+
+    public void even(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 2; i <= n; i += 2) {
+            even.acquire();
+            printNumber.accept(i);
+            zero.release();
+        }
+    }
+
+    public void odd(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i += 2) {
+            odd.acquire();
+            printNumber.accept(i);
+            zero.release();
+        }
+    }
+}
+
+```
+
+#### [1117. H2O 生成](https://leetcode-cn.com/problems/building-h2o/)
+
+现在有两种线程，氢 `oxygen` 和氧 `hydrogen`，你的目标是组织这两种线程来产生水分子。
+
+存在一个屏障（barrier）使得每个线程必须等候直到一个完整水分子能够被产生出来。
+
+氢和氧线程会被分别给予 `releaseHydrogen` 和 `releaseOxygen` 方法来允许它们突破屏障。
+
+这些线程应该三三成组突破屏障并能立即组合产生一个水分子。
+
+你必须保证产生一个水分子所需线程的结合必须发生在下一个水分子产生之前。
+
+换句话说:
+
+- 如果一个氧线程到达屏障时没有氢线程到达，它必须等候直到两个氢线程到达。
+- 如果一个氢线程到达屏障时没有其它线程到达，它必须等候直到一个氧线程和另一个氢线程到达。
+
+书写满足这些限制条件的氢、氧线程同步代码。
+
+ 
+
+**示例 1:**
+
+```
+输入: "HOH"
+输出: "HHO"
+解释: "HOH" 和 "OHH" 依然都是有效解。
+```
+
+**示例 2:**
+
+```
+输入: "OOHHHH"
+输出: "HHOHHO"
+解释: "HOHHHO", "OHHHHO", "HHOHOH", "HOHHOH", "OHHHOH", "HHOOHH", "HOHOHH" 和 "OHHOHH" 依然都是有效解。
+```
+
+ 
+
+**限制条件:**
+
+- 输入字符串的总长将会是 3*n*, 1 ≤ *n* ≤ 50；
+- 输入字符串中的 “H” 总数将会是 2n；
+- 输入字符串中的 “O” 总数将会是 n。
+
+```java
+class H2O {
+
+    Semaphore h;
+    Semaphore o ;
+    public H2O() {
+        h = new Semaphore(2);
+        o = new Semaphore(2);
+    }
+
+    public void hydrogen(Runnable releaseHydrogen) throws InterruptedException {
+        h.acquire();
+        // releaseHydrogen.run() outputs "H". Do not change or remove this line.
+        releaseHydrogen.run();
+        o.release();
+    }
+
+    public void oxygen(Runnable releaseOxygen) throws InterruptedException {
+        o.acquire(2);
+        // releaseOxygen.run() outputs "O". Do not change or remove this line.
+		releaseOxygen.run();
+        h.release(2);
+    }
+}
+```
+
+#### [1195. 交替打印字符串](https://leetcode-cn.com/problems/fizz-buzz-multithreaded/)
+
+编写一个可以从 1 到 n 输出代表这个数字的字符串的程序，但是：
+
+- 如果这个数字可以被 3 整除，输出 "fizz"。
+- 如果这个数字可以被 5 整除，输出 "buzz"。
+- 如果这个数字可以同时被 3 和 5 整除，输出 "fizzbuzz"。
+
+例如，当 `n = 15`，输出： `1, 2, fizz, 4, buzz, fizz, 7, 8, fizz, buzz, 11, fizz, 13, 14, fizzbuzz`。
+
+假设有这么一个类：
+
+```
+class FizzBuzz {
+  public FizzBuzz(int n) { ... }               // constructor
+  public void fizz(printFizz) { ... }          // only output "fizz"
+  public void buzz(printBuzz) { ... }          // only output "buzz"
+  public void fizzbuzz(printFizzBuzz) { ... }  // only output "fizzbuzz"
+  public void number(printNumber) { ... }      // only output the numbers
+}
+```
+
+请你实现一个有四个线程的多线程版 `FizzBuzz`， 同一个 `FizzBuzz` 实例会被如下四个线程使用：
+
+1. 线程A将调用 `fizz()` 来判断是否能被 3 整除，如果可以，则输出 `fizz`。
+2. 线程B将调用 `buzz()` 来判断是否能被 5 整除，如果可以，则输出 `buzz`。
+3. 线程C将调用 `fizzbuzz()` 来判断是否同时能被 3 和 5 整除，如果可以，则输出 `fizzbuzz`。
+4. 线程D将调用 `number()` 来实现输出既不能被 3 整除也不能被 5 整除的数字。
+
+```java
+class FizzBuzz {
+    private int n;
+
+    Semaphore sem, sem3, sem5, sem15;
+    public FizzBuzz(int n) {
+        this.n = n;
+        sem = new Semaphore(1);
+        sem3 = new Semaphore(0);
+        sem5 = new Semaphore(0);
+        sem15 = new Semaphore(0);
+    }
+
+    // printFizz.run() outputs "fizz".
+    public void fizz(Runnable printFizz) throws InterruptedException {
+        for(int i = 3; i <= n; i += 3){
+            sem3.acquire();
+            printFizz.run();
+            if((i + 3) % 5 == 0)
+                i += 3;
+            sem.release();
+        }        
+    }
+
+    // printBuzz.run() outputs "buzz".
+    public void buzz(Runnable printBuzz) throws InterruptedException {
+        for(int i = 5; i <= n; i += 5){
+            sem5.acquire();
+            printBuzz.run();
+            if((i + 5) % 3 == 0)
+                i += 5;
+            sem.release();
+        }    
+    }
+
+    // printFizzBuzz.run() outputs "fizzbuzz".
+    public void fizzbuzz(Runnable printFizzBuzz) throws InterruptedException {
+        for(int i = 15; i <= n; i += 15){
+            sem15.acquire();
+            printFizzBuzz.run();
+            sem.release();
+        }
+    }
+
+    // printNumber.accept(x) outputs "x", where x is an integer.
+    public void number(IntConsumer printNumber) throws InterruptedException {
+        for(int i = 1; i <= n; i++){
+            sem.acquire();
+            if(i % 15 == 0)   sem15.release();
+            else if(i % 5 == 0)   sem5.release();
+            else if(i % 3 == 0)   sem3.release();
+            else{
+                    printNumber.accept(i);
+                    sem.release();
+                }
+        }
+    }
+}
+```
+
+```java
+//使用cyclicBarrier
+class FizzBuzz {
+    private int n;
+
+    private static CyclicBarrier barrier = new CyclicBarrier(4);
+
+    public FizzBuzz(int n) {
+        this.n = n;
+    }
+
+    // printFizz.run() outputs "fizz".
+    public void fizz(Runnable printFizz) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 == 0 && i % 5 != 0) {
+                printFizz.run();
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // printBuzz.run() outputs "buzz".
+    public void buzz(Runnable printBuzz) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 != 0 && i % 5 == 0) {
+                printBuzz.run();
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // printFizzBuzz.run() outputs "fizzbuzz".
+    public void fizzbuzz(Runnable printFizzBuzz) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 == 0 && i % 5 == 0) {
+                printFizzBuzz.run();
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // printNumber.accept(x) outputs "x", where x is an integer.
+    public void number(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 != 0 && i % 5 != 0) {
+                printNumber.accept(i);
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 ```
 
