@@ -26,6 +26,7 @@ public class CountDownLatchTest {
                 System.out.println(Thread.currentThread().getName() + ", end...");
             }
         }).start();
+
         cd1.await();// 減去为0,恢复任务继续执行
         System.out.println("两个Thread执行完毕...");
         System.out.println("主线程继续执行...");

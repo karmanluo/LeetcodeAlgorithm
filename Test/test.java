@@ -3,6 +3,8 @@ package Test;
 import com.sun.jmx.snmp.Timestamp;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -20,6 +22,16 @@ public class test {
         calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH) - 1, 0, 0, 0);
         long tt = calendar.getTime().getTime();
         System.out.println("昨天零点的时间戳"+tt);
+
+        HashMap<Integer, Integer> map = new HashMap<>();
+        map.put(1, 1);
+        map.put(1, 2);
+        map.put(1, 3);
+        map.put(1, 4);
+        map.put(2, 2);
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+        }
 
     }
 

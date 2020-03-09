@@ -5968,5 +5968,66 @@ class Solution {
 }
 ```
 
-# 栈
+# 多线程
 
+#### [1114. 按序打印](https://leetcode-cn.com/problems/print-in-order/)
+
+我们提供了一个类：
+
+```
+public class Foo {
+  public void one() { print("one"); }
+  public void two() { print("two"); }
+  public void three() { print("three"); }
+}
+```
+
+三个不同的线程将会共用一个 `Foo` 实例。
+
+- 线程 A 将会调用 `one()` 方法
+- 线程 B 将会调用 `two()` 方法
+- 线程 C 将会调用 `three()` 方法
+
+请设计修改程序，以确保 `two()` 方法在 `one()` 方法之后被执行，`three()` 方法在 `two()` 方法之后被执行。
+
+ 
+
+**示例 1:**
+
+```
+输入: [1,2,3]
+输出: "onetwothree"
+解释: 
+有三个线程会被异步启动。
+输入 [1,2,3] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 two() 方法，线程 C 将会调用 three() 方法。
+正确的输出是 "onetwothree"。
+```
+
+**示例 2:**
+
+```
+输入: [1,3,2]
+输出: "onetwothree"
+解释: 
+输入 [1,3,2] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 three() 方法，线程 C 将会调用 two() 方法。
+正确的输出是 "onetwothree"。
+```
+
+ 
+
+**注意:**
+
+尽管输入中的数字似乎暗示了顺序，但是我们并不保证线程在操作系统中的调度顺序。
+
+你看到的输入格式主要是为了确保测试的全面性。
+
+**解题思路：**
+
+这是一个典型的执行屏障的问题，可以通过构造屏障来实现。
+
+如下图，我们需要构造 22 道屏障，`second` 线程等待 `first` 屏障，`third` 线程等待 `second` 屏障。：
+![image.png](https://pic.leetcode-cn.com/879c5abd22c2dbc2618a1433dfbeb02a34b9586a10425986fafdc90eef978cc1-image.png)
+
+`first` 线程会释放 `first` 屏障，而 `second` 线程会释放 `second` 屏障。
+
+Java 中，我们使用线程等待的方式实现执行屏障，使用释放线程等待的方式实现屏障消除。具体代码如下：

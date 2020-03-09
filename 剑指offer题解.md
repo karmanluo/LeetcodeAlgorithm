@@ -4669,8 +4669,6 @@ class Solution {
 
 #### [16. 最接近的三数之和(排序+双指针)](https://leetcode-cn.com/problems/3sum-closest/)
 
-难度中等368收藏分享切换为英文关注反馈
-
 给定一个包括 *n* 个整数的数组 `nums` 和 一个目标值 `target`。找出 `nums` 中的三个整数，使得它们的和与 `target` 最接近。返回这三个数的和。假定每组输入只存在唯一答案。
 
 ```
@@ -5968,5 +5966,282 @@ class Solution {
 }
 ```
 
-# 栈
+# 多线程
+
+#### [1114. 按序打印](https://leetcode-cn.com/problems/print-in-order/)
+
+我们提供了一个类：
+
+```
+public class Foo {
+  public void one() { print("one"); }
+  public void two() { print("two"); }
+  public void three() { print("three"); }
+}
+```
+
+**三个不同的线程将会共用一个 `Foo` 实例。**
+
+- 线程 A 将会调用 `one()` 方法
+- 线程 B 将会调用 `two()` 方法
+- 线程 C 将会调用 `three()` 方法
+
+请设计修改程序，以确保 `two()` 方法在 `one()` 方法之后被执行，`three()` 方法在 `two()` 方法之后被执行。
+
+ 
+
+**示例 1:**
+
+```
+输入: [1,2,3]
+输出: "onetwothree"
+解释: 
+有三个线程会被异步启动。
+输入 [1,2,3] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 two() 方法，线程 C 将会调用 three() 方法。
+正确的输出是 "onetwothree"。
+```
+
+**示例 2:**
+
+```
+输入: [1,3,2]
+输出: "onetwothree"
+解释: 
+输入 [1,3,2] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 three() 方法，线程 C 将会调用 two() 方法。
+正确的输出是 "onetwothree"。
+```
+
+ 
+
+**注意:**
+
+尽管输入中的数字似乎暗示了顺序，但是我们并不保证线程在操作系统中的调度顺序。
+
+你看到的输入格式主要是为了确保测试的全面性。
+
+**解题思路：**
+
+这是一个典型的执行屏障的问题，可以通过构造屏障来实现。
+
+```java
+class Foo {
+    CountDownLatch cd1;
+    CountDownLatch cd2;
+    public Foo() {
+        cd1 = new CountDownLatch(1);
+        cd2 = new CountDownLatch(1);
+    }
+
+    public void first(Runnable printFirst) throws InterruptedException {
+        // printFirst.run() outputs "first". Do not change or remove this line.
+        printFirst.run();
+        cd1.countDown();
+    }
+
+    public void second(Runnable printSecond) throws InterruptedException {
+
+        cd1.await();
+        // printSecond.run() outputs "second". Do not change or remove this line.
+        printSecond.run();
+        cd2.countDown();
+    }
+
+    public void third(Runnable printThird) throws InterruptedException {
+        cd2.await();
+        // printThird.run() outputs "third". Do not change or remove this line.
+        printThird.run();
+    }
+}
+```
+
+#### [1115. 交替打印FooBar](https://leetcode-cn.com/problems/print-foobar-alternately/)
+
+我们提供一个类：
+
+```
+class FooBar {
+  public void foo() {
+    for (int i = 0; i < n; i++) {
+      print("foo");
+    }
+  }
+
+  public void bar() {
+    for (int i = 0; i < n; i++) {
+      print("bar");
+    }
+  }
+}
+```
+
+**两个不同的线程将会共用一个 `FooBar` 实例**。其中一个线程将会调用 `foo()` 方法，另一个线程将会调用 `bar()` 方法。
+
+请设计修改程序，以确保 "foobar" 被输出 n 次。
+
+**示例 1:**
+
+```
+输入: n = 1
+输出: "foobar"
+解释: 这里有两个线程被异步启动。其中一个调用 foo() 方法, 另一个调用 bar() 方法，"foobar" 将被输出一次。
+```
+
+**示例 2:**
+
+```
+输入: n = 2
+输出: "foobarfoobar"
+解释: "foobar" 将被输出两次。
+```
+
+```java
+class FooBar {
+    private int n;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    Semaphore foo = new Semaphore(1);
+    Semaphore bar = new Semaphore(0);
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+        for (int i = 0; i < n; i++) {
+            foo.acquire();
+            printFoo.run();
+            bar.release();
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+        for (int i = 0; i < n; i++) {
+            bar.acquire();
+            printBar.run();
+            foo.release();
+        }
+    }
+}
+```
+
+```java
+//synchronized方法
+public class FooBar {
+    
+    private int n;
+    //flag 0->foo to be print  1->foo has been printed
+    private int flag = 0;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            synchronized (this) {
+                while (flag == 1) {
+                    this.wait();
+                }
+                // printFoo.run() outputs "foo". Do not change or remove this line.
+                printFoo.run();
+                flag = 1;
+                this.notifyAll();
+            }
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            synchronized (this) {
+                while (flag == 0) {
+                    this.wait();
+                }
+                // printBar.run() outputs "bar". Do not change or remove this line.
+                printBar.run();
+                flag = 0;
+                this.notifyAll();
+            }
+        }
+    }
+}
+```
+
+```java
+//使用Volatile的方法
+public class FooBarVolatile {
+
+    private int n;
+   //flag 0->foo to be print  1->foo has been printed  using volatile
+    private volatile int flag=0;
+
+
+    public FooBarVolatile(int n) {
+        this.n = n;
+    }
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            while (true){
+                if(flag==0){
+                    printFoo.run();
+                    flag=1;
+                    break;
+                }
+                Thread.sleep(1);
+            }
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            while (true){
+                if(flag==1){
+                    printBar.run();
+                    flag=0;
+                    break;
+                }
+                Thread.sleep(1);
+            }
+        }
+    }
+}
+```
+
+```java
+//cas 方法
+public class FooBarCAS {
+
+        private int n;
+        ////flag 0->foo to be print  1->foo has been printed
+        private AtomicInteger flag=new AtomicInteger(0);
+
+        public FooBarCAS(int n) {
+            this.n = n;
+        }
+
+        public void foo(Runnable printFoo) throws InterruptedException {
+
+            for (int i = 0; i < n; i++) {
+                while (!flag.compareAndSet(0,1)){//如果当前值等于预期值，设为目标值
+                    Thread.sleep(1);
+                }
+                printFoo.run();
+            }
+        }
+
+        public void bar(Runnable printBar) throws InterruptedException {
+
+            for (int i = 0; i < n; i++) {
+                while (!flag.compareAndSet(1,0)){
+                    Thread.sleep(1);
+                }
+                printBar.run();
+            }
+        }
+
+}
+```
 
