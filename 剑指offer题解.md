@@ -2,9 +2,126 @@
 [TOC]
 # 剑指offer题解
 
-#### [面试题03. 数组中重复的数字](https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/)
+#### kmp算法dp
 
-找出数组中重复的数字。
+```java
+package LeetcodeAlgorithm.KMP;
+
+/**
+ * @Author:KunmingLuo
+ * @Date: 2020/3/11 20:40
+ */
+public class KMP {
+    private int[][] dp;
+    private String pat;
+
+    public KMP(String pat) {
+        this.pat = pat;
+        int M = pat.length();
+        // dp[状态][字符] = 下个状态
+        dp = new int[M][256];
+        // base case
+        dp[0][pat.charAt(0)] = 1;
+        // 影⼦状态 X 初始为 0
+        int X = 0;
+        // 构建状态转移图（稍改的更紧凑了）
+        for (int j = 1; j < M; j++) {
+            for (int c = 0; c < 256; c++)
+                dp[j][c] = dp[X][c];
+            dp[j][pat.charAt(j)] = j + 1;
+            // 更新影⼦状态
+            X = dp[X][pat.charAt(j)];
+        }
+    }
+
+    public int search(String txt) {
+        int M = pat.length();
+        int N = txt.length();
+        // pat 的初始态为 0
+        int j = 0;
+        for (int i = 0; i < N; i++) {
+            // 计算 pat 的下⼀个状态
+            j = dp[j][txt.charAt(i)];
+            // 到达终⽌态， 返回结果
+            if (j == M) return i - M + 1;
+        }
+        //没到达终⽌态，匹配失败
+        return -1;
+    }
+}
+```
+
+
+
+#### [1013. 将数组分成和相等的三个部分](https://leetcode-cn.com/problems/partition-array-into-three-parts-with-equal-sum/)
+
+给你一个整数数组 `A`，只有可以将其划分为三个和相等的非空部分时才返回 `true`，否则返回 `false`。
+
+形式上，如果可以找出索引 `i+1 < j` 且满足 `(A[0] + A[1] + ... + A[i] == A[i+1] + A[i+2] + ... + A[j-1] == A[j] + A[j-1] + ... + A[A.length - 1])` 就可以将数组三等分。
+
+ 
+
+**示例 1：**
+
+```
+输出：[0,2,1,-6,6,-7,9,1,2,0,1]
+输出：true
+解释：0 + 2 + 1 = -6 + 6 - 7 + 9 + 1 = 2 + 0 + 1
+```
+
+**示例 2：**
+
+```
+输入：[0,2,1,-6,6,7,9,-1,2,0,1]
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：[3,3,6,5,-2,2,5,1,-9,4]
+输出：true
+解释：3 + 3 = 6 = 5 - 2 + 2 + 5 + 1 - 9 + 4
+```
+
+ 
+
+**提示：**
+
+1. `3 <= A.length <= 50000`
+2. `-10^4 <= A[i] <= 10^4`
+
+```java
+class Solution {
+    public boolean canThreePartsEqualSum(int[] A) {
+        int sum = 0;
+        for(int num : A){
+            sum += num;
+        }
+        if(sum % 3 != 0) return false;
+        sum /= 3;
+        int partition = 0;
+        int curSum = 0;
+        int index = 0;
+        for(int i = 0; i < A.length; i++){
+            curSum += A[i];
+            if(curSum == sum && partition <= 1){
+                partition++;
+                curSum = 0;
+                if(partition == 2)
+                    index = i;
+            }
+            
+        }
+
+        return (partition == 2) && (curSum == sum) && (index < A.length - 1);
+    }
+}
+```
+
+
+
+#### [面试题03. 数组中重复的数字](https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/)
 
 
 在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。
@@ -4211,13 +4328,409 @@ class Solution {
 }
 ```
 
+#### [543. 二叉树的直径](https://leetcode-cn.com/problems/diameter-of-binary-tree/)
+
+给定一棵二叉树，你需要计算它的直径长度。一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过根结点。
+
+**示例 :**
+给定二叉树
+
+```
+          1
+         / \
+        2   3
+       / \     
+      4   5    
+```
+
+返回 **3**, 它的长度是路径 [4,2,1,3] 或者 [5,2,1,3]。
+
+**注意：**两结点之间的路径长度是以它们之间边的数目表示。
+
+```java
+class Solution {
+    public int diameterOfBinaryTree(TreeNode root) {
+        int[] res = new int[1];
+        dfs(root, res);
+
+        return res[0];
+    }
+
+    private int dfs(TreeNode node, int[] res){
+        if(node == null)    return 0;
+
+        int left = dfs(node.left, res);
+        int right = dfs(node.right, res);
+
+        res[0] = Math.max(res[0], left + right);
+
+        return Math.max(left, right) + 1; 
+    }
+}
+```
+
+
+
+#### [236. 二叉树的最近公共祖先（面试题68）](https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree/)
+
+给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+
+[百度百科](https://baike.baidu.com/item/最近公共祖先/8918834?fr=aladdin)中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（**一个节点也可以是它自己的祖先**）。”
+
+例如，给定如下二叉树: root = [3,5,1,6,2,0,8,null,null,7,4]
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/15/binarytree.png)
+
+ 
+
+**示例 1:**
+
+```
+输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+输出: 3
+解释: 节点 5 和节点 1 的最近公共祖先是节点 3。
+```
+
+**示例 2:**
+
+```
+输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4
+输出: 5
+解释: 节点 5 和节点 4 的最近公共祖先是节点 5。因为根据定义最近公共祖先节点可以为节点本身。
+```
+
+**说明:**
+
+- 所有节点的值都是唯一的。
+- p、q 为不同节点且均存在于给定的二叉树中。
+
+
+
+如果每个节点都有父指针，那么我们可以从 p 和 q 返回以获取它们的祖先。在这个遍历过程中，我们得到的第一个公共节点是 LCA 节点。我们可以在遍历树时将父指针保存在字典中。
+
+算法：
+
+- 从根节点开始遍历树。
+- 在找到 p 和 q 之前，将父指针存储在字典中。
+- 一旦我们找到了 p 和 q，我们就可以使用父亲字典获得 p 的所有祖先，并添加到一个称为祖先的集合中。
+  同样，我们遍历节点 q 的祖先。如果祖先存在于为 p 设置的祖先中，这意味着这是 p 和 q 之间的第一个共同祖先（同时向上遍历），因此这是 LCA 节点。
+
+```java
+//迭代
+class Solution {
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+
+        // Stack for tree traversal
+        Deque<TreeNode> stack = new ArrayDeque<>();
+
+        // HashMap for parent pointers
+        Map<TreeNode, TreeNode> parent = new HashMap<>();
+
+        parent.put(root, null);
+        stack.push(root);
+
+        // Iterate until we find both the nodes p and q
+        while (!parent.containsKey(p) || !parent.containsKey(q)) {
+
+            TreeNode node = stack.pop();
+
+            // While traversing the tree, keep saving the parent pointers.
+            if (node.left != null) {
+                parent.put(node.left, node);
+                stack.push(node.left);
+            }
+            if (node.right != null) {
+                parent.put(node.right, node);
+                stack.push(node.right);
+            }
+        }
+
+        // Ancestors set() for node p.
+        Set<TreeNode> ancestors = new HashSet<>();
+
+        // Process all ancestors for node p using parent pointers.
+        while (p != null) {
+            ancestors.add(p);
+            p = parent.get(p);
+        }
+
+        // The first ancestor of q which appears in
+        // p's ancestor set() is their lowest common ancestor.
+        while (!ancestors.contains(q))
+            q = parent.get(q);
+        return q;
+    }
+
+}
+```
+
+复杂度分析
+
+时间复杂度：O(N),其中 N 是二进制树中的节点数。在最坏的情况下，我们可能会访问二叉树的所有节点。
+空间复杂度：O(N),在堆栈使用的最坏情况下，每个节点的父指针字典和祖先集的空间为 N，斜二叉树的高度可能为 N。
+
+```java
+//DFS 递归
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+    // 递归结束条件为找到了 p、q 节点，或者后续没有节点了
+    if (root == null || root == p || root == q) return root;
+      
+    // 递归遍历左右子树
+    TreeNode left = lowestCommonAncestor(root.left, p, q);
+    TreeNode right = lowestCommonAncestor(root.right, p, q);
+    // 如果 root 节点左右子树中，都查找出了 p、q 节点，那么说明 root 节点就是最近的公共节点
+    if (left != null && right != null) return root;
+    // 否则，只要不为 null 的一方就是最近的公共节点，因为它是最先被查出来的
+    return left != null ? left : right;    
+  }
+}
+```
 
 
 
 
 
+#### [111. 二叉树的最小深度](https://leetcode-cn.com/problems/minimum-depth-of-binary-tree/)
+
+给定一个二叉树，找出其最小深度。
+
+最小深度是从根节点到最近叶子节点的最短路径上的节点数量。
+
+**说明:** 叶子节点是指没有子节点的节点。
+
+**示例:**
+
+给定二叉树 `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回它的最小深度  2.
+
+```java
+class Solution {
+    public int minDepth(TreeNode root) {
+        if(root == null) return 0;
+
+        int left = minDepth(root.left);
+        int right = minDepth(root.right);
+
+        if(left == 0 || right == 0) return Math.max(left, right) + 1;
+
+        return Math.min(left, right) + 1;
+    }
+}
+```
+
+#### [257. 二叉树的所有路径](https://leetcode-cn.com/problems/binary-tree-paths/)
+
+给定一个二叉树，返回所有从根节点到叶子节点的路径。
+
+**说明:** 叶子节点是指没有子节点的节点。
+
+**示例:**
+
+```
+输入:
+
+   1
+ /   \
+2     3
+ \
+  5
+
+输出: ["1->2->5", "1->3"]
+
+解释: 所有根节点到叶子节点的路径为: 1->2->5, 1->3
+```
 
 
+
+方法一：递归
+最直观的方法是使用递归。在递归遍历二叉树时，需要考虑当前的节点和它的孩子节点。如果当前的节点不是叶子节点，则在当前的路径末尾添加该节点，并递归遍历该节点的每一个孩子节点。如果当前的节点是叶子节点，则在当前的路径末尾添加该节点后，就得到了一条从根节点到叶子节点的路径，可以把该路径加入到答案中。
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+ //递归
+class Solution {
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> res = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        helper(res, root, sb);
+        return res;
+    }
+
+    private void helper(List<String> res, TreeNode node, StringBuilder sb){
+        if(node == null)    return;
+
+        int len = sb.length();
+
+        if(node.left == null && node.right == null) res.add(sb.append(node.val).toString());
+        if(node.left != null || node.right != null){
+            sb.append(node.val).append("->");
+            helper(res, node.left, sb);
+            helper(res, node.right, sb);
+        }
+
+        sb.setLength(len);//very trick... hard to think 可以画个图理解
+            
+    }
+}
+```
+
+
+
+```java
+class Solution {
+    //BFS solution
+    //如果到一个节点左右子节点都是空说明遍历到了末尾
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> res = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        Queue<String> strQueue = new LinkedList<>();
+        if(root == null)    return res;
+        queue.add(root);
+        strQueue.add("");
+
+        while(!queue.isEmpty()){
+            TreeNode node = queue.poll();
+            String curStr = strQueue.poll();
+            if(node.left == null && node.right == null) res.add(curStr + node.val);
+            if(node.left != null){
+                queue.add(node.left);
+                strQueue.add(curStr + node.val + "->");
+            }
+            if(node.right != null){
+                queue.add(node.right);
+                strQueue.add(curStr + node.val + "->");
+            }
+        }
+
+        return res;
+    }
+}
+```
+
+```java
+public class Solution {
+//DFS - Stack
+public List<String> binaryTreePaths(TreeNode root) {
+    List<String> list=new ArrayList<String>();
+    Stack<TreeNode> sNode=new Stack<TreeNode>();
+    Stack<String> sStr=new Stack<String>();
+    
+    if(root==null) return list;
+    sNode.push(root);
+    sStr.push("");
+    while(!sNode.isEmpty()) {
+        TreeNode curNode=sNode.pop();
+        String curStr=sStr.pop();
+        
+        if(curNode.left==null && curNode.right==null) list.add(curStr+curNode.val);
+        if(curNode.left!=null) {
+            sNode.push(curNode.left);
+            sStr.push(curStr+curNode.val+"->");
+        }
+        if(curNode.right!=null) {
+            sNode.push(curNode.right);
+            sStr.push(curStr+curNode.val+"->");
+        }
+    }
+    return list;
+}
+```
+
+#### [112. 路径总和](https://leetcode-cn.com/problems/path-sum/)
+
+给定一个二叉树和一个目标和，判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。
+
+**说明:** 叶子节点是指没有子节点的节点。
+
+**示例:** 
+给定如下二叉树，以及目标和 `sum = 22`，
+
+```
+              5
+             / \
+            4   8
+           /   / \
+          11  13  4
+         /  \      \
+        7    2      1
+```
+
+返回 `true`, 因为存在目标和为 22 的根节点到叶子节点的路径 `5->4->11->2`。
+
+```java
+//方法一：递归
+class Solution {
+  public boolean hasPathSum(TreeNode root, int sum) {
+    if (root == null)
+      return false;
+
+    sum -= root.val;
+    if ((root.left == null) && (root.right == null))  	return (sum == 0);
+     
+    return hasPathSum(root.left, sum) || hasPathSum(root.right, sum);
+  }
+}
+//复杂度分析
+//时间复杂度：我们访问每个节点一次，时间复杂度为O(N) ，其中 NN 是节点个数。
+//空间复杂度：最坏情况下，整棵树是非平衡的，例如每个节点都只有一个孩子，递归会调用 N 次（树的高度），因此栈的空间开销是 O(N) 。但在最好情况下，树是完全平衡的，高度只有 log(N)，因此在这种情况下空间复杂度只有 O(log(N)) 。
+```
+
+```java
+//方法二：迭代DFS
+class Solution {
+  public boolean hasPathSum(TreeNode root, int sum) {
+    if (root == null)
+      return false;
+
+    LinkedList<TreeNode> node_stack = new LinkedList();
+    LinkedList<Integer> sum_stack = new LinkedList();
+    node_stack.add(root);
+    sum_stack.add(sum - root.val);
+
+    TreeNode node;
+    int curr_sum;
+    while ( !node_stack.isEmpty() ) {
+      node = node_stack.pollLast();
+      curr_sum = sum_stack.pollLast();
+      if ((node.right == null) && (node.left == null) && (curr_sum == 0))
+        return true;
+
+      if (node.right != null) {
+        node_stack.add(node.right);
+        sum_stack.add(curr_sum - node.right.val);
+      }
+      if (node.left != null) {
+        node_stack.add(node.left);
+        sum_stack.add(curr_sum - node.left.val);
+      }
+    }
+    return false;
+  }
+}
+//复杂度分析
+
+//时间复杂度：和递归方法相同是 O(N)。
+//空间复杂度：当树不平衡的最坏情况下是 O(N) 。在最好情况（树是平衡的）下是O(logN)。
+```
 
 
 

@@ -3840,7 +3840,388 @@ class Solution {
 }
 ```
 
-# 动态规划套路详解
+
+
+####  [255. 验证前序遍历序列二叉搜索树](https://leetcode-cn.com/problems/verify-preorder-sequence-in-binary-search-tree/)
+
+难度中等21收藏分享切换为英文关注反馈
+
+给定一个整数数组，你需要验证它是否是一个二叉搜索树正确的先序遍历序列。
+
+你可以假定该序列中的数都是不相同的。
+
+参考以下这颗二叉搜索树：
+
+```
+     5
+    / \
+   2   6
+  / \
+ 1   3
+```
+
+**示例 1：**
+
+```
+输入: [5,2,6,1,3]
+输出: false
+```
+
+**示例 2：**
+
+```
+输入: [5,2,1,3,6]
+输出: true
+```
+
+**进阶挑战：**
+
+您能否使用恒定的空间复杂度来完成此题？
+
+这个题需要理解如下知识点：
+
+- 先序遍历，如果递减，一定是左子树；
+- 如果出现非递减的值，意味着到了某个节点的右子树；
+- 利用栈来寻找该节点，最后一个比当前元素小的从栈弹出的元素即为该节点的父亲节点，而且当前元素父节点即为新的下限值；
+- 后续的元素一定是比当前的下限值要大的，否则return false；
+
+```java
+class Solution {
+    public boolean verifyPreorder(int[] preorder) {
+        Stack<Integer> stack = new Stack();
+        int min = Integer.MIN_VALUE;
+        for (int i = 0; i < preorder.length; i++) {
+            if (preorder[i] < min) return false;
+            while (!stack.isEmpty() && preorder[i]>stack.peek()){
+                min = stack.pop();
+            }
+            stack.push(preorder[i]);
+        }
+        return true;
+    }
+}
+```
+
+#### [面试题33. 二叉搜索树的后序遍历序列](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie-lcof/)
+
+输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回 `true`，否则返回 `false`。假设输入的数组的任意两个数字都互不相同。
+
+ 
+
+参考以下这颗二叉搜索树：
+
+```
+     5
+    / \
+   2   6
+  / \
+ 1   3
+```
+
+**示例 1：**
+
+```
+输入: [1,6,3,2,5]
+输出: false
+```
+
+**示例 2：**
+
+```
+输入: [1,3,2,6,5]
+输出: true
+```
+
+```java
+class Solution {
+    public boolean verifyPostorder(int[] postorder) {
+        // 单调栈使用，单调递增的单调栈
+        Deque<Integer> stack = new LinkedList<>();
+        int pervElem = Integer.MAX_VALUE;
+        // 逆向遍历，就是翻转的先序遍历
+        for (int i = postorder.length - 1;i>=0;i--){
+            // 左子树元素必须要小于递增栈被peek访问的元素，否则就不是二叉搜索树
+            if (postorder[i] > pervElem){
+                return false;
+            }
+            while (!stack.isEmpty() && postorder[i] < stack.peek()){
+                // 数组元素小于单调栈的元素了，表示往左子树走了，记录下上个根节点
+                // 找到这个左子树对应的根节点，之前右子树全部弹出，不再记录，因为不可能在往根节点的右子树走了
+                pervElem = stack.pop();
+            }
+            // 这个新元素入栈
+            stack.push(postorder[i]);
+        }
+        return true;
+    }
+}
+
+
+
+
+
+
+//解题思路
+//后序遍历，最后一个为根节点，遍历数组找到第一个大于根节点的，然后判断后面的全部都是大于根节点的，然后分为两部分，左右子树，左子树为lefr到temp-1，右子树为temp到right-1，递归。
+class Solution {
+    public boolean verifyPostorder(int[] postorder) {
+        if(postorder.length == 1){
+            return true;
+        }
+        if(postorder.length == 0){
+            return true;
+        }
+        boolean flag = verify(postorder,0,postorder.length-1);
+        return flag;
+
+    }
+    public boolean verify(int [] postorder,int left, int right){
+        if(right <= left){
+            return true;
+        }
+        int temp = left;
+        //找到第一个大于根节点的值
+        while((temp < right)&&(postorder[temp] < postorder[right])){
+            temp++;
+        }
+        //判断后面是否都大于根节点
+        for(int i = temp; i < right; i++){
+            if(postorder[i] < postorder[right]){
+                return false;
+            }
+        }
+        
+        return verify(postorder,left,temp - 1) && verify(postorder,temp,right - 1);
+    }
+}
+```
+
+#### [面试题07. 重建二叉树](https://leetcode-cn.com/problems/zhong-jian-er-cha-shu-lcof/)
+
+输入某二叉树的前序遍历和中序遍历的结果，请重建该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+
+ 例如，给出
+
+```
+前序遍历 preorder = [3,9,20,15,7]
+中序遍历 inorder = [9,3,15,20,7]
+```
+
+返回如下的二叉树：
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+```java
+package 剑指offer.N07根据前序中序重建二叉树;
+
+public class Solution {
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return helper(0, 0, inorder.length - 1, preorder, inorder);
+    }
+
+    public TreeNode helper(int preStart, int inStart, int inEnd, int[] preorder, int[] inorder) {
+        if (preStart > inorder.length - 1 || inStart > inEnd) return null;
+
+        TreeNode root = new TreeNode(preorder[preStart]);
+        int inIndex = 0;
+        for (int i = 0; i <= inEnd; i++) {
+            if (preorder[preStart] == inorder[i])
+                inIndex = i;
+        }
+
+        root.left = helper(preStart + 1, inStart, inIndex - 1, preorder, inorder);
+        root.right = helper(preStart + inIndex - inStart + 1, inIndex + 1, inEnd,preorder, inorder);
+        return root;
+    }
+}
+
+```
+
+#### [297. 二叉树的序列化与反序列化](https://leetcode-cn.com/problems/serialize-and-deserialize-binary-tree/)
+
+序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
+
+请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+**示例:** 
+
+```
+你可以将以下二叉树：
+
+    1
+   / \
+  2   3
+     / \
+    4   5
+
+序列化为 "[1,2,3,null,null,4,5]"
+```
+
+**提示:** 这与 LeetCode 目前使用的方式一致，详情请参阅 [LeetCode 序列化二叉树的格式](https://leetcode-cn.com/faq/#binary-tree)。你并非必须采取这种方式，你也可以采用其他的方法解决这个问题。
+
+**说明:** 不要使用类的成员 / 全局 / 静态变量来存储状态，你的序列化和反序列化算法应该是无状态的。动态规划套路详解
+
+```java
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        return serial(new StringBuilder(), root).toString();
+    }
+    
+    // Generate preorder string
+    private StringBuilder serial(StringBuilder str, TreeNode root) {
+        if (root == null) return str.append("#");
+        str.append(root.val).append(",");
+        serial(str, root.left).append(",");
+        serial(str, root.right);
+        return str;
+    }
+
+    public TreeNode deserialize(String data) {
+        return deserial(new LinkedList<>(Arrays.asList(data.split(","))));
+    }
+    
+    // Use queue to simplify position move
+    private TreeNode deserial(Queue<String> q) {
+        String val = q.poll();
+        if ("#".equals(val)) return null;
+        TreeNode root = new TreeNode(Integer.valueOf(val));
+        root.left = deserial(q);
+        root.right = deserial(q);
+        return root;
+    }
+}
+```
+
+
+
+#### [110. 平衡二叉树](https://leetcode-cn.com/problems/balanced-binary-tree/)
+
+给定一个二叉树，判断它是否是高度平衡的二叉树。
+
+本题中，一棵高度平衡二叉树定义为：
+
+> 一个二叉树*每个节点* 的左右两个子树的高度差的绝对值不超过1。
+
+**示例 1:**
+
+给定二叉树 `[3,9,20,null,null,15,7]`
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回 `true` 。
+
+**示例 2:**
+
+给定二叉树 `[1,2,2,3,3,null,null,4,4]`
+
+```
+       1
+      / \
+     2   2
+    / \
+   3   3
+  / \
+ 4   4
+```
+
+返回 `false` 。
+
+```java
+class Solution {
+    public boolean isBalanced(TreeNode root) {
+        return dfs(root) != -1;
+    }
+
+    private int dfs(TreeNode node){
+        if(node == null)    return 0;
+
+        int left = dfs(node.left);
+        int right = dfs(node.right);
+
+        if(left == -1 || right == -1 || Math.abs(left - right) > 1) 
+            return -1;
+        
+        return Math.max(left, right) + 1;
+    }
+}
+```
+
+#### [98. 验证二叉搜索树](https://leetcode-cn.com/problems/validate-binary-search-tree/)
+
+给定一个二叉树，判断其是否是一个有效的二叉搜索树。
+
+假设一个二叉搜索树具有如下特征：
+
+- 节点的左子树只包含**小于**当前节点的数。
+- 节点的右子树只包含**大于**当前节点的数。
+- 所有左子树和右子树自身必须也是二叉搜索树。
+
+**示例 1:**
+
+```
+输入:
+    2
+   / \
+  1   3
+输出: true
+```
+
+**示例 2:**
+
+```
+输入:
+    5
+   / \
+  1   4
+     / \
+    3   6
+输出: false
+解释: 输入为: [5,1,4,null,null,3,6]。
+     根节点的值为 5 ，但是其右子节点值为 4 。
+```
+
+```java
+class Solution {
+    public boolean isValidBST(TreeNode root) {
+        return helper(root, null, null);
+    }
+
+    private boolean helper(TreeNode root, TreeNode min, TreeNode max){
+        if(root == null)    return true;
+
+        if((min != null && root.val <= min.val) || (max != null && root.val >= max.val))
+            return  false;
+
+        return  helper(root.left, min, root) && helper(root.right, root, max);
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+# 动态规划
 
 [labuladong](https://leetcode-cn.com/u/labuladong/)发布于 9 个月前33.6k动态规划递归记忆化C++
 
@@ -4154,6 +4535,199 @@ PS：**我的所有算法文章都已经上传到了 Github 仓库**：[**fuckin
 PPS：我最近精心制作了一份电子书《labuladong的算法小抄》，分为「动态规划」「数据结构」「算法思维」「高频面试」四个章节，目录如下，限时开放下载，如有需要可扫码到我的公众号 **labuladong** 后台回复关键词「pdf」下载：
 
 ![目录](https://pic.leetcode-cn.com/66b9e7466b8c493b67a709f3ebd87c88daa7ca0b85d960288dec10aff8c7fc3e.jpg)
+
+# 买卖股票（dp）
+
+二、状态转移框架
+现在，我们完成了「状态」的穷举，我们开始思考每种「状态」有哪些「选择」，应该如何更新「状态」。只看「持有状态」，可以画个状态转移图。
+
+通过这个图可以很清楚地看到，每种状态（0 和 1）是如何转移而来的。根据这个图，我们来写一下状态转移方程：
+
+```
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+              max(   选择 rest  ,           选择 sell      )
+
+解释：今天我没有持有股票，有两种可能：
+要么是我昨天就没有持有，然后今天选择 rest，所以我今天还是没有持有；
+要么是我昨天持有股票，但是今天我 sell 了，所以我今天没有持有股票了。
+
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+              max(   选择 rest  ,           选择 buy         )
+
+解释：今天我持有着股票，有两种可能：
+要么我昨天就持有着股票，然后今天选择 rest，所以我今天还持有着股票；
+要么我昨天本没有持有，但今天我选择 buy，所以今天我就持有股票了。
+```
+
+
+这个解释应该很清楚了，如果 buy，就要从利润中减去 prices[i]，如果 sell，就要给利润增加 prices[i]。今天的最大利润就是这两种可能选择中较大的那个。而且注意 k 的限制，我们在选择 buy 的时候，把 k 减小了 1，很好理解吧，当然你也可以在 sell 的时候减 1，一样的。
+
+现在，我们已经完成了动态规划中最困难的一步：状态转移方程。如果之前的内容你都可以理解，那么你已经可以秒杀所有问题了，只要套这个框架就行了。不过还差最后一点点，就是定义 base case，即最简单的情况。
+
+```
+dp[-1][k][0] = 0
+解释：因为 i 是从 0 开始的，所以 i = -1 意味着还没有开始，这时候的利润当然是 0 。
+dp[-1][k][1] = -infinity
+解释：还没开始的时候，是不可能持有股票的，用负无穷表示这种不可能。
+dp[i][0][0] = 0
+解释：因为 k 是从 1 开始的，所以 k = 0 意味着根本不允许交易，这时候利润当然是 0 。
+dp[i][0][1] = -infinity
+解释：不允许交易的情况下，是不可能持有股票的，用负无穷表示这种不可能。
+```
+
+
+把上面的状态转移方程总结一下：
+
+```
+base case：
+dp[-1][k][0] = dp[i][0][0] = 0
+dp[-1][k][1] = dp[i][0][1] = -infinity
+
+状态转移方程：
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+```
+
+
+读者可能会问，这个数组索引是 -1 怎么编程表示出来呢，负无穷怎么表示呢？这都是细节问题，有很多方法实现。现在完整的框架已经完成，下面开始具体化。
+
+#### [121. 买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/)
+
+给定一个数组，它的第 *i* 个元素是一支给定股票第 *i* 天的价格。
+
+如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。
+
+注意你不能在买入股票前卖出股票。
+
+**示例 1:**
+
+```
+输入: [7,1,5,3,6,4]
+输出: 5
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
+     注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格。
+```
+
+**示例 2:**
+
+```
+输入: [7,6,4,3,1]
+输出: 0
+解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。
+```
+
+```java
+//普通解法  推荐
+public class Solution {
+    public int maxProfit(int[] prices) {
+        int minPrice = Integer.MAX_VALUE;
+        int maxprofit = 0;
+
+        for (int i = 0; i < prices.length; i++) {
+            if (prices[i] < minPrice)
+                minPrice = prices[i];
+            else if (prices[i] - minPrice > maxprofit) {
+                maxprofit = prices[i] - minPrice;
+            }
+        }
+        return maxprofit;
+    }
+}
+```
+
+```java
+//dp解法
+public class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        if(n == 0)  return 0;
+        int[][] dp = new int[n][2];
+
+        for (int i = 0; i < n; i++) {
+            if (i - 1 == -1){
+                dp[i][0] = 0;
+                dp[i][1] = -prices[i];
+                continue;
+            }
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], -prices[i]);
+        }
+        
+        return dp[n - 1][0];
+    }
+}
+
+//dp解法优化
+public class Solution {
+     public int maxProfit(int[] prices) {
+        int n = prices.length;
+        if(n == 0)  return 0;
+        int dp_i_0 = 0, dp_i_1 = -prices[0];
+
+        for (int i = 1; i < n; i++) {
+            dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+            dp_i_1 = Math.max(dp_i_1, -prices[i]);
+        }
+
+        return dp_i_0;
+    }
+}
+```
+
+#### [122. 买卖股票的最佳时机 II](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/)
+
+给定一个数组，它的第 *i* 个元素是一支给定股票第 *i* 天的价格。
+
+设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票）。
+
+**注意：**你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+
+**示例 1:**
+
+```
+输入: [7,1,5,3,6,4]
+输出: 7
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 3 天（股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     随后，在第 4 天（股票价格 = 3）的时候买入，在第 5 天（股票价格 = 6）的时候卖出, 这笔交易所能获得利润 = 6-3 = 3 。
+```
+
+**示例 2:**
+
+```
+输入: [1,2,3,4,5]
+输出: 4
+解释: 在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。
+     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。
+```
+
+**示例 3:**
+
+```
+输入: [7,6,4,3,1]
+输出: 0
+解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。
+```
+
+```java
+//推荐普通解法
+class Solution {
+    public int maxProfit(int[] prices) {
+        int maxProfit = 0;
+
+        for(int i = 0; i < prices.length - 1; i++){
+            if(prices[i + 1] > prices[i])
+                maxProfit += prices[i + 1] - prices[i];
+        }
+
+        return maxProfit;
+    }
+}
+```
+
+
+
+
 
 # DP解法
 
@@ -4668,8 +5242,6 @@ class Solution {
 ```
 
 #### [16. 最接近的三数之和(排序+双指针)](https://leetcode-cn.com/problems/3sum-closest/)
-
-难度中等368收藏分享切换为英文关注反馈
 
 给定一个包括 *n* 个整数的数组 `nums` 和 一个目标值 `target`。找出 `nums` 中的三个整数，使得它们的和与 `target` 最接近。返回这三个数的和。假定每组输入只存在唯一答案。
 
@@ -5982,7 +6554,7 @@ public class Foo {
 }
 ```
 
-三个不同的线程将会共用一个 `Foo` 实例。
+**三个不同的线程将会共用一个 `Foo` 实例。**
 
 - 线程 A 将会调用 `one()` 方法
 - 线程 B 将会调用 `two()` 方法
@@ -6025,9 +6597,535 @@ public class Foo {
 
 这是一个典型的执行屏障的问题，可以通过构造屏障来实现。
 
-如下图，我们需要构造 22 道屏障，`second` 线程等待 `first` 屏障，`third` 线程等待 `second` 屏障。：
-![image.png](https://pic.leetcode-cn.com/879c5abd22c2dbc2618a1433dfbeb02a34b9586a10425986fafdc90eef978cc1-image.png)
+```java
+class Foo {
+    CountDownLatch cd1;
+    CountDownLatch cd2;
+    public Foo() {
+        cd1 = new CountDownLatch(1);
+        cd2 = new CountDownLatch(1);
+    }
 
-`first` 线程会释放 `first` 屏障，而 `second` 线程会释放 `second` 屏障。
+    public void first(Runnable printFirst) throws InterruptedException {
+        // printFirst.run() outputs "first". Do not change or remove this line.
+        printFirst.run();
+        cd1.countDown();
+    }
 
-Java 中，我们使用线程等待的方式实现执行屏障，使用释放线程等待的方式实现屏障消除。具体代码如下：
+    public void second(Runnable printSecond) throws InterruptedException {
+
+        cd1.await();
+        // printSecond.run() outputs "second". Do not change or remove this line.
+        printSecond.run();
+        cd2.countDown();
+    }
+
+    public void third(Runnable printThird) throws InterruptedException {
+        cd2.await();
+        // printThird.run() outputs "third". Do not change or remove this line.
+        printThird.run();
+    }
+}
+```
+
+#### [1115. 交替打印FooBar](https://leetcode-cn.com/problems/print-foobar-alternately/)
+
+我们提供一个类：
+
+```
+class FooBar {
+  public void foo() {
+    for (int i = 0; i < n; i++) {
+      print("foo");
+    }
+  }
+
+  public void bar() {
+    for (int i = 0; i < n; i++) {
+      print("bar");
+    }
+  }
+}
+```
+
+**两个不同的线程将会共用一个 `FooBar` 实例**。其中一个线程将会调用 `foo()` 方法，另一个线程将会调用 `bar()` 方法。
+
+请设计修改程序，以确保 "foobar" 被输出 n 次。
+
+**示例 1:**
+
+```
+输入: n = 1
+输出: "foobar"
+解释: 这里有两个线程被异步启动。其中一个调用 foo() 方法, 另一个调用 bar() 方法，"foobar" 将被输出一次。
+```
+
+**示例 2:**
+
+```
+输入: n = 2
+输出: "foobarfoobar"
+解释: "foobar" 将被输出两次。
+```
+
+```java
+class FooBar {
+    private int n;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    Semaphore foo = new Semaphore(1);
+    Semaphore bar = new Semaphore(0);
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+        for (int i = 0; i < n; i++) {
+            foo.acquire();
+            printFoo.run();
+            bar.release();
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+        for (int i = 0; i < n; i++) {
+            bar.acquire();
+            printBar.run();
+            foo.release();
+        }
+    }
+}
+```
+
+```java
+//synchronized方法
+public class FooBar {
+    
+    private int n;
+    //flag 0->foo to be print  1->foo has been printed
+    private int flag = 0;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            synchronized (this) {
+                while (flag == 1) {
+                    this.wait();
+                }
+                // printFoo.run() outputs "foo". Do not change or remove this line.
+                printFoo.run();
+                flag = 1;
+                this.notifyAll();
+            }
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            synchronized (this) {
+                while (flag == 0) {
+                    this.wait();
+                }
+                // printBar.run() outputs "bar". Do not change or remove this line.
+                printBar.run();
+                flag = 0;
+                this.notifyAll();
+            }
+        }
+    }
+}
+```
+
+```java
+//使用Volatile的方法
+public class FooBarVolatile {
+
+    private int n;
+   //flag 0->foo to be print  1->foo has been printed  using volatile
+    private volatile int flag=0;
+
+
+    public FooBarVolatile(int n) {
+        this.n = n;
+    }
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            while (true){
+                if(flag==0){
+                    printFoo.run();
+                    flag=1;
+                    break;
+                }
+                Thread.sleep(1);
+            }
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+
+        for (int i = 0; i < n; i++) {
+            while (true){
+                if(flag==1){
+                    printBar.run();
+                    flag=0;
+                    break;
+                }
+                Thread.sleep(1);
+            }
+        }
+    }
+}
+```
+
+```java
+//cas 方法
+public class FooBarCAS {
+
+        private int n;
+        ////flag 0->foo to be print  1->foo has been printed
+        private AtomicInteger flag=new AtomicInteger(0);
+
+        public FooBarCAS(int n) {
+            this.n = n;
+        }
+
+        public void foo(Runnable printFoo) throws InterruptedException {
+
+            for (int i = 0; i < n; i++) {
+                while (!flag.compareAndSet(0,1)){//如果当前值等于预期值，设为目标值
+                    Thread.sleep(1);
+                }
+                printFoo.run();
+            }
+        }
+
+        public void bar(Runnable printBar) throws InterruptedException {
+
+            for (int i = 0; i < n; i++) {
+                while (!flag.compareAndSet(1,0)){
+                    Thread.sleep(1);
+                }
+                printBar.run();
+            }
+        }
+
+}
+```
+
+#### [1116. 打印零与奇偶数](https://leetcode-cn.com/problems/print-zero-even-odd/)
+
+假设有这么一个类：
+
+```
+class ZeroEvenOdd {
+  public ZeroEvenOdd(int n) { ... }      // 构造函数
+  public void zero(printNumber) { ... }  // 仅打印出 0
+  public void even(printNumber) { ... }  // 仅打印出 偶数
+  public void odd(printNumber) { ... }   // 仅打印出 奇数
+}
+```
+
+相同的一个 `ZeroEvenOdd` 类实例将会传递给三个不同的线程：
+
+1. 线程 A 将调用 `zero()`，它只输出 0 。
+2. 线程 B 将调用 `even()`，它只输出偶数。
+3. 线程 C 将调用 `odd()`，它只输出奇数。
+
+每个线程都有一个 `printNumber` 方法来输出一个整数。请修改给出的代码以输出整数序列 `010203040506`... ，其中序列的长度必须为 2*n*。
+
+ 
+
+**示例 1：**
+
+```
+输入：n = 2
+输出："0102"
+说明：三条线程异步执行，其中一个调用 zero()，另一个线程调用 even()，最后一个线程调用odd()。正确的输出为 "0102"。
+```
+
+**示例 2：**
+
+```
+输入：n = 5
+输出："0102030405"
+```
+
+```java
+public class ZeroEvenOdd {
+    private int n;
+
+    Semaphore zero = new Semaphore(1);
+    Semaphore even = new Semaphore(0);
+    Semaphore odd = new Semaphore(0);
+
+    public ZeroEvenOdd(int n) {
+        this.n = n;
+    }
+
+    // printNumber.accept(x) outputs "x", where x is an integer.
+    public void zero(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            zero.acquire();
+            printNumber.accept(0);
+            if (i % 2 == 1)
+                odd.release();
+            else 
+                even.release();
+        }
+    }
+
+    public void even(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 2; i <= n; i += 2) {
+            even.acquire();
+            printNumber.accept(i);
+            zero.release();
+        }
+    }
+
+    public void odd(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i += 2) {
+            odd.acquire();
+            printNumber.accept(i);
+            zero.release();
+        }
+    }
+}
+
+```
+
+#### [1117. H2O 生成](https://leetcode-cn.com/problems/building-h2o/)
+
+现在有两种线程，氢 `oxygen` 和氧 `hydrogen`，你的目标是组织这两种线程来产生水分子。
+
+存在一个屏障（barrier）使得每个线程必须等候直到一个完整水分子能够被产生出来。
+
+氢和氧线程会被分别给予 `releaseHydrogen` 和 `releaseOxygen` 方法来允许它们突破屏障。
+
+这些线程应该三三成组突破屏障并能立即组合产生一个水分子。
+
+你必须保证产生一个水分子所需线程的结合必须发生在下一个水分子产生之前。
+
+换句话说:
+
+- 如果一个氧线程到达屏障时没有氢线程到达，它必须等候直到两个氢线程到达。
+- 如果一个氢线程到达屏障时没有其它线程到达，它必须等候直到一个氧线程和另一个氢线程到达。
+
+书写满足这些限制条件的氢、氧线程同步代码。
+
+ 
+
+**示例 1:**
+
+```
+输入: "HOH"
+输出: "HHO"
+解释: "HOH" 和 "OHH" 依然都是有效解。
+```
+
+**示例 2:**
+
+```
+输入: "OOHHHH"
+输出: "HHOHHO"
+解释: "HOHHHO", "OHHHHO", "HHOHOH", "HOHHOH", "OHHHOH", "HHOOHH", "HOHOHH" 和 "OHHOHH" 依然都是有效解。
+```
+
+ 
+
+**限制条件:**
+
+- 输入字符串的总长将会是 3*n*, 1 ≤ *n* ≤ 50；
+- 输入字符串中的 “H” 总数将会是 2n；
+- 输入字符串中的 “O” 总数将会是 n。
+
+```java
+class H2O {
+
+    Semaphore h;
+    Semaphore o ;
+    public H2O() {
+        h = new Semaphore(2);
+        o = new Semaphore(2);
+    }
+
+    public void hydrogen(Runnable releaseHydrogen) throws InterruptedException {
+        h.acquire();
+        // releaseHydrogen.run() outputs "H". Do not change or remove this line.
+        releaseHydrogen.run();
+        o.release();
+    }
+
+    public void oxygen(Runnable releaseOxygen) throws InterruptedException {
+        o.acquire(2);
+        // releaseOxygen.run() outputs "O". Do not change or remove this line.
+		releaseOxygen.run();
+        h.release(2);
+    }
+}
+```
+
+#### [1195. 交替打印字符串](https://leetcode-cn.com/problems/fizz-buzz-multithreaded/)
+
+编写一个可以从 1 到 n 输出代表这个数字的字符串的程序，但是：
+
+- 如果这个数字可以被 3 整除，输出 "fizz"。
+- 如果这个数字可以被 5 整除，输出 "buzz"。
+- 如果这个数字可以同时被 3 和 5 整除，输出 "fizzbuzz"。
+
+例如，当 `n = 15`，输出： `1, 2, fizz, 4, buzz, fizz, 7, 8, fizz, buzz, 11, fizz, 13, 14, fizzbuzz`。
+
+假设有这么一个类：
+
+```
+class FizzBuzz {
+  public FizzBuzz(int n) { ... }               // constructor
+  public void fizz(printFizz) { ... }          // only output "fizz"
+  public void buzz(printBuzz) { ... }          // only output "buzz"
+  public void fizzbuzz(printFizzBuzz) { ... }  // only output "fizzbuzz"
+  public void number(printNumber) { ... }      // only output the numbers
+}
+```
+
+请你实现一个有四个线程的多线程版 `FizzBuzz`， 同一个 `FizzBuzz` 实例会被如下四个线程使用：
+
+1. 线程A将调用 `fizz()` 来判断是否能被 3 整除，如果可以，则输出 `fizz`。
+2. 线程B将调用 `buzz()` 来判断是否能被 5 整除，如果可以，则输出 `buzz`。
+3. 线程C将调用 `fizzbuzz()` 来判断是否同时能被 3 和 5 整除，如果可以，则输出 `fizzbuzz`。
+4. 线程D将调用 `number()` 来实现输出既不能被 3 整除也不能被 5 整除的数字。
+
+```java
+class FizzBuzz {
+    private int n;
+
+    Semaphore sem, sem3, sem5, sem15;
+    public FizzBuzz(int n) {
+        this.n = n;
+        sem = new Semaphore(1);
+        sem3 = new Semaphore(0);
+        sem5 = new Semaphore(0);
+        sem15 = new Semaphore(0);
+    }
+
+    // printFizz.run() outputs "fizz".
+    public void fizz(Runnable printFizz) throws InterruptedException {
+        for(int i = 3; i <= n; i += 3){
+            sem3.acquire();
+            printFizz.run();
+            if((i + 3) % 5 == 0)
+                i += 3;
+            sem.release();
+        }        
+    }
+
+    // printBuzz.run() outputs "buzz".
+    public void buzz(Runnable printBuzz) throws InterruptedException {
+        for(int i = 5; i <= n; i += 5){
+            sem5.acquire();
+            printBuzz.run();
+            if((i + 5) % 3 == 0)
+                i += 5;
+            sem.release();
+        }    
+    }
+
+    // printFizzBuzz.run() outputs "fizzbuzz".
+    public void fizzbuzz(Runnable printFizzBuzz) throws InterruptedException {
+        for(int i = 15; i <= n; i += 15){
+            sem15.acquire();
+            printFizzBuzz.run();
+            sem.release();
+        }
+    }
+
+    // printNumber.accept(x) outputs "x", where x is an integer.
+    public void number(IntConsumer printNumber) throws InterruptedException {
+        for(int i = 1; i <= n; i++){
+            sem.acquire();
+            if(i % 15 == 0)   sem15.release();
+            else if(i % 5 == 0)   sem5.release();
+            else if(i % 3 == 0)   sem3.release();
+            else{
+                    printNumber.accept(i);
+                    sem.release();
+                }
+        }
+    }
+}
+```
+
+```java
+//使用cyclicBarrier
+class FizzBuzz {
+    private int n;
+
+    private static CyclicBarrier barrier = new CyclicBarrier(4);
+
+    public FizzBuzz(int n) {
+        this.n = n;
+    }
+
+    // printFizz.run() outputs "fizz".
+    public void fizz(Runnable printFizz) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 == 0 && i % 5 != 0) {
+                printFizz.run();
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // printBuzz.run() outputs "buzz".
+    public void buzz(Runnable printBuzz) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 != 0 && i % 5 == 0) {
+                printBuzz.run();
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // printFizzBuzz.run() outputs "fizzbuzz".
+    public void fizzbuzz(Runnable printFizzBuzz) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 == 0 && i % 5 == 0) {
+                printFizzBuzz.run();
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // printNumber.accept(x) outputs "x", where x is an integer.
+    public void number(IntConsumer printNumber) throws InterruptedException {
+        for (int i = 1; i <= n; i++) {
+            if (i % 3 != 0 && i % 5 != 0) {
+                printNumber.accept(i);
+            }
+            try {
+                barrier.await();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
