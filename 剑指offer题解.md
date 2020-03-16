@@ -2,6 +2,154 @@
 [TOC]
 # 剑指offer题解
 
+#### [300. 最长上升子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
+
+给定一个无序的整数数组，找到其中最长上升子序列的长度。
+
+**示例:**
+
+```
+输入: [10,9,2,5,3,7,101,18]
+输出: 4 
+解释: 最长的上升子序列是 [2,3,7,101]，它的长度是 4。
+```
+
+**说明:**
+
+- 可能会有多种最长上升子序列的组合，你只需要输出对应的长度即可。
+- 你算法的时间复杂度应该为 O(*n2*) 。
+
+**进阶:** 你能将算法的时间复杂度降低到 O(*n* log *n*) 吗?
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        /**
+        dp[i]: 所有长度为i+1的递增子序列中, 最小的那个序列尾数.
+        由定义知dp数组必然是一个递增数组, 可以用 maxL 来表示最长递增子序列的长度. 
+        对数组进行迭代, 依次判断每个数num将其插入dp数组相应的位置:
+        1. num > dp[maxL], 表示num比所有已知递增序列的尾数都大, 将num添加入dp
+           数组尾部, 并将最长递增序列长度maxL加1
+        2. dp[i-1] < num <= dp[i], 只更新相应的dp[i]
+        **/
+        int maxL = 0;
+        int[] dp = new int[nums.length];
+        for(int num : nums) {
+            // 二分法查找, 也可以调用库函数如binary_search
+            int lo = 0, hi = maxL;
+            while(lo < hi) {
+                int mid = lo+(hi-lo)/2;
+                if(dp[mid] < num)
+                    lo = mid+1;
+                elses
+                    hi = mid;
+            }
+            dp[lo] = num;
+            if(lo == maxL)
+                maxL++;
+        }
+        return maxL;
+    }
+}
+```
+
+```java
+//dp思路
+//https://leetcode-cn.com/problems/longest-increasing-subsequence/comments/
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int len = nums.length;
+        if (len < 2) {
+            return len;
+        }
+        int[] dp = new int[len];
+        // 自己一定是一个子序列
+        Arrays.fill(dp, 1);
+        for (int i = 1; i < len; i++) {
+            // 看以前的，比它小的，说明可以接在后面形成一个更长的子序列
+            // int curMax = Integer.MIN_VALUE; 不能这样写，万一前面没有比自己小的，
+            // 这个值就得不到更新
+            for (int j = 0; j < i; j++) {
+                if (nums[j] < nums[i]) {
+                    dp[i] = Math.max(dp[j] + 1, dp[i]);
+                }
+            }
+        }
+
+        int res = dp[0];
+        for (int i = 0; i < len; i++) {
+            res = Math.max(res, dp[i]);
+        }
+        return res;
+    }
+}
+```
+
+
+
+
+
+#### [1071. 字符串的最大公因子](https://leetcode-cn.com/problems/greatest-common-divisor-of-strings/)
+
+对于字符串 `S` 和 `T`，只有在 `S = T + ... + T`（`T` 与自身连接 1 次或多次）时，我们才认定 “`T` 能除尽 `S`”。
+
+返回最长字符串 `X`，要求满足 `X` 能除尽 `str1` 且 `X` 能除尽 `str2`。
+
+ 
+
+**示例 1：**
+
+```
+输入：str1 = "ABCABC", str2 = "ABC"
+输出："ABC"
+```
+
+**示例 2：**
+
+```
+输入：str1 = "ABABAB", str2 = "ABAB"
+输出："AB"
+```
+
+**示例 3：**
+
+```
+输入：str1 = "LEET", str2 = "CODE"
+输出：""
+```
+
+ 
+
+**提示：**
+
+1. `1 <= str1.length <= 1000`
+2. `1 <= str2.length <= 1000`
+3. `str1[i]` 和 `str2[i]` 为大写英文字母
+
+```java
+class Solution {
+    public String gcdOfStrings(String str1, String str2) {
+        if(!(str1+str2).equals(str2+str1))   return "";
+
+        int len1 = str1.length();
+        int len2 = str2.length();
+        
+        int index = len1 > len2 ? GCD(len1, len2) : GCD(len2, len1);
+
+        return str1.substring(0, index);
+    }
+
+    private int GCD(int len1, int len2){
+        if(len2 == 0)   return 0;
+
+        return len1 % len2 == 0 ? len2 : GCD(len2, len1 % len2);
+    }
+
+}
+```
+
+
+
 #### kmp算法dp
 
 ```java
@@ -4690,7 +4838,7 @@ class Solution {
   }
 }
 //复杂度分析
-//时间复杂度：我们访问每个节点一次，时间复杂度为O(N) ，其中 NN 是节点个数。
+//时间复杂度：我们访问每个节点一次，时间复杂度为O(N) ，其中 N 是节点个数。
 //空间复杂度：最坏情况下，整棵树是非平衡的，例如每个节点都只有一个孩子，递归会调用 N 次（树的高度），因此栈的空间开销是 O(N) 。但在最好情况下，树是完全平衡的，高度只有 log(N)，因此在这种情况下空间复杂度只有 O(log(N)) 。
 ```
 
@@ -4731,6 +4879,155 @@ class Solution {
 //时间复杂度：和递归方法相同是 O(N)。
 //空间复杂度：当树不平衡的最坏情况下是 O(N) 。在最好情况（树是平衡的）下是O(logN)。
 ```
+
+#### [113. 路径总和 II（回溯法）](https://leetcode-cn.com/problems/path-sum-ii/)
+
+给定一个二叉树和一个目标和，找到所有从根节点到叶子节点路径总和等于给定目标和的路径。
+
+**说明:** 叶子节点是指没有子节点的节点。
+
+**示例:**
+给定如下二叉树，以及目标和 `sum = 22`，
+
+```
+              5
+             / \
+            4   8
+           /   / \
+          11  13  4
+         /  \    / \
+        7    2  5   1
+```
+
+返回:
+
+```
+[
+   [5,4,11,2],
+   [5,8,4,5]
+]
+```
+
+
+
+```java
+/**
+ *回溯法
+ */
+class Solution {
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> tmp = new ArrayList<>();
+        pathSum(root, sum, tmp, res);
+        return res;
+    }
+
+    private void pathSum(TreeNode node, int sum, List<Integer> tmp, List<List<Integer>> res) {
+        if (node == null) return;
+
+        tmp.add(node.val);
+        if (node.left == null && node.right == null && node.val == sum)
+            res.add(new ArrayList(tmp));
+        else{
+            pathSum(node.left, sum - node.val, tmp, res);
+            pathSum(node.right, sum - node.val, tmp, res);
+        }
+
+        tmp.remove(tmp.size() - 1);//移除最后一个元素
+    }
+    
+}
+```
+
+#### [437. 路径总和 III(回溯，难)](https://leetcode-cn.com/problems/path-sum-iii/)
+
+给定一个二叉树，它的每个结点都存放着一个整数值。
+
+找出路径和等于给定数值的路径总数。
+
+路径不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+
+二叉树不超过1000个节点，且节点数值范围是 [-1000000,1000000] 的整数。
+
+**示例：**
+
+```
+root = [10,5,-3,3,2,null,11,3,-2,null,1], sum = 8
+
+      10
+     /  \
+    5   -3
+   / \    \
+  3   2   11
+ / \   \
+3  -2   1
+
+返回 3。和等于 8 的路径有:
+
+1.  5 -> 3
+2.  5 -> 2 -> 1
+3.  -3 -> 11
+```
+
+```java
+class Solution {
+    public int pathSum(TreeNode root, int sum) {
+        // key是前缀和, value是大小为key的前缀和出现的次数
+        Map<Integer, Integer> prefixSumCount = new HashMap<>();
+        // 前缀和为0的一条路径
+        prefixSumCount.put(0, 1);
+        // 前缀和的递归回溯思路
+        return recursionPathSum(root, prefixSumCount, sum, 0);
+    }
+
+    /**
+     * 前缀和的递归回溯思路
+     * 从当前节点反推到根节点(反推比较好理解，正向其实也只有一条)，有且仅有一条路径，因为这是一棵树
+     * 如果此前有和为currSum-target,而当前的和又为currSum,两者的差就肯定为target了
+     * 所以前缀和对于当前路径来说是唯一的，当前记录的前缀和，在回溯结束，回到本层时去除，保证其不影响其他分支的结果
+     * @param node 树节点
+     * @param prefixSumCount 前缀和Map
+     * @param target 目标值
+     * @param currSum 当前路径和
+     * @return 满足题意的解
+     */
+    private int recursionPathSum(TreeNode node, Map<Integer, Integer> prefixSumCount, int target, int currSum) {
+        // 1.递归终止条件
+        if (node == null) {
+            return 0;
+        }
+        // 2.本层要做的事情
+        int res = 0;
+        // 当前路径上的和
+        currSum += node.val;
+
+        //---核心代码
+        // 看看root到当前节点这条路上是否存在节点前缀和加target为currSum的路径
+        // 当前节点->root节点反推，有且仅有一条路径，如果此前有和为currSum-target,而当前的和又为currSum,两者的差就肯定为target了
+        // currSum-target相当于找路径的起点，起点的sum+target=currSum，当前点到起点的距离就是target
+        res += prefixSumCount.getOrDefault(currSum - target, 0);
+        // 更新路径上当前节点前缀和的个数
+        prefixSumCount.put(currSum, prefixSumCount.getOrDefault(currSum, 0) + 1);
+        //---核心代码
+
+        // 3.进入下一层
+        res += recursionPathSum(node.left, prefixSumCount, target, currSum);
+        res += recursionPathSum(node.right, prefixSumCount, target, currSum);
+
+        // 4.回到本层，恢复状态，去除当前节点的前缀和数量
+        prefixSumCount.put(currSum, prefixSumCount.get(currSum) - 1);
+        return res;
+    }
+}
+```
+
+
+
+
+
+
+
+
 
 
 

@@ -2,6 +2,7 @@ package Test;
 
 import com.sun.jmx.snmp.Timestamp;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +19,13 @@ public class test {
         System.out.println(new Timestamp(zero));
         System.out.println("今天零点时间戳" + zero);
 
+
         Calendar calendar = Calendar.getInstance();
         calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH) - 1, 0, 0, 0);
         long tt = calendar.getTime().getTime();
         System.out.println("昨天零点的时间戳"+tt);
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(tt);
+        System.out.println("昨天时间 "+ date);
 
         HashMap<Integer, Integer> map = new HashMap<>();
         map.put(1, 1);
