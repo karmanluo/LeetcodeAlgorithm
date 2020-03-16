@@ -5021,6 +5021,182 @@ class Solution {
 }
 ```
 
+#### [114. 二叉树展开为链表](https://leetcode-cn.com/problems/flatten-binary-tree-to-linked-list/)
+
+前序展开
+
+给定一个二叉树，[原地](https://baike.baidu.com/item/原地算法/8010757)将它展开为链表。
+
+例如，给定二叉树
+
+```
+    1
+   / \
+  2   5
+ / \   \
+3   4   6
+```
+
+将其展开为：
+
+```
+1
+ \
+  2
+   \
+    3
+     \
+      4
+       \
+        5
+         \
+          6
+```
+
+```java
+public class Solution{
+    public void flatten(TreeNode root) {
+        if (root == null) return;
+
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+
+        root.left = null;
+
+        flatten(left);
+        flatten(right);
+
+        root.right = left;
+        TreeNode curr = root;
+        while (curr.right != null) curr = curr.right;
+        curr.right = right;
+    }
+}
+```
+
+#### [595.二叉树最长连续序列](https://www.lintcode.com/problem/binary-tree-longest-consecutive-sequence/description)
+
+给一棵二叉树，找到最长连续路径的长度。
+这条路径是指 任何的节点序列中的起始节点到树中的任一节点都必须遵循 父-子 联系。最长的连续路径必须是从父亲节点到孩子节点（`不能逆序`）。
+
+您在真实的面试中是否遇到过这个题？ 是
+
+题目纠错
+
+**样例1:**
+
+```
+输入:
+{1,#,3,2,4,#,#,#,5}
+输出:3
+说明:
+这棵树如图所示
+   1
+    \
+     3
+    / \
+   2   4
+        \
+         5
+最长连续序列是3-4-5，所以返回3.
+```
+
+**样例2:**
+
+```
+输入:
+{2,#,3,2,#,1,#}
+输出:2
+说明:
+这棵树如图所示：
+   2
+    \
+     3
+    / 
+   2    
+  / 
+ 1
+最长连续序列是2-3，而不是3-2-1，所以返回2.
+```
+
+```java
+
+public class Solution {
+    /**
+     * @param root: the root of binary tree
+     * @return: the length of the longest consecutive sequence path
+     */
+    public int longestConsecutive(TreeNode root) {
+    
+        // write your code here
+        return helper(root, null, 0);
+    }
+
+    private int helper(TreeNode root, TreeNode parent, int lengthWithoutRoot) {
+        if (root == null) return 0;
+
+        int length = (parent != null && parent.val + 1 == root.val)
+                ? lengthWithoutRoot + 1 : 1;
+
+        int left = helper(root.left, root, length);
+        int right = helper(root.right, root, length);
+
+        return Math.max(length, Math.max(left, right));
+    }
+
+}
+```
+
+#### [101. 对称二叉树](https://leetcode-cn.com/problems/symmetric-tree/)
+
+给定一个二叉树，检查它是否是镜像对称的。
+
+例如，二叉树 `[1,2,2,3,4,4,3]` 是对称的。
+
+```
+    1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+```
+
+但是下面这个 `[1,2,2,null,3,null,3]` 则不是镜像对称的:
+
+```
+    1
+   / \
+  2   2
+   \   \
+   3    3
+```
+
+**说明:**
+
+如果你可以运用递归和迭代两种方法解决这个问题，会很加分。
+
+```java
+//递归
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        if(root == null) return true;
+
+        return isSymmetric(root.left, root.right);
+    }
+
+    private boolean isSymmetric(TreeNode l, TreeNode r){
+        if(l == null && r == null) return true;
+        if(l == null || r == null) return false;
+
+        return l.val == r.val && isSymmetric(l.left, r.right) && isSymmetric(l.right, r.left);
+    }
+}
+```
+
+
+
+
+
 
 
 
