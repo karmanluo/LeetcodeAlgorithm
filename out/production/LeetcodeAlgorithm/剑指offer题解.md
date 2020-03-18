@@ -380,31 +380,20 @@ B是A的子结构， 即 A中有出现和B相同的结构和节点值。
 0 <= 节点个数 <= 10000
 
 ```java
-//这道题存在问题的地方：A和B中默认没有重复的数字
-class Solution {
-    //思路，找到和B根节点值相同的位置
-   public boolean isSubStructure(TreeNode A, TreeNode B) {
-        if (A == null || B == null) return false;
-
-        if (A != null && B != null && A.val == B.val){
-            //helper用来判断两个树是否相等
-            return helper(A, B);
-        }
-
-        if (isSubStructure(A.left, B))  return true;
-        if (isSubStructure(A.right, B)) return true;
-
-        return false;   
+public class Solution {
+    public boolean isSubtree(TreeNode s, TreeNode t) {
+        if (s == null) return false;
+        if (isSame(s, t)) return true;
+        return isSubtree(s.left, t) || isSubtree(s.right, t);
     }
-
-    private boolean helper(TreeNode a, TreeNode b) {
-        if (b == null) return true;
-
-        if (a != null && b!= null && a.val != b.val)
-            return false;
-        if (a != null && b!= null && a.val == b.val)
-            return helper(a.left, b.left) && helper(a.right, b.right);
-        return false;
+    
+    private boolean isSame(TreeNode s, TreeNode t) {
+        if (s == null && t == null) return true;
+        if (s == null || t == null) return false;
+        
+        if (s.val != t.val) return false;
+        
+        return isSame(s.left, t.left) && isSame(s.right, t.right);
     }
 }
 ```
@@ -4838,7 +4827,7 @@ class Solution {
   }
 }
 //复杂度分析
-//时间复杂度：我们访问每个节点一次，时间复杂度为O(N) ，其中 NN 是节点个数。
+//时间复杂度：我们访问每个节点一次，时间复杂度为O(N) ，其中 N 是节点个数。
 //空间复杂度：最坏情况下，整棵树是非平衡的，例如每个节点都只有一个孩子，递归会调用 N 次（树的高度），因此栈的空间开销是 O(N) 。但在最好情况下，树是完全平衡的，高度只有 log(N)，因此在这种情况下空间复杂度只有 O(log(N)) 。
 ```
 
@@ -4879,6 +4868,416 @@ class Solution {
 //时间复杂度：和递归方法相同是 O(N)。
 //空间复杂度：当树不平衡的最坏情况下是 O(N) 。在最好情况（树是平衡的）下是O(logN)。
 ```
+
+#### [113. 路径总和 II（回溯法）](https://leetcode-cn.com/problems/path-sum-ii/)
+
+给定一个二叉树和一个目标和，找到所有从根节点到叶子节点路径总和等于给定目标和的路径。
+
+**说明:** 叶子节点是指没有子节点的节点。
+
+**示例:**
+给定如下二叉树，以及目标和 `sum = 22`，
+
+```
+              5
+             / \
+            4   8
+           /   / \
+          11  13  4
+         /  \    / \
+        7    2  5   1
+```
+
+返回:
+
+```
+[
+   [5,4,11,2],
+   [5,8,4,5]
+]
+```
+
+
+
+```java
+/**
+ *回溯法
+ */
+class Solution {
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> tmp = new ArrayList<>();
+        pathSum(root, sum, tmp, res);
+        return res;
+    }
+
+    private void pathSum(TreeNode node, int sum, List<Integer> tmp, List<List<Integer>> res) {
+        if (node == null) return;
+
+        tmp.add(node.val);
+        if (node.left == null && node.right == null && node.val == sum)
+            res.add(new ArrayList(tmp));
+        else{
+            pathSum(node.left, sum - node.val, tmp, res);
+            pathSum(node.right, sum - node.val, tmp, res);
+        }
+
+        tmp.remove(tmp.size() - 1);//移除最后一个元素
+    }
+    
+}
+```
+
+#### [437. 路径总和 III(回溯，难)](https://leetcode-cn.com/problems/path-sum-iii/)
+
+给定一个二叉树，它的每个结点都存放着一个整数值。
+
+找出路径和等于给定数值的路径总数。
+
+路径不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+
+二叉树不超过1000个节点，且节点数值范围是 [-1000000,1000000] 的整数。
+
+**示例：**
+
+```
+root = [10,5,-3,3,2,null,11,3,-2,null,1], sum = 8
+
+      10
+     /  \
+    5   -3
+   / \    \
+  3   2   11
+ / \   \
+3  -2   1
+
+返回 3。和等于 8 的路径有:
+
+1.  5 -> 3
+2.  5 -> 2 -> 1
+3.  -3 -> 11
+```
+
+```java
+class Solution {
+    public int pathSum(TreeNode root, int sum) {
+        // key是前缀和, value是大小为key的前缀和出现的次数
+        Map<Integer, Integer> prefixSumCount = new HashMap<>();
+        // 前缀和为0的一条路径
+        prefixSumCount.put(0, 1);
+        // 前缀和的递归回溯思路
+        return recursionPathSum(root, prefixSumCount, sum, 0);
+    }
+
+    /**
+     * 前缀和的递归回溯思路
+     * 从当前节点反推到根节点(反推比较好理解，正向其实也只有一条)，有且仅有一条路径，因为这是一棵树
+     * 如果此前有和为currSum-target,而当前的和又为currSum,两者的差就肯定为target了
+     * 所以前缀和对于当前路径来说是唯一的，当前记录的前缀和，在回溯结束，回到本层时去除，保证其不影响其他分支的结果
+     * @param node 树节点
+     * @param prefixSumCount 前缀和Map
+     * @param target 目标值
+     * @param currSum 当前路径和
+     * @return 满足题意的解
+     */
+    private int recursionPathSum(TreeNode node, Map<Integer, Integer> prefixSumCount, int target, int currSum) {
+        // 1.递归终止条件
+        if (node == null) {
+            return 0;
+        }
+        // 2.本层要做的事情
+        int res = 0;
+        // 当前路径上的和
+        currSum += node.val;
+
+        //---核心代码
+        // 看看root到当前节点这条路上是否存在节点前缀和加target为currSum的路径
+        // 当前节点->root节点反推，有且仅有一条路径，如果此前有和为currSum-target,而当前的和又为currSum,两者的差就肯定为target了
+        // currSum-target相当于找路径的起点，起点的sum+target=currSum，当前点到起点的距离就是target
+        res += prefixSumCount.getOrDefault(currSum - target, 0);
+        // 更新路径上当前节点前缀和的个数
+        prefixSumCount.put(currSum, prefixSumCount.getOrDefault(currSum, 0) + 1);
+        //---核心代码
+
+        // 3.进入下一层
+        res += recursionPathSum(node.left, prefixSumCount, target, currSum);
+        res += recursionPathSum(node.right, prefixSumCount, target, currSum);
+
+        // 4.回到本层，恢复状态，去除当前节点的前缀和数量
+        prefixSumCount.put(currSum, prefixSumCount.get(currSum) - 1);
+        return res;
+    }
+}
+```
+
+#### [114. 二叉树展开为链表](https://leetcode-cn.com/problems/flatten-binary-tree-to-linked-list/)
+
+前序展开
+
+给定一个二叉树，[原地](https://baike.baidu.com/item/原地算法/8010757)将它展开为链表。
+
+例如，给定二叉树
+
+```
+    1
+   / \
+  2   5
+ / \   \
+3   4   6
+```
+
+将其展开为：
+
+```
+1
+ \
+  2
+   \
+    3
+     \
+      4
+       \
+        5
+         \
+          6
+```
+
+```java
+public class Solution{
+    public void flatten(TreeNode root) {
+        if (root == null) return;
+
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+
+        root.left = null;
+
+        flatten(left);
+        flatten(right);
+
+        root.right = left;
+        TreeNode curr = root;
+        while (curr.right != null) curr = curr.right;
+        curr.right = right;
+    }
+}
+```
+
+#### [595.二叉树最长连续序列](https://www.lintcode.com/problem/binary-tree-longest-consecutive-sequence/description)
+
+给一棵二叉树，找到最长连续路径的长度。
+这条路径是指 任何的节点序列中的起始节点到树中的任一节点都必须遵循 父-子 联系。最长的连续路径必须是从父亲节点到孩子节点（`不能逆序`）。
+
+您在真实的面试中是否遇到过这个题？ 是
+
+题目纠错
+
+**样例1:**
+
+```
+输入:
+{1,#,3,2,4,#,#,#,5}
+输出:3
+说明:
+这棵树如图所示
+   1
+    \
+     3
+    / \
+   2   4
+        \
+         5
+最长连续序列是3-4-5，所以返回3.
+```
+
+**样例2:**
+
+```
+输入:
+{2,#,3,2,#,1,#}
+输出:2
+说明:
+这棵树如图所示：
+   2
+    \
+     3
+    / 
+   2    
+  / 
+ 1
+最长连续序列是2-3，而不是3-2-1，所以返回2.
+```
+
+```java
+
+public class Solution {
+    /**
+     * @param root: the root of binary tree
+     * @return: the length of the longest consecutive sequence path
+     */
+    public int longestConsecutive(TreeNode root) {
+    
+        // write your code here
+        return helper(root, null, 0);
+    }
+
+    private int helper(TreeNode root, TreeNode parent, int lengthWithoutRoot) {
+        if (root == null) return 0;
+
+        int length = (parent != null && parent.val + 1 == root.val)
+                ? lengthWithoutRoot + 1 : 1;
+
+        int left = helper(root.left, root, length);
+        int right = helper(root.right, root, length);
+
+        return Math.max(length, Math.max(left, right));
+    }
+
+}
+```
+
+#### [101. 对称二叉树](https://leetcode-cn.com/problems/symmetric-tree/)
+
+给定一个二叉树，检查它是否是镜像对称的。
+
+例如，二叉树 `[1,2,2,3,4,4,3]` 是对称的。
+
+```
+    1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+```
+
+但是下面这个 `[1,2,2,null,3,null,3]` 则不是镜像对称的:
+
+```
+    1
+   / \
+  2   2
+   \   \
+   3    3
+```
+
+**说明:**
+
+如果你可以运用递归和迭代两种方法解决这个问题，会很加分。
+
+```java
+//递归
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        if(root == null) return true;
+
+        return isSymmetric(root.left, root.right);
+    }
+
+    private boolean isSymmetric(TreeNode l, TreeNode r){
+        if(l == null && r == null) return true;
+        if(l == null || r == null) return false;
+
+        return l.val == r.val && isSymmetric(l.left, r.right) && isSymmetric(l.right, r.left);
+    }
+}
+```
+
+```java
+//迭代
+public boolean isSymmetric(TreeNode root) {
+    if (root == null) return true;
+    Stack<TreeNode> stack = new Stack<>();
+    stack.push(root.left);
+    stack.push(root.right);
+    while (!stack.empty()) {
+        TreeNode n1 = stack.pop(), n2 = stack.pop();
+        if (n1 == null && n2 == null) continue;
+        if (n1 == null || n2 == null || n1.val != n2.val) return false;
+        stack.push(n1.left);
+        stack.push(n2.right);
+        stack.push(n1.right);
+        stack.push(n2.left);
+    }
+    return true;
+}
+```
+
+#### [572. 另一个树的子树](https://leetcode-cn.com/problems/subtree-of-another-tree/)
+
+给定两个非空二叉树 **s** 和 **t**，检验 **s** 中是否包含和 **t** 具有相同结构和节点值的子树。**s** 的一个子树包括 **s** 的一个节点和这个节点的所有子孙。**s** 也可以看做它自身的一棵子树。
+
+**示例 1:**
+给定的树 s:
+
+```
+     3
+    / \
+   4   5
+  / \
+ 1   2
+```
+
+给定的树 t：
+
+```
+   4 
+  / \
+ 1   2
+```
+
+返回 **true**，因为 t 与 s 的一个子树拥有相同的结构和节点值。
+
+**示例 2:**
+给定的树 s：
+
+```
+     3
+    / \
+   4   5
+  / \
+ 1   2
+    /
+   0
+```
+
+给定的树 t：
+
+```
+   4
+  / \
+ 1   2
+```
+
+返回 **false**。
+
+```java
+public class Solution {
+    public boolean isSubtree(TreeNode s, TreeNode t) {
+        if (s == null) return false;
+        if (isSame(s, t)) return true;
+        return isSubtree(s.left, t) || isSubtree(s.right, t);
+    }
+    
+    private boolean isSame(TreeNode s, TreeNode t) {
+        if (s == null && t == null) return true;
+        if (s == null || t == null) return false;
+        
+        if (s.val != t.val) return false;
+        
+        return isSame(s.left, t.left) && isSame(s.right, t.right);
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
 
 
 

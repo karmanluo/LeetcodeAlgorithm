@@ -380,31 +380,20 @@ B是A的子结构， 即 A中有出现和B相同的结构和节点值。
 0 <= 节点个数 <= 10000
 
 ```java
-//这道题存在问题的地方：A和B中默认没有重复的数字
-class Solution {
-    //思路，找到和B根节点值相同的位置
-   public boolean isSubStructure(TreeNode A, TreeNode B) {
-        if (A == null || B == null) return false;
-
-        if (A != null && B != null && A.val == B.val){
-            //helper用来判断两个树是否相等
-            return helper(A, B);
-        }
-
-        if (isSubStructure(A.left, B))  return true;
-        if (isSubStructure(A.right, B)) return true;
-
-        return false;   
+public class Solution {
+    public boolean isSubtree(TreeNode s, TreeNode t) {
+        if (s == null) return false;
+        if (isSame(s, t)) return true;
+        return isSubtree(s.left, t) || isSubtree(s.right, t);
     }
-
-    private boolean helper(TreeNode a, TreeNode b) {
-        if (b == null) return true;
-
-        if (a != null && b!= null && a.val != b.val)
-            return false;
-        if (a != null && b!= null && a.val == b.val)
-            return helper(a.left, b.left) && helper(a.right, b.right);
-        return false;
+    
+    private boolean isSame(TreeNode s, TreeNode t) {
+        if (s == null && t == null) return true;
+        if (s == null || t == null) return false;
+        
+        if (s.val != t.val) return false;
+        
+        return isSame(s.left, t.left) && isSame(s.right, t.right);
     }
 }
 ```
@@ -5193,8 +5182,601 @@ class Solution {
 }
 ```
 
+```java
+//迭代
+public boolean isSymmetric(TreeNode root) {
+    if (root == null) return true;
+    Stack<TreeNode> stack = new Stack<>();
+    stack.push(root.left);
+    stack.push(root.right);
+    while (!stack.empty()) {
+        TreeNode n1 = stack.pop(), n2 = stack.pop();
+        if (n1 == null && n2 == null) continue;
+        if (n1 == null || n2 == null || n1.val != n2.val) return false;
+        stack.push(n1.left);
+        stack.push(n2.right);
+        stack.push(n1.right);
+        stack.push(n2.left);
+    }
+    return true;
+}
+```
 
+#### [572. 另一个树的子树](https://leetcode-cn.com/problems/subtree-of-another-tree/)
 
+给定两个非空二叉树 **s** 和 **t**，检验 **s** 中是否包含和 **t** 具有相同结构和节点值的子树。**s** 的一个子树包括 **s** 的一个节点和这个节点的所有子孙。**s** 也可以看做它自身的一棵子树。
+
+**示例 1:**
+给定的树 s:
+
+```
+     3
+    / \
+   4   5
+  / \
+ 1   2
+```
+
+给定的树 t：
+
+```
+   4 
+  / \
+ 1   2
+```
+
+返回 **true**，因为 t 与 s 的一个子树拥有相同的结构和节点值。
+
+**示例 2:**
+给定的树 s：
+
+```
+     3
+    / \
+   4   5
+  / \
+ 1   2
+    /
+   0
+```
+
+给定的树 t：
+
+```
+   4
+  / \
+ 1   2
+```
+
+返回 **false**。
+
+```java
+public class Solution {
+    public boolean isSubtree(TreeNode s, TreeNode t) {
+        if (s == null) return false;
+        if (isSame(s, t)) return true;
+        return isSubtree(s.left, t) || isSubtree(s.right, t);
+    }
+    
+    private boolean isSame(TreeNode s, TreeNode t) {
+        if (s == null && t == null) return true;
+        if (s == null || t == null) return false;
+        
+        if (s.val != t.val) return false;
+        
+        return isSame(s.left, t.left) && isSame(s.right, t.right);
+    }
+}
+```
+
+#### [226. 翻转二叉树](https://leetcode-cn.com/problems/invert-binary-tree/)
+
+翻转一棵二叉树。
+
+**示例：**
+
+输入：
+
+```
+     4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+```
+
+输出：
+
+```
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+
+```java
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        if(root == null) return root;
+        
+        TreeNode left = invertTree(root.left);
+        TreeNode right = invertTree(root.right);
+        
+        root.left = right;
+        root.right = left;
+        
+        return root;
+    }
+}
+```
+
+#### [124. 二叉树中的最大路径和](https://leetcode-cn.com/problems/binary-tree-maximum-path-sum/)
+
+给定一个**非空**二叉树，返回其最大路径和。
+
+本题中，路径被定义为一条从树中任意节点出发，达到任意节点的序列。该路径**至少包含一个**节点，且不一定经过根节点。
+
+**示例 1:**
+
+```
+输入: [1,2,3]
+
+       1
+      / \
+     2   3
+
+输出: 6
+```
+
+**示例 2:**
+
+```
+输入: [-10,9,20,null,null,15,7]
+
+   -10
+   / \
+  9  20
+    /  \
+   15   7
+
+输出: 42
+```
+
+```java
+class Solution {
+
+    private int max = Integer.MIN_VALUE;
+
+    public int maxPathSum(TreeNode root) {
+         /**
+        对于任意一个节点, 如果最大和路径包含该节点, 那么只可能是两种情况:
+        1. 其左右子树中所构成的和路径值较大的那个加上该节点的值后向父节点回溯构成最大路径
+        2. 左右子树都在最大路径中, 加上该节点的值构成了最终的最大路径
+        **/
+        helper(root);
+        return max;
+    }
+
+    private int helper(TreeNode node){
+        if(node == null) return 0;
+
+        // 如果子树路径和为负则应当置0表示最大路径不包含子树
+        int left = Math.max(helper(node.left), 0);
+        int right = Math.max(helper(node.right), 0);
+
+        // 判断在该节点包含左右子树的路径和是否大于当前最大路径和
+        max = Math.max(max, left + right + node.val);
+
+        return node.val + Math.max(left, right);
+    }
+
+}
+```
+
+#### [109. 有序链表转换二叉搜索树（双指针）](https://leetcode-cn.com/problems/convert-sorted-list-to-binary-search-tree/)
+
+给定一个单链表，其中的元素**按升序排序**，将其转换为高度平衡的二叉搜索树。
+
+本题中，一个高度平衡二叉树是指一个二叉树*每个节点* 的左右两个子树的高度差的绝对值不超过 1。
+
+**示例:**
+
+```
+给定的有序链表： [-10, -3, 0, 5, 9],
+
+一个可能的答案是：[0, -3, 9, -10, null, 5], 它可以表示下面这个高度平衡二叉搜索树：
+
+      0
+     / \
+   -3   9
+   /   /
+ -10  5
+```
+
+[答案以及时间空间复杂度分析+附有动图](https://leetcode-cn.com/problems/convert-sorted-list-to-binary-search-tree/solution/you-xu-lian-biao-zhuan-huan-er-cha-sou-suo-shu-by-/)
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public TreeNode sortedListToBST(ListNode head) {
+        if(head == null) return null;
+        ListNode slow = head, fast = head, pre_slow = null;
+        while(fast != null && fast.next != null){
+            pre_slow = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        TreeNode node = new TreeNode(slow.val);
+        if(pre_slow != null)   pre_slow.next = null;
+        if(slow != head)
+            node.left = sortedListToBST(head);
+        node.right = sortedListToBST(slow.next);
+
+        return node;    
+    }
+}
+```
+
+#### [面试题36. 二叉搜索树与双向链表](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-lcof/)
+
+输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的循环双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。
+
+ 
+
+为了让您更好地理解问题，以下面的二叉搜索树为例：
+
+ 
+
+![img](https://assets.leetcode.com/uploads/2018/10/12/bstdlloriginalbst.png)
+
+ 
+
+我们希望将这个二叉搜索树转化为双向循环链表。链表中的每个节点都有一个前驱和后继指针。对于双向循环链表，第一个节点的前驱是最后一个节点，最后一个节点的后继是第一个节点。
+
+下图展示了上面的二叉搜索树转化成的链表。“head” 表示指向链表中有最小元素的节点。
+
+ 
+
+![img](https://assets.leetcode.com/uploads/2018/10/12/bstdllreturndll.png)
+
+ 
+
+特别地，我们希望可以就地完成转换操作。当转化完成以后，树中节点的左指针需要指向前驱，树中节点的右指针需要指向后继。还需要返回链表中的第一个节点的指针。
+
+```java
+/*
+// Definition for a Node.
+class Node {
+    public int val;
+    public Node left;
+    public Node right;
+
+    public Node() {}
+
+    public Node(int _val) {
+        val = _val;
+    }
+
+    public Node(int _val,Node _left,Node _right) {
+        val = _val;
+        left = _left;
+        right = _right;
+    }
+};
+*/
+//中序遍历的思想
+class Solution {
+    public Node treeToDoublyList(Node root) {
+        if(root == null) return null;
+        Deque<Node> stack = new LinkedList<>();
+        Node curr = root;
+        Node head = null, tail = null, pre = null;
+        while(curr != null || !stack.isEmpty()){
+            if(curr != null){
+                stack.push(curr);
+                curr = curr.left;
+            }else{
+                curr = stack.pop();
+                //do
+                tail = curr;
+                if(pre == null){//处理头结点
+                    head = curr;
+                }else{//不是头结点
+                    pre.right = curr;
+                    curr.left = pre;
+                }
+                pre = curr;
+                //do end
+                curr = curr.right;
+            }
+        }
+        //头尾相连
+        tail.right = head;
+        head.left = tail;
+
+        return head;
+    }
+}
+```
+
+#### [230. 二叉搜索树中第K小的元素](https://leetcode-cn.com/problems/kth-smallest-element-in-a-bst/)
+
+给定一个二叉搜索树，编写一个函数 `kthSmallest` 来查找其中第 **k** 个最小的元素。
+
+**说明：**
+你可以假设 k 总是有效的，1 ≤ k ≤ 二叉搜索树元素个数。
+
+**示例 1:**
+
+```
+输入: root = [3,1,4,null,2], k = 1
+   3
+  / \
+ 1   4
+  \
+   2
+输出: 1
+```
+
+**示例 2:**
+
+```
+输入: root = [5,3,6,2,4,null,null,1], k = 3
+       5
+      / \
+     3   6
+    / \
+   2   4
+  /
+ 1
+输出: 3
+```
+
+**进阶：**
+如果二叉搜索树经常被修改（插入/删除操作）并且你需要频繁地查找第 k 小的值，你将如何优化 `kthSmallest` 函数？
+
+```java
+class Solution {
+    public int kthSmallest(TreeNode root, int k) {
+        int cnt = 0;
+        Deque<TreeNode> stack = new LinkedList<>();
+        TreeNode curr = root;
+
+        while(curr != null || !stack.isEmpty()){
+            if(curr != null){
+                stack.push(curr);
+                curr = curr.left;
+            }else{
+                curr = stack.pop();
+                if(++cnt == k)    return curr.val;
+                curr = curr.right;
+            }
+        }
+
+        return Integer.MIN_VALUE;
+    }
+}
+```
+
+#### [450. 删除二叉搜索树中的节点](https://leetcode-cn.com/problems/delete-node-in-a-bst/)
+
+给定一个二叉搜索树的根节点 **root** 和一个值 **key**，删除二叉搜索树中的 **key** 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。
+
+一般来说，删除节点可分为两个步骤：
+
+1. 首先找到需要删除的节点；
+2. 如果找到了，删除它。
+
+**说明：** 要求算法时间复杂度为 O(h)，h 为树的高度。
+
+**示例:**
+
+```
+root = [5,3,6,2,4,null,7]
+key = 3
+
+    5
+   / \
+  3   6
+ / \   \
+2   4   7
+
+给定需要删除的节点值是 3，所以我们首先找到 3 这个节点，然后删除它。
+
+一个正确的答案是 [5,4,6,2,null,null,7], 如下图所示。
+
+    5
+   / \
+  4   6
+ /     \
+2       7
+
+另一个正确答案是 [5,2,6,null,4,null,7]。
+
+    5
+   / \
+  2   6
+   \   \
+    4   7
+```
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public TreeNode deleteNode(TreeNode root, int key) {
+        if(root == null) return null;
+
+        if(root.val < key)
+            root.right = deleteNode(root.right, key);
+        else if(root.val > key)
+            root.left = deleteNode(root.left, key);
+        else{
+            if(root.left == null)   return root.right;
+            else if(root.right == null) return root.left;
+            else{
+                root.val = successor(root);
+                root.right = deleteNode(root.right, root.val);
+            }
+        }
+
+        return root;
+    }
+
+    private int successor(TreeNode node){
+        node = node.right;
+        while(node.left != null)    node = node.left;
+        return node.val;
+    }
+
+}
+```
+
+# 回溯法
+
+#### [494. 目标和](https://leetcode-cn.com/problems/target-sum/)
+
+给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 `+` 和 `-`。对于数组中的任意一个整数，你都可以从 `+` 或 `-`中选择一个符号添加在前面。
+
+返回可以使最终数组和为目标数 S 的所有添加符号的方法数。
+
+**示例 1:**
+
+```
+输入: nums: [1, 1, 1, 1, 1], S: 3
+输出: 5
+解释: 
+
+-1+1+1+1+1 = 3
++1-1+1+1+1 = 3
++1+1-1+1+1 = 3
++1+1+1-1+1 = 3
++1+1+1+1-1 = 3
+
+一共有5种方法让最终目标和为3。
+```
+
+**注意:**
+
+1. 数组非空，且长度不会超过20。
+2. 初始的数组的和不会超过1000。
+3. 保证返回的最终结果能被32位整数存下。
+
+```java
+class Solution {
+    
+    int count = 0;
+
+    public int findTargetSumWays(int[] nums, int S) {
+        if(nums == null || nums.length == 0) return 0;
+        
+        helper(nums, S, 0);
+        return count;
+    }
+
+    private void helper(int[] nums, int target, int index){
+        if(index == nums.length){
+            if(target == 0)
+                count++;
+            return;
+        }
+
+        helper(nums, target - nums[index], index + 1);
+        helper(nums, target + nums[index], index + 1);
+    }
+
+}
+```
+
+#### [78. 子集](https://leetcode-cn.com/problems/subsets/)
+
+给定一组**不含重复元素**的整数数组 *nums*，返回该数组所有可能的子集（幂集）。
+
+**说明：**解集不能包含重复的子集。
+
+**示例:**
+
+```
+输入: nums = [1,2,3]
+输出:
+[
+  [3],
+  [1],
+  [2],
+  [1,2,3],
+  [1,3],
+  [2,3],
+  [1,2],
+  []
+]
+```
+
+```java
+class Solution {
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+
+        backtrack(res, new ArrayList<>(), nums, 0);
+        return res;
+    }
+
+    private void backtrack(List<List<Integer>> res, List<Integer> tmp, int[] nums, int index){
+        res.add(new ArrayList<>(tmp));
+        for(int i = index; i < nums.length; i++){
+            tmp.add(nums[i]);
+            backtrack(res, tmp, nums, i + 1);
+            tmp.remove(tmp.size() - 1);
+        }
+    }
+}
+```
+
+```java
+//可以运用二进制来
+public class Solution2 {
+    public List<List<Integer>> subsets(int[] nums) {
+        int totalNum = 1<< nums.length;
+        List<List<Integer>> res = new ArrayList<>(totalNum);
+
+        //取值的可能性 000， 001， 010，...，111；如果集合有三个元素，就是8种
+        for (int i = 0; i < totalNum; i++) {
+            List<Integer> tempList = new ArrayList<>();
+            //前面给出的000、001这些数，和这些数的每一位去比较，有1就加
+            for (int j = 0; j < nums.length; j++) {
+                if ((i & 1<<j) != 0){//    “<< ” 大于 “！=” 大于 “&与”
+                    tempList.add(nums[j]);
+                }
+            }
+            res.add(tempList);
+        }
+        return res;
+    }
+}
+```
 
 
 
@@ -7525,6 +8107,56 @@ class Solution {
     }
 }
 ```
+
+# 数学方法
+
+#### [836. 矩形重叠](https://leetcode-cn.com/problems/rectangle-overlap/)
+
+矩形以列表 `[x1, y1, x2, y2]` 的形式表示，其中 `(x1, y1)` 为左下角的坐标，`(x2, y2)` 是右上角的坐标。
+
+如果相交的面积为正，则称两矩形重叠。需要明确的是，只在角或边接触的两个矩形不构成重叠。
+
+给出两个矩形，判断它们是否重叠并返回结果。
+
+**示例 1：**
+
+```
+输入：rec1 = [0,0,2,2], rec2 = [1,1,3,3]
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：rec1 = [0,0,1,1], rec2 = [1,0,2,1]
+输出：false
+```
+
+**说明：**
+
+1. 两个矩形 `rec1` 和 `rec2` 都以含有四个整数的列表的形式给出。
+2. 矩形中的所有坐标都处于 `-10^9` 和 `10^9` 之间。
+
+```java
+class Solution {
+    public boolean isRectangleOverlap(int[] rec1, int[] rec2) {
+        //直接根据坐标可以判断是否可能重叠，找边界条件
+        return !(rec1[2] <= rec2[0] ||      //rec1 on the left
+                 rec1[0] >= rec2[2] ||      //right
+                 rec1[1] >= rec2[3] ||      //up
+                 rec1[3] <= rec2[1]         //down
+                );
+    }
+}
+```
+
+
+
+
+
+
+
+
 
 # 多线程
 
