@@ -6039,20 +6039,55 @@ class Solution {
 }
 ```
 
+#### [131. 分割回文串](https://leetcode-cn.com/problems/palindrome-partitioning/)
 
+难度中等235收藏分享切换为英文关注反馈
 
+给定一个字符串 *s*，将 *s* 分割成一些子串，使每个子串都是回文串。
 
+返回 *s* 所有可能的分割方案。
 
+**示例:**
 
+```
+输入: "aab"
+输出:
+[
+  ["aa","b"],
+  ["a","a","b"]
+]
+```
 
+```java
+class Solution {
+    public List<List<String>> partition(String s) {
+        List<List<String>> list = new ArrayList<>();
+        backtrack(list, new ArrayList<>(), s, 0);
+        return list;
+    }
 
+    public void backtrack(List<List<String>> list, List<String> tempList, String s, int start){
+        if(start == s.length()){
+            list.add(new ArrayList<>(tempList));
+            return;
+        }
+            
+        for(int i = start; i < s.length(); i++){
+            if(isPalindrome(s, start, i)){
+                tempList.add(s.substring(start, i + 1));
+                backtrack(list, tempList, s, i + 1);
+                tempList.remove(tempList.size() - 1);//除去的是当前行
+            }
+        }
+    }
 
-
-
-
-
-
-
+    public boolean isPalindrome(String s, int low, int high){
+        while(low < high)
+            if(s.charAt(low++) != s.charAt(high--)) return false;
+        return true;
+    } 
+}
+```
 
 # 动态规划
 
@@ -6722,8 +6757,8 @@ public class Solution {
 }
 复杂度分析
 
-//时间复杂度：O(Sn)O(Sn)，其中 SS 是金额，nn 是面额数。我们一共需要计算 SS 个状态的答案，且每个状态 F(S)F(S) 由于上面的记忆化的措施只计算了一次，而计算一个状态的答案需要枚举 nn 个面额值，所以一共需要 O(Sn)O(Sn) 的时间复杂度。
-//空间复杂度：O(S)O(S)，我们需要额外开一个长为 SS 的数组来存储计算出来的答案 F(S)F(S) 。
+//时间复杂度：O(Sn)，其中 S 是金额，n 是面额数。我们一共需要计算 S 个状态的答案，且每个状态 F(S) 由于上面的记忆化的措施只计算了一次，而计算一个状态的答案需要枚举 n 个面额值，所以一共需要 O(Sn) 的时间复杂度。
+//空间复杂度：O(S)，我们需要额外开一个长为 S 的数组来存储计算出来的答案 F(S)。
 ```
 
 
@@ -6749,6 +6784,66 @@ public class Solution {
 ```
 
 
+
+
+
+#### [62. 不同路径](https://leetcode-cn.com/problems/unique-paths/)
+
+难度中等456收藏分享切换为英文关注反馈
+
+一个机器人位于一个 *m x n* 网格的左上角 （起始点在下图中标记为“Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。
+
+问总共有多少条不同的路径？
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/22/robot_maze.png)
+
+例如，上图是一个7 x 3 的网格。有多少可能的路径？
+
+ 
+
+**示例 1:**
+
+```
+输入: m = 3, n = 2
+输出: 3
+解释:
+从左上角开始，总共有 3 条路径可以到达右下角。
+1. 向右 -> 向右 -> 向下
+2. 向右 -> 向下 -> 向右
+3. 向下 -> 向右 -> 向右
+```
+
+**示例 2:**
+
+```
+输入: m = 7, n = 3
+输出: 28
+```
+
+ 
+
+**提示：**
+
+- `1 <= m, n <= 100`
+- 题目数据保证答案小于等于 `2 * 10 ^ 9`
+
+```java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int N = m + n -2;
+        int k = m - 1;
+        double res = 1;
+
+        for(int i = 1; i <= k; i++){
+            res = res * (N - k + i) / i;
+        }
+
+        return (int)res;
+    }
+}
+```
 
 
 
