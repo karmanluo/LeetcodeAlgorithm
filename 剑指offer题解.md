@@ -5778,6 +5778,271 @@ public class Solution2 {
 }
 ```
 
+#### [90. 子集 II](https://leetcode-cn.com/problems/subsets-ii/)
+
+给定一个可能包含重复元素的整数数组 ***nums***，返回该数组所有可能的子集（幂集）。
+
+**说明：**解集不能包含重复的子集。
+
+**示例:**
+
+```
+输入: [1,2,2]
+输出:
+[
+  [2],
+  [1],
+  [1,2,2],
+  [2,2],
+  [1,2],
+  []
+]
+```
+
+```java
+class Solution {
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(nums);
+        backtrack(res, new ArrayList<>(), nums, 0);
+        return res;
+    }
+
+    private void backtrack(List<List<Integer>> res, List<Integer> tmp, int[] nums, int index){
+        res.add(new ArrayList<>(tmp));
+        for(int i = index; i < nums.length; i++){
+            if(i > index && nums[i] == nums[i - 1])
+                continue;
+            tmp.add(nums[i]);
+            backtrack(res, tmp, nums, i + 1);
+            tmp.remove(tmp.size() - 1);
+        }
+    }
+
+}
+```
+
+#### [39. 组合总和](https://leetcode-cn.com/problems/combination-sum/)
+
+给定一个**无重复元素**的数组 `candidates` 和一个目标数 `target` ，找出 `candidates` 中所有可以使数字和为 `target` 的组合。
+
+`candidates` 中的数字可以无限制重复被选取。
+
+**说明：**
+
+- 所有数字（包括 `target`）都是正整数。
+- 解集不能包含重复的组合。 
+
+**示例 1:**
+
+```
+输入: candidates = [2,3,6,7], target = 7,
+所求解集为:
+[
+  [7],
+  [2,2,3]
+]
+```
+
+**示例 2:**
+
+```
+输入: candidates = [2,3,5], target = 8,
+所求解集为:
+[
+  [2,2,2,2],
+  [2,3,3],
+  [3,5]
+]
+```
+
+```java
+class Solution {
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(candidates);
+        backtrack(res, new ArrayList<>(), candidates, target, 0);
+        return res;
+    }
+
+    private void backtrack(List<List<Integer>> res, List<Integer> tmp, int[] nums, int target,  int index){
+        if(target < 0) return;
+        if(target == 0) 
+            res.add(new ArrayList<>(tmp));
+        
+        for(int i = index; i < nums.length; i++){
+            tmp.add(nums[i]);
+            backtrack(res, tmp, nums, target - nums[i], i);
+            tmp.remove(tmp.size() - 1);
+        }
+    }
+}
+```
+
+#### [40. 组合总和 II](https://leetcode-cn.com/problems/combination-sum-ii/)
+
+难度中等219收藏分享切换为英文关注反馈
+
+给定一个数组 `candidates` 和一个目标数 `target` ，找出 `candidates` 中所有可以使数字和为 `target` 的组合。
+
+`candidates` 中的每个数字在每个组合中只能使用一次。
+
+**说明：**
+
+- 所有数字（包括目标数）都是正整数。
+- 解集不能包含重复的组合。 
+
+**示例 1:**
+
+```
+输入: candidates = [10,1,2,7,6,1,5], target = 8,
+所求解集为:
+[
+  [1, 7],
+  [1, 2, 5],
+  [2, 6],
+  [1, 1, 6]
+]
+```
+
+**示例 2:**
+
+```
+输入: candidates = [2,5,2,1,2], target = 5,
+所求解集为:
+[
+  [1,2,2],
+  [5]
+]
+```
+
+```java
+class Solution {
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(candidates);
+        backtrack(res, new ArrayList<>(), candidates, target, 0);
+        return res;
+    }
+
+    private void backtrack(List<List<Integer>> res, List<Integer> tmp, int[] nums, int target,  int index){
+        if(target < 0) return;
+        if(target == 0) 
+            res.add(new ArrayList<>(tmp));
+        
+        for(int i = index; i < nums.length; i++){
+            //注意：这里是i > index 代表第一次可以进，第二次就不能进，画图方便理解
+            if(i > index && nums[i] == nums[i - 1])   continue;
+            tmp.add(nums[i]);
+            backtrack(res, tmp, nums, target - nums[i], i + 1);
+            tmp.remove(tmp.size() - 1);
+        }
+    }
+}
+```
+
+#### [46. 全排列](https://leetcode-cn.com/problems/permutations/)
+
+难度中等566收藏分享切换为英文关注反馈
+
+给定一个 **没有重复** 数字的序列，返回其所有可能的全排列。
+
+**示例:**
+
+```
+输入: [1,2,3]
+输出:
+[
+  [1,2,3],
+  [1,3,2],
+  [2,1,3],
+  [2,3,1],
+  [3,1,2],
+  [3,2,1]
+]
+```
+
+```java
+class Solution {
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        backtrack(res, new ArrayList<>(), nums);
+        return res;
+    }
+
+    private void backtrack(List<List<Integer>> res, List<Integer> tmp, int[] nums){
+        if(tmp.size() == nums.length){
+            res.add(new ArrayList<>(tmp));
+            return;
+        }
+            
+        for(int i = 0; i < nums.length; i++){
+            if(tmp.contains(nums[i]))   continue;
+            tmp.add(nums[i]);
+            backtrack(res, tmp, nums);
+            tmp.remove(tmp.size() - 1);
+        }
+    }
+}
+```
+
+#### [47. 全排列 II](https://leetcode-cn.com/problems/permutations-ii/)
+
+难度中等245收藏分享切换为英文关注反馈
+
+给定一个可包含重复数字的序列，返回所有不重复的全排列。
+
+**示例:**
+
+```
+输入: [1,1,2]
+输出:
+[
+  [1,1,2],
+  [1,2,1],
+  [2,1,1]
+]
+```
+
+[题解，最好画图理解](https://leetcode-cn.com/problems/permutations-ii/solution/hui-su-suan-fa-python-dai-ma-java-dai-ma-by-liwe-2/)
+
+```java
+class Solution {
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(nums);
+        backtrack(res, new ArrayList<>(), nums, new boolean[nums.length]);
+        return res;
+    }
+
+    private void backtrack(List<List<Integer>> res, List<Integer> tmp, int[] nums, boolean[] used){
+        if(tmp.size() == nums.length){
+            res.add(new ArrayList<>(tmp));
+            return;
+        }
+            
+        for(int i = 0; i < nums.length; i++){
+            //1.第i个元素已经使用，则跳过
+            if(used[i]) continue;
+            //2.第i个元素还未被使用,且遇到i和i-1的数字相等,且i-1已未被使用，此时递归树剪枝
+            if(i > 0 && nums[i] == nums[i - 1] && used[i - 1] == false) continue;
+            
+            //标记为使用
+            used[i] = true;
+            tmp.add(nums[i]);
+            backtrack(res, tmp, nums, used);
+            tmp.remove(tmp.size() - 1);
+            used[i] = false;
+            //使用完标记为false
+        }
+    }
+}
+```
+
+
+
+
+
 
 
 
