@@ -2,6 +2,75 @@
 [TOC]
 # 剑指offer题解
 
+#### [409. 构造最长回文串](https://leetcode-cn.com/problems/longest-palindrome/)
+
+难度简单146收藏分享切换为英文关注反馈
+
+给定一个包含大写字母和小写字母的字符串，找到通过这些字母**构造成**的最长的回文串。
+
+在构造过程中，请注意区分大小写。比如 `"Aa"` 不能当做一个回文字符串。
+
+**注意:**
+假设字符串的长度不会超过 1010。
+
+**示例 1:**
+
+```
+输入:
+"abccccdd"
+
+输出:
+7
+
+解释:
+我们可以构造的最长的回文串是"dccaccd", 它的长度是 7。
+```
+
+```java
+class Solution {
+    public int longestPalindrome(String s) {
+        if(s == null || s.length() == 0)    return 0;
+
+        Map<Character, Integer> map = new HashMap<>();
+
+        for(char c : s.toCharArray()){
+            map.put(c, map.getOrDefault(c , 0) + 1);
+        }
+
+        int result = 0;
+        for(char key : map.keySet()){
+            if(map.get(key) % 2 == 0){
+                result += map.get(key);
+            }else{
+                result += (map.get(key) / 2) * 2;
+            }
+        }
+
+        return result == s.length() ? result : result + 1;
+    }
+}
+```
+
+```java
+//最优解法
+class Solution {
+    public int longestPalindrome(String s) {
+        int res = 0;
+        int[] count = new int[128];
+        
+        for(char c : s.toCharArray())
+            count[c]++;
+        
+        for(int num : count)
+            res += num / 2 * 2;
+        
+        return  res == s.length() ? res : res + 1;
+    }
+}
+```
+
+
+
 #### [300. 最长上升子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
 
 给定一个无序的整数数组，找到其中最长上升子序列的长度。
