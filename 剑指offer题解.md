@@ -22,33 +22,28 @@
 **进阶:** 你能将算法的时间复杂度降低到 O(*n* log *n*) 吗?
 
 ```java
+//此算法时间复杂度nlogn
 class Solution {
     public int lengthOfLIS(int[] nums) {
-        /**
-        dp[i]: 所有长度为i+1的递增子序列中, 最小的那个序列尾数.
-        由定义知dp数组必然是一个递增数组, 可以用 maxL 来表示最长递增子序列的长度. 
-        对数组进行迭代, 依次判断每个数num将其插入dp数组相应的位置:
-        1. num > dp[maxL], 表示num比所有已知递增序列的尾数都大, 将num添加入dp
-           数组尾部, 并将最长递增序列长度maxL加1
-        2. dp[i-1] < num <= dp[i], 只更新相应的dp[i]
-        **/
-        int maxL = 0;
+        if(nums == null || nums.length == 0)    return 0;
+
         int[] dp = new int[nums.length];
-        for(int num : nums) {
-            // 二分法查找, 也可以调用库函数如binary_search
-            int lo = 0, hi = maxL;
-            while(lo < hi) {
-                int mid = lo+(hi-lo)/2;
-                if(dp[mid] < num)
-                    lo = mid+1;
-                elses
-                    hi = mid;
+        int res = 0;
+
+        for(int num : nums){
+            int lo = 0, hi = res;
+            while(lo < hi){
+                int mid = lo + ((hi - lo) >>> 1);
+                if(dp[mid] < num)	lo = mid + 1;
+                else	hi = mid;
             }
+            //lo代表插入点 
+            //res代表下一次新的有序元素进来应该插入的index位置，也代表当前集合里有几个元素
             dp[lo] = num;
-            if(lo == maxL)
-                maxL++;
+            if(res == lo)   res++;
         }
-        return maxL;
+
+        return res;
     }
 }
 ```
@@ -58,28 +53,21 @@ class Solution {
 //https://leetcode-cn.com/problems/longest-increasing-subsequence/comments/
 class Solution {
     public int lengthOfLIS(int[] nums) {
-        int len = nums.length;
-        if (len < 2) {
-            return len;
-        }
-        int[] dp = new int[len];
-        // 自己一定是一个子序列
+        if(nums == null || nums.length == 0)    return 0;
+
+        int[] dp = new int[nums.length];
         Arrays.fill(dp, 1);
-        for (int i = 1; i < len; i++) {
-            // 看以前的，比它小的，说明可以接在后面形成一个更长的子序列
-            // int curMax = Integer.MIN_VALUE; 不能这样写，万一前面没有比自己小的，
-            // 这个值就得不到更新
-            for (int j = 0; j < i; j++) {
-                if (nums[j] < nums[i]) {
+
+        int res = 0;
+        for(int i = 0; i < nums.length; i++){
+            for(int j = 0; j < i; j++){
+                if(nums[j] < nums[i]){
                     dp[i] = Math.max(dp[j] + 1, dp[i]);
                 }
             }
+            res = Math.max(dp[i], res);
         }
 
-        int res = dp[0];
-        for (int i = 0; i < len; i++) {
-            res = Math.max(res, dp[i]);
-        }
         return res;
     }
 }
@@ -6089,6 +6077,138 @@ class Solution {
 }
 ```
 
+#### [79. 单词搜索](https://leetcode-cn.com/problems/word-search/)
+
+难度中等344收藏分享切换为英文关注反馈
+
+给定一个二维网格和一个单词，找出该单词是否存在于网格中。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+**示例:**
+
+```
+board =
+[
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+
+给定 word = "ABCCED", 返回 true
+给定 word = "SEE", 返回 true
+给定 word = "ABCB", 返回 false
+```
+
+```java
+public class Solution {
+    public boolean exist(char[][] board, String word) {
+        int row = board.length;
+        int col = board[0].length;
+        boolean[][] visited = new boolean[row][col];
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (existRecursive(board, word, i, j, 0, visited)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean existRecursive(char[][] board, String word,int row, int col, int index, boolean[][] visited) {
+        if (row < 0 || row >= board.length || col < 0 || col >= board[0].length)
+            return false;
+        if (visited[row][col] || word.charAt(index) != board[row][col])
+            return false;
+        if (index == word.length() - 1)
+            return true;
+        visited[row][col] = true;
+
+        boolean up = existRecursive(board, word, row + 1, col, index + 1, visited);
+        boolean down = existRecursive(board, word, row - 1, col, index + 1, visited);
+        boolean left = existRecursive(board, word, row, col - 1, index + 1, visited);
+        boolean rigth = existRecursive(board, word, row, col + 1, index + 1, visited);
+        if (up || down || left || rigth){
+            return true;
+        }
+        visited[row][col] = false;
+        return false;
+    }
+}
+```
+
+#### [面试题13. 机器人的运动范围](https://leetcode-cn.com/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/)
+
+难度中等18收藏分享切换为英文关注反馈
+
+地上有一个m行n列的方格，从坐标 `[0,0]` 到坐标 `[m-1,n-1]` 。一个机器人从坐标 `[0, 0] `的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+
+ 
+
+**示例 1：**
+
+```
+输入：m = 2, n = 3, k = 1
+输出：3
+```
+
+**示例 1：**
+
+```
+输入：m = 3, n = 1, k = 0
+输出：1
+```
+
+**提示：**
+
+- `1 <= n,m <= 100`
+- `0 <= k <= 20`
+
+```java
+package 剑指offer.N13机器人的运动范围;
+
+public class GoodSolution {
+    //带有递归的DFS,不用借助栈的数据结构来完成，，，，记住 Stack 和 DFS 的关联，从本题目中多总结
+    int count;
+    boolean[][] visited;
+
+    public int movingCount(int m, int n, int k) {
+        if (m <= 0 || n <= 0 || k < 0) return 0;
+        visited = new boolean[m][n];
+        dfs(0, 0, m, n, k);
+        return count;
+    }
+
+    public void dfs(int i, int j, int m, int n, int k) {
+        if (i < 0 || j < 0 || i >= m || j >= n || visited[i][j] == true) return;
+
+        if (!canK(i, j, k)) return;
+        visited[i][j] = true;
+        count++;
+        dfs(i + 1, j, m, n, k);
+        dfs(i - 1, j, m, n, k);
+        dfs(i, j + 1, m, n, k);
+        dfs(i, j - 1, m, n, k);
+    }
+
+    public boolean canK(int i, int j, int k) {
+        int sum = 0;
+        while (i != 0) {
+            sum += i % 10;
+            i /= 10;
+        }
+        while (j != 0) {
+            sum += j % 10;
+            j /= 10;
+        }
+        return sum <= k;
+    }
+}
+```
+
+
+
 # 动态规划
 
 [labuladong](https://leetcode-cn.com/u/labuladong/)发布于 9 个月前33.6k动态规划递归记忆化C++
@@ -6906,11 +7026,444 @@ class Solution {
 }
 ```
 
+#### [64. 最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
+
+难度中等404收藏分享切换为英文关注反馈
+
+给定一个包含非负整数的 *m* x *n* 网格，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+
+**说明：**每次只能向下或者向右移动一步。
+
+**示例:**
+
+```
+输入:
+[
+  [1,3,1],
+  [1,5,1],
+  [4,2,1]
+]
+输出: 7
+解释: 因为路径 1→3→1→1→1 的总和最小。
+```
+
+```java
+class Solution {
+    public int minPathSum(int[][] grid) {
+        if(grid == null || grid.length == 0)    return 0;
+
+        int rows = grid.length, cols = grid[0].length;
+        int[][] dp = new int[rows][cols];
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < cols; j++){
+                if(i == 0 && j == 0)
+                    dp[i][j] = grid[i][j];
+                else{
+                    if(i == 0)  dp[i][j] = dp[i][j - 1] + grid[i][j];
+                    else if(j == 0) dp[i][j] = dp[i - 1][j] + grid[i][j];    
+                    else{
+                        dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+                    }
+                }
+            }
+        }
+
+        return dp[rows - 1][cols - 1];
+    }
+}
+//思路2
+//在原来的数组上进行迭代，这样会改变原来数组的值
+```
 
 
 
+#### [120. 三角形最小路径和](https://leetcode-cn.com/problems/triangle/)
 
+难度中等335收藏分享切换为英文关注反馈
 
+给定一个三角形，找出自顶向下的最小路径和。每一步只能移动到下一行中相邻的结点上。
+
+例如，给定三角形：
+
+```
+[
+     [2],
+    [3,4],
+   [6,5,7],
+  [4,1,8,3]
+]
+```
+
+自顶向下的最小路径和为 `11`（即，**2** + **3** + **5** + **1** = 11）。
+
+**说明：**
+
+如果你可以只使用 *O*(*n*) 的额外空间（*n* 为三角形的总行数）来解决这个问题，那么你的算法会很加分。
+
+```java
+class Solution {
+    public int minimumTotal(List<List<Integer>> triangle) {
+            if (triangle == null || triangle.size() == 0) {
+            return 0;
+        }
+
+        int row = triangle.size();
+        int column = triangle.get(row - 1).size();
+
+        int[][] dp = new int[row][column];
+        dp[0][0] = triangle.get(0).get(0);
+        int res = Integer.MAX_VALUE;
+
+        for(int i = 1; i < row; i++){
+            for(int j = 0; j <= i; j ++){
+                if(j == 0)  dp[i][j] = dp[i - 1][j] + triangle.get(i).get(j);
+                else if(j == i) dp[i][j] = dp[i - 1][j - 1] + triangle.get(i).get(j);
+                else{
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j]) + triangle.get(i).get(j);
+                }
+            }
+        }
+
+        for(int j = 0; j < row; j++){
+            res = Math.min(dp[column - 1][j], res);
+        }
+
+        return res;
+    }
+}
+```
+
+```java
+//dp[]一维数组的方法
+class Solution {
+    public int minimumTotal(List<List<Integer>> triangle) {
+            if (triangle == null || triangle.size() == 0) {
+            return 0;
+        }
+
+        int row = triangle.size();
+        int column = triangle.get(row - 1).size();
+
+        int[] dp = new int[column];
+        for(int i = 0; i < column; i++){
+            dp[i] = triangle.get(row - 1).get(i);
+        }
+
+        for(int i = row - 2; i >= 0; i--){
+            for(int j = 0; j <= i; j ++){
+                dp[j] = Math.min(dp[j], dp[j + 1]) + triangle.get(i).get(j);
+            }
+        }
+
+        return dp[0];
+    }
+}
+```
+
+#### [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber/)
+
+难度简单674收藏分享切换为英文关注反馈
+
+你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，**如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警**。
+
+给定一个代表每个房屋存放金额的非负整数数组，计算你**在不触动警报装置的情况下，**能够偷窃到的最高金额。
+
+**示例 1:**
+
+```
+输入: [1,2,3,1]
+输出: 4
+解释: 偷窃 1 号房屋 (金额 = 1) ，然后偷窃 3 号房屋 (金额 = 3)。
+     偷窃到的最高金额 = 1 + 3 = 4 。
+```
+
+**示例 2:**
+
+```
+输入: [2,7,9,3,1]
+输出: 12
+解释: 偷窃 1 号房屋 (金额 = 2), 偷窃 3 号房屋 (金额 = 9)，接着偷窃 5 号房屋 (金额 = 1)。
+     偷窃到的最高金额 = 2 + 9 + 1 = 12 。
+```
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        if(nums == null || nums.length == 0)    return 0;
+
+        int n = nums.length;
+        int[] dp = new int[n + 2];
+        for(int i = n - 1; i >= 0; i--){
+            dp[i] = Math.max(dp[i + 1], dp[i + 2] + nums[i]);
+        }
+
+        return dp[0];
+    }
+}
+```
+
+#### [213. 打家劫舍 II](https://leetcode-cn.com/problems/house-robber-ii/)
+
+难度中等208收藏分享切换为英文关注反馈
+
+你是一个专业的小偷，计划偷窃沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都**围成一圈，**这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，**如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警**。
+
+给定一个代表每个房屋存放金额的非负整数数组，计算你**在不触动警报装置的情况下，**能够偷窃到的最高金额。
+
+**示例 1:**
+
+```
+输入: [2,3,2]
+输出: 3
+解释: 你不能先偷窃 1 号房屋（金额 = 2），然后偷窃 3 号房屋（金额 = 2）, 因为他们是相邻的。
+```
+
+**示例 2:**
+
+```
+输入: [1,2,3,1]
+输出: 4
+解释: 你可以先偷窃 1 号房屋（金额 = 1），然后偷窃 3 号房屋（金额 = 3）。
+     偷窃到的最高金额 = 1 + 3 = 4 。
+```
+
+```java
+//其实就是把环拆成两个队列，一个是从0到n-1，另一个是从1到n，然后返回两个结果最大的。
+class Solution {
+    public int rob(int[] nums) {
+        if(nums == null || nums.length == 0)    return 0;
+        //此边界条件需要注意
+        if(nums.length == 1)    return nums[0];
+
+        int n = nums.length;
+        int[] dp = new int[n + 2];
+        for(int i = n - 1; i >= 1; i--){
+            dp[i] = Math.max(dp[i + 1], dp[i + 2] + nums[i]);
+        }
+        int res = dp[1];
+
+        dp[n - 1] = 0;
+        for(int i = n - 2; i >= 0; i--){
+            dp[i] = Math.max(dp[i + 1], dp[i + 2] + nums[i]);
+        }
+
+        return Math.max(res, dp[0]);
+    }
+}
+```
+
+#### [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/)
+
+难度中等335收藏分享切换为英文关注反馈
+
+给定正整数 *n*，找到若干个完全平方数（比如 `1, 4, 9, 16, ...`）使得它们的和等于 *n*。你需要让组成和的完全平方数的个数最少。
+
+**示例 1:**
+
+```
+输入: n = 12
+输出: 3 
+解释: 12 = 4 + 4 + 4.
+```
+
+**示例 2:**
+
+```
+输入: n = 13
+输出: 2
+解释: 13 = 4 + 9.
+```
+
+```java
+dp[0] = 0 
+dp[1] = dp[0]+1 = 1
+dp[2] = dp[1]+1 = 2
+dp[3] = dp[2]+1 = 3
+dp[4] = Min{ dp[4-1*1]+1, dp[4-2*2]+1 } 
+      = Min{ dp[3]+1, dp[0]+1 } 
+      = 1				
+dp[5] = Min{ dp[5-1*1]+1, dp[5-2*2]+1 } 
+      = Min{ dp[4]+1, dp[1]+1 } 
+      = 2
+						.
+						.
+						.
+dp[13] = Min{ dp[13-1*1]+1, dp[13-2*2]+1, dp[13-3*3]+1 } 
+       = Min{ dp[12]+1, dp[9]+1, dp[4]+1 } 
+       = 2
+						.
+						.
+						.
+dp[n] = Min{ dp[n - i*i] + 1 },  n - i*i >=0 && i >= 1
+```
+
+```java
+class Solution {
+    public int numSquares(int n) {
+        int[] dp = new int[n + 1];
+
+        dp[0] = 0;
+        for(int i = 1; i <= n; i++){
+            dp[i] = i;
+            for(int j = 1; j * j <= i; j++){
+                dp[i] = Math.min(dp[i], dp[i - j * j] + 1);
+            }
+        }
+
+        return dp[n];
+    }
+}
+```
+
+#### [221. 最大正方形](https://leetcode-cn.com/problems/maximal-square/)
+
+在一个由 0 和 1 组成的二维矩阵内，找到只包含 1 的最大正方形，并返回其面积。
+
+**示例:**
+
+```
+输入: 
+
+1 0 1 0 0
+1 0 1 1 1
+1 1 1 1 1
+1 0 0 1 0
+
+输出: 4
+```
+
+**理解 三者取最小+1**
+
+**理解 min(上, 左, 左上) + 1**
+
+如题，动态规划方法的题解中，都会涉及到下列形式的代码：
+
+```java
+if (grid(i, j) == 1) {
+    dp(i, j) = min(dp(i-1, j), dp(i, j-1), dp(i-1, j-1)) + 1;
+}
+```
+
+翻译成中文
+
+> 若某格子值为 `1` ，则以此为**右下角**的正方形的、最大边长为：上面的正方形、左面的正方形或左上的正方形中，最小的那个，再加上此格。
+
+先来阐述简单共识
+
+- 若形成正方形（非单 `1`），以当前为右下角的视角看，则需要：当前格、上、左、左上都是 `1`
+- 可以换个角度：当前格、上、左、左上都不能受 `0` 的限制，才能成为正方形
+
+![image.png](https://pic.leetcode-cn.com/8c4bf78cf6396c40291e40c25d34ef56bd524313c2aa863f3a20c1f004f32ab0-image.png)
+
+上面详解了 三者取最小 的含义：
+
+- 图1：受限于左上的0
+- 图2：受限于上边的0
+- 图3：受限于左边的0
+- 数字表示：以此为正方形右下角的最大边长
+- 黄色表示：格子 `?` 作为右下角的正方形区域
+
+就像 **[木桶的短板理论](https://baike.baidu.com/item/短板理论)** 那样——附近的最小边长，才与 `?` 的最长边长有关。
+此时已可得到递推公式 `if (grid[i][j] == 1) f[i][j] = min(f[i-1][j-1], f[i-1][j], f[i][j-1]) + 1;`
+
+```java
+class Solution {
+    public int maximalSquare(char[][] matrix) {
+        if(matrix == null || matrix.length == 0)    return 0;
+
+        int row = matrix.length, col = matrix[0].length;
+        
+        //相当于预处理，第一行，第一列为0
+        int[][] dp = new int[row + 1][col + 1];
+        
+        int maxlen = 0;
+        for(int i = 1; i <= row; i++){
+            for(int j = 1; j <= col; j++){
+                if(matrix[i - 1][j - 1] == '1'){
+                    dp[i][j] = Math.min(Math.min(dp[i - 1][j - 1], dp[i - 1][j])
+                                            , dp[i][j - 1]) + 1;
+                    maxlen = Math.max(maxlen, dp[i][j]);
+                }
+            }
+        }
+
+        return maxlen * maxlen;
+    }
+}
+```
+
+#### [300. 最长上升子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
+
+难度中等559收藏分享切换为英文关注反馈
+
+给定一个无序的整数数组，找到其中最长上升子序列的长度。
+
+**示例:**
+
+```
+输入: [10,9,2,5,3,7,101,18]
+输出: 4 
+解释: 最长的上升子序列是 [2,3,7,101]，它的长度是 4。
+```
+
+**说明:**
+
+- 可能会有多种最长上升子序列的组合，你只需要输出对应的长度即可。
+- 你算法的时间复杂度应该为 O(*n2*) 。
+
+**进阶:** 你能将算法的时间复杂度降低到 O(*n* log *n*) 吗?
+
+```java
+//dp思路
+//https://leetcode-cn.com/problems/longest-increasing-subsequence/comments/
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        if(nums == null || nums.length == 0)    return 0;
+
+        int[] dp = new int[nums.length];
+        Arrays.fill(dp, 1);
+
+        int res = 0;
+        for(int i = 0; i < nums.length; i++){
+            for(int j = 0; j < i; j++){
+                if(nums[j] < nums[i]){
+                    dp[i] = Math.max(dp[j] + 1, dp[i]);
+                }
+            }
+            res = Math.max(dp[i], res);
+        }
+
+        return res;
+    }
+}
+```
+
+```java
+//此算法时间复杂度nlogn
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        if(nums == null || nums.length == 0)    return 0;
+
+        int[] dp = new int[nums.length];
+        int res = 0;
+
+        for(int num : nums){
+            int lo = 0, hi = res;
+            while(lo < hi){
+                int mid = lo + ((hi - lo) >>> 1);
+                if(dp[mid] < num)	lo = mid + 1;
+                else	hi = mid;
+            }
+            //lo代表插入点 
+            //res代表下一次新的有序元素进来应该插入的index位置，也代表当前集合里有几个元素
+            dp[lo] = num;
+            if(res == lo)   res++;
+        }
+
+        return res;
+    }
+}
+```
 
 
 
