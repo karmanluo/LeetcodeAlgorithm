@@ -7675,7 +7675,66 @@ public class Solution {
 }
 ```
 
+#### [368. 最大整除子集（类似于最大上升子串）](https://leetcode-cn.com/problems/largest-divisible-subset/)
 
+给出一个由**无重复的**正整数组成的集合，找出其中最大的整除子集，子集中任意一对 (Si，Sj) 都要满足：Si % Sj = 0 或 Sj % Si = 0。
+
+如果有多个目标子集，返回其中任何一个均可。
+
+ 
+
+**示例 1:**
+
+```
+输入: [1,2,3]
+输出: [1,2] (当然, [1,3] 也正确)
+```
+
+**示例 2:**
+
+```
+输入: [1,2,4,8]
+输出: [1,2,4,8]
+```
+
+```java
+//dp 类似于最大的上升子串
+class Solution {
+    public List<Integer> largestDivisibleSubset(int[] nums) {
+        int n = nums.length;
+        int[] count = new int[n]; //dp核心,表示第i个位置有几个
+        int[] pre = new int[n]; //在第i个位置,记住上一个num的位置
+        Arrays.sort(nums);
+        Arrays.fill(count, 1);//初始化每个位置的数量
+        Arrays.fill(pre, -1);//初始化每个位置的上一个元素
+
+        int max = 0, index = -1; // index存最大值count 的 index
+        for(int i = 0; i < n; i++){
+            for(int j = i - 1; j >= 0; j--){
+                if(nums[i] % nums[j] == 0){
+                    if(count[j] + 1 > count[i]){
+                        count[i] = count[j] + 1;
+                        pre[i] = j;
+                    }
+                }  
+            }
+            
+            if(count[i] > max){
+                max = count[i];
+                index = i;
+            }
+        }
+
+        List<Integer> res = new ArrayList<>();
+        while(index != -1){
+            res.add(nums[index]);
+            index = pre[index];
+        }
+
+        return res;
+    }
+}
+```
 
 
 
