@@ -1714,19 +1714,7 @@ public class Solution2 {
 
 ```
 输入: [3,2,3,1,2,4,5,5,6] 和 k = 4
-输出: 4
-```
-
-
-
-```java
-//调用函数
-public class Solution {
-    public int findKthLargest(int[] nums, int k) {
-        Arrays.sort(nums);
-        return nums[nums.length - k];
-    }
-}
+输出:4
 ```
 
 ```java
@@ -1745,8 +1733,10 @@ public class Solution2 {
 }
 ```
 
+
+
 ```java
-//快速排序
+//快速排序，性能最好，时间复杂度为o(n),因为不用每次搜索完，是一个类似二分的形式
 class Solution3 {
     public int findKthLargest(int[] nums, int k) {
         int size = nums.length;
@@ -1799,9 +1789,94 @@ class Solution3 {
 }
 ```
 
+#### [面试题40. 最小的k个数](https://leetcode-cn.com/problems/zui-xiao-de-kge-shu-lcof/)
 
+难度简单18收藏分享切换为英文关注反馈
 
+输入整数数组 `arr` ，找出其中最小的 `k` 个数。例如，输入4、5、1、6、2、7、3、8这8个数字，则最小的4个数字是1、2、3、4。
 
+ 
+
+**示例 1：**
+
+```
+输入：arr = [3,2,1], k = 2
+输出：[1,2] 或者 [2,1]
+```
+
+**示例 2：**
+
+```
+输入：arr = [0,1,2,1], k = 1
+输出：[0]
+```
+
+ 
+
+**限制：**
+
+- `0 <= k <= arr.length <= 10000`
+- `0 <= arr[i] <= 10000`
+
+```java
+class Solution {
+    public int[] getLeastNumbers(int[] arr, int k) {
+        if(arr == null || k == 0 || arr.length == 0)  return new int[0];
+
+        return quickSelect(arr, 0, arr.length - 1, k - 1);
+    }
+
+    private int[] quickSelect(int[] arr, int left, int right, int desPos){
+        int pivot_index = partition(arr, left, right);
+
+        if(desPos == pivot_index)
+            return Arrays.copyOf(arr, pivot_index + 1);
+        
+        return pivot_index > desPos ? quickSelect(arr, left, pivot_index - 1, desPos)
+                                    :   quickSelect(arr, pivot_index + 1, right, desPos);
+    }
+
+    private int partition(int[] arr, int start, int end){
+        int pivot_index = start;
+
+        for(int i = start; i < end; i++){
+            if(arr[i] < arr[end]){
+                int tmp = arr[i];
+                arr[i] = arr[pivot_index];
+                arr[pivot_index] = tmp;
+                pivot_index++;
+            }
+        }
+
+        int tmp = arr[end];
+        arr[end] = arr[pivot_index];
+        arr[pivot_index] = tmp;
+
+        return pivot_index;
+    }
+}
+```
+
+```java
+//klogk 时间复杂度更高
+public class Solution {
+    public int[] getLeastNumbers(int[] arr, int k) {
+        PriorityQueue<Integer> priorityQueue = new PriorityQueue<>((v1, v2)->(v2 - v1));
+
+        for (int val : arr) {
+            priorityQueue.offer(val);
+            if (priorityQueue.size() > k)
+                priorityQueue.poll();
+        }
+        
+        int[] res = new int[k];
+        for(int i = 0; i < k; i++)
+            res[i] =  priorityQueue.poll();
+        
+        return res;
+    }
+}
+```
 
 
 
@@ -6944,7 +7019,7 @@ public class Solution {
         return count[rem];
     }
 }
-复杂度分析
+// 复杂度分析
 
 //时间复杂度：O(Sn)，其中 S 是金额，n 是面额数。我们一共需要计算 S 个状态的答案，且每个状态 F(S) 由于上面的记忆化的措施只计算了一次，而计算一个状态的答案需要枚举 n 个面额值，所以一共需要 O(Sn) 的时间复杂度。
 //空间复杂度：O(S)，我们需要额外开一个长为 S 的数组来存储计算出来的答案 F(S)。
@@ -6958,6 +7033,8 @@ public class Solution {
     public int coinChange(int[] coins, int amount) {
         int max = amount + 1;
         int[] dp = new int[amount + 1];
+
+        //方便排除没有合适金钱匹配的情况
         Arrays.fill(dp, max);
         dp[0] = 0;
         for (int i = 1; i <= amount; i++) {
@@ -7533,6 +7610,176 @@ class Solution {
     }
 }
 ```
+
+#### [115. 不同的子序列](https://leetcode-cn.com/problems/distinct-subsequences/)
+
+难度困难150收藏分享切换为英文关注反馈
+
+给定一个字符串 **S** 和一个字符串 **T**，计算在 **S** 的子序列中 **T** 出现的个数。
+
+一个字符串的一个子序列是指，通过删除一些（也可以不删除）字符且不干扰剩余字符相对位置所组成的新字符串。（例如，`"ACE"` 是 `"ABCDE"` 的一个子序列，而 `"AEC"` 不是）
+
+**示例 1:**
+
+```
+输入: S = "rabbbit", T = "rabbit"
+输出: 3
+解释:
+
+如下图所示, 有 3 种可以从 S 中得到 "rabbit" 的方案。
+(上箭头符号 ^ 表示选取的字母)
+
+rabbbit
+^^^^ ^^
+rabbbit
+^^ ^^^^
+rabbbit
+^^^ ^^^
+```
+
+**示例 2:**
+
+```
+输入: S = "babgbag", T = "bag"
+输出: 5
+解释:
+
+如下图所示, 有 5 种可以从 S 中得到 "bag" 的方案。 
+(上箭头符号 ^ 表示选取的字母)
+
+babgbag
+^^ ^
+babgbag
+^^    ^
+babgbag
+^    ^^
+babgbag
+  ^  ^^
+babgbag
+    ^^^
+```
+
+动态规划
+
+`dp[i][j]` 代表 `T` 前 `i` 字符串可以由 `S` `j` 字符串组成最多个数.
+
+所以动态方程:
+
+当 `S[j] == T[i]` , `dp[i][j] = dp[i-1][j-1] + dp[i][j-1]`;
+
+当 `S[j] != T[i]` , `dp[i][j] = dp[i][j-1]`
+
+举个例子,如示例的
+
+![1561970400084.png](https://pic.leetcode-cn.com/a3a1d30700be05cad2e60666f20ab261e7a04b85ed88b854dd1d8cb484909983-1561970400084.png)
+
+对于第一行, `T` 为空,因为空集是所有字符串子集, 所以我们第一行都是 `1`
+
+对于第一列, `S` 为空,这样组成 `T` 个数当然为 0` 了
+
+```java
+class Solution {
+    //dp[i][j]表示目标串t的前i个元素，与字符串s在前j个位置为止，匹配到了几个可能性的组合
+    public int numDistinct(String s, String t) {
+        int S = s.length(), T = t.length();
+        int[][] dp = new int[S + 1][T + 1];
+        
+        for(int i = 0; i < S; i ++){
+            dp[i][0] = 1;
+        }
+        for(int i = 1; i <= S; i ++){
+            for(int j = 1; j <= T; j ++){
+                if(s.charAt(i - 1) == t.charAt(j - 1)){
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
+                }else{
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        
+        return dp[S][T];
+    }
+}
+```
+
+#### [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+
+难度中等1885
+
+给定一个字符串 `s`，找到 `s` 中最长的回文子串。你可以假设 `s` 的最大长度为 1000。
+
+**示例 1：**
+
+```
+输入: "babad"
+输出: "bab"
+注意: "aba" 也是一个有效答案。
+```
+
+**示例 2：**
+
+```
+输入: "cbbd"
+输出: "bb"
+```
+
+//暴力法、dp、中心扩展算法
+
+```java
+//dp 算法
+class Solution {
+    public String longestPalindrome(String s) {
+        String res = "";
+        int n = s.length();
+        boolean[][] dp = new boolean[n][n];
+
+        for(int i = n - 1; i >= 0; i--){
+            for(int j = i; j < n; j++){
+                dp[i][j] = s.charAt(i) == s.charAt(j) && (j - i < 2 || dp[i + 1][j - 1]);
+                if(dp[i][j] && j - i + 1 > res.length()){
+                    res = s.substring(i, j + 1);
+                }
+            }
+        }
+
+        return res;
+    }
+}
+```
+
+```java
+class Solution {
+    public String longestPalindrome(String s) {
+        if (s == null || s.length() < 1) return "";
+        int start = 0, end = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int len1 = expandAroundCenter(s, i, i);
+            int len2 = expandAroundCenter(s, i, i + 1);
+            int len = Math.max(len1, len2);
+            if (len > end - start) {
+                start = i - (len - 1) / 2;
+                end = i + len / 2;
+            }
+        }
+        return s.substring(start, end + 1);
+    }
+
+    private int expandAroundCenter(String s, int left, int right) {
+        int L = left, R = right;
+        while (L >= 0 && R < s.length() && s.charAt(L) == s.charAt(R)) {
+            L--;
+            R++;
+        }
+        return R - L - 1;
+    }
+}
+```
+
+
+
+
+
+
 
 
 
