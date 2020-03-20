@@ -2,6 +2,93 @@
 [TOC]
 # 剑指offer题解
 
+#### [329. 矩阵中的最长递增路径(DFS)](https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix/)
+
+难度困难132收藏分享切换为英文关注反馈
+
+给定一个整数矩阵，找出最长递增路径的长度。
+
+对于每个单元格，你可以往上，下，左，右四个方向移动。 你不能在对角线方向上移动或移动到边界外（即不允许环绕）。
+
+**示例 1:**
+
+```
+输入: nums = 
+[
+  [9,9,4],
+  [6,6,8],
+  [2,1,1]
+] 
+输出: 4 
+解释: 最长递增路径为 [1, 2, 6, 9]。
+```
+
+**示例 2:**
+
+```
+输入: nums = 
+[
+  [3,4,5],
+  [3,2,6],
+  [2,2,1]
+] 
+输出: 4 
+解释: 最长递增路径是 [3, 4, 5, 6]。注意不允许在对角线方向上移动。
+```
+
+```java
+public class Solution {
+
+	public int longestIncreasingPath(int[][] matrix) {
+
+		if (matrix == null || matrix.length < 1 || matrix[0].length < 1)
+			return 0;
+
+		int max = 0, n = matrix.length, m = matrix[0].length;
+
+		// create a cache matrix
+		int[][] cache = new int[n][m];//cache存在i,j开始的矩阵最长递增路径
+
+		// dfs search on every element in matrix
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
+				max = Math.max(dfs(matrix, Integer.MIN_VALUE, i, j, cache), max);
+			}
+		}
+		return max;
+	}
+
+	int dfs(int[][] matrix, int min, int i, int j, int[][] cache) {
+
+		// check boundary limits
+		if (i < 0 || j < 0 || i >= matrix.length || j >= matrix[0].length)
+			return 0;
+
+		// check min condition
+		if (matrix[i][j] <= min)
+			return 0;
+
+		// check into cache
+		if (cache[i][j] != 0)
+			return cache[i][j];
+
+		// update min
+		min = matrix[i][j];
+
+		// run dfs in all four directions
+		int a = dfs(matrix, min, i - 1, j, cache) + 1;
+		int b = dfs(matrix, min, i + 1, j, cache) + 1;
+		int c = dfs(matrix, min, i, j - 1, cache) + 1;
+		int d = dfs(matrix, min, i, j + 1, cache) + 1;
+
+		// find max and update cache
+		return  cache[i][j] = Math.max(a, Math.max(b, Math.max(c, d)));
+	}
+}
+```
+
+
+
 #### [409. 构造最长回文串](https://leetcode-cn.com/problems/longest-palindrome/)
 
 难度简单146收藏分享切换为英文关注反馈
