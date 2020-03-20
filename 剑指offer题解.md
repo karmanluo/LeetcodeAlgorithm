@@ -7611,6 +7611,74 @@ class Solution {
 }
 ```
 
+#### [354. 俄罗斯套娃信封问题(最长上升子序问题延伸)](https://leetcode-cn.com/problems/russian-doll-envelopes/)
+
+难度困难108收藏分享切换为英文关注反馈
+
+给定一些标记了宽度和高度的信封，宽度和高度以整数对形式 `(w, h)` 出现。当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。
+
+请计算最多能有多少个信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。
+
+**说明:**
+不允许旋转信封。
+
+**示例:**
+
+```
+输入: envelopes = [[5,4],[6,4],[6,7],[2,3]]
+输出: 3 
+解释: 最多信封的个数为 3, 组合为: [2,3] => [5,4] => [6,7]。
+```
+
+```java
+public class Solution {
+    public int maxEnvelopes(int[][] envelopes) {
+        Arrays.sort(envelopes, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] a, int[] b) {
+                if (a[0] == b[0]){
+                    return b[1] - a[1];
+                }else {
+                    return a[0] - b[0];
+                }
+            }
+        });
+        int[] secNums = new int[envelopes.length];
+        for (int i = 0; i < envelopes.length; i++) {
+            secNums[i] = envelopes[i][1];
+        }
+
+        return lengthOfLIS(secNums);
+    }
+
+    private int lengthOfLIS(int[] nums) {
+        if (nums == null || nums.length == 0)   return 0;
+
+        int[] dp = new int[nums.length];
+        int res = 0;
+
+        for (int num : nums){
+            int lo = 0, hi = res;
+            while (lo < hi){
+                int mid = lo + ((hi - lo) >>> 1);
+                if (num > dp[mid]) lo = mid + 1;
+                else    hi = mid;
+            }
+            dp[lo] = num;
+            //res是下一个插入的点，也是上升子序列的个数
+            if (lo == res)  res++;
+        }
+        
+        return res;
+    }
+    
+}
+```
+
+
+
+
+
 #### [115. 不同的子序列](https://leetcode-cn.com/problems/distinct-subsequences/)
 
 难度困难150收藏分享切换为英文关注反馈
