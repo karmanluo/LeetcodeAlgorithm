@@ -9974,11 +9974,133 @@ class Solution {
 }
 ```
 
+#### [面试题65. 不用加减乘除做加法](https://leetcode-cn.com/problems/bu-yong-jia-jian-cheng-chu-zuo-jia-fa-lcof/)
 
+难度简单15收藏分享切换为英文关注反馈
 
+写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。
 
+ 
 
+**示例:**
 
+```
+输入: a = 1, b = 1
+输出: 2
+```
+
+ 
+
+**提示：**
+
+- `a`, `b` 均可能是负数或 0
+- 结果不会溢出 32 位整数
+
+```java
+class Solution {
+    public int add(int a, int b) {
+        
+        while(b != 0){
+            int plus = a ^ b;// 求和（不计进位）. 相同位置0，相反位置1
+            b = (a & b) << 1;// 计算进位. 先保留同为1的位，都为1的位要向左进位，因此左移1位
+            a = plus;
+        }
+
+        return a;
+    }
+}
+```
+
+#### [365. 水壶问题](https://leetcode-cn.com/problems/water-and-jug-problem/)
+
+难度中等167收藏分享切换为英文关注反馈
+
+有两个容量分别为 *x*升 和 *y*升 的水壶以及无限多的水。请判断能否通过使用这两个水壶，从而可以得到恰好 *z*升 的水？
+
+如果可以，最后请用以上水壶中的一或两个来盛放取得的 *z升* 水。
+
+你允许：
+
+- 装满任意一个水壶
+- 清空任意一个水壶
+- 从一个水壶向另外一个水壶倒水，直到装满或者倒空
+
+**示例 1:** (From the famous [*"Die Hard"* example](https://www.youtube.com/watch?v=BVtQNK_ZUJg))
+
+```
+输入: x = 3, y = 5, z = 4
+输出: True
+```
+
+**示例 2:**
+
+```
+输入: x = 2, y = 6, z = 5
+输出: False
+```
+
+[视频详解，为啥用GCD](https://www.youtube.com/watch?v=0Oef3MHYEC0)
+
+```java
+class Solution {
+    public boolean canMeasureWater(int x, int y, int z) {
+        if(x + y < z)   return false;
+        
+        if(z == x || z == y || z == x + y)  return true;
+
+        return z % GCD(x, y) == 0;// % level 3  + level 4  == level 7
+    }
+
+    private int GCD(int a, int b){
+        while(b != 0){
+            int tmp = b;
+            b = a % b;
+            a = tmp;
+        }
+        return a;
+    }
+}
+```
+
+#### [233. 数字 1 的个数](https://leetcode-cn.com/problems/number-of-digit-one/)
+
+难度困难104收藏分享切换为英文关注反馈
+
+给定一个整数 n，计算所有小于等于 n 的非负整数中数字 1 出现的个数。
+
+**示例:**
+
+```
+输入: 13
+输出: 6 
+解释: 数字 1 出现在以下数字中: 1, 10, 11, 12, 13 。
+```
+
+```java
+class Solution {
+     /**
+    * Calculate occurance on every digit, from
+    * least important digit to most important digit
+    * number = 1432
+    * One's digit: n/10=143 143*1+1
+    * Ten's digit: n/100=14 14*10+10
+    * Hun's digit: n/1000=1 1*100+100
+    * Tho's digit: 1432%1000+1=433
+    * Sum all occurance on digits together
+    */
+    public int countDigitOne(int n) {
+        int count = 0;
+            
+        for (long k = 1; k <= n; k *= 10) {
+            long r = n / k, m = n % k;
+            // sum up the count of ones on every place k
+            count += (r + 8) / 10 * k + (r % 10 == 1 ? m + 1 : 0);
+        }
+            
+        return count;
+    }
+}
+```
 
 
 
