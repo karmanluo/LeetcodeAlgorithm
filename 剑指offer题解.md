@@ -2,6 +2,54 @@
 [TOC]
 # 剑指offer题解
 
+#### [179. 最大数](https://leetcode-cn.com/problems/largest-number/)
+
+难度中等240收藏分享切换为英文关注反馈
+
+给定一组非负整数，重新排列它们的顺序使之组成一个最大的整数。
+
+**示例 1:**
+
+```
+输入: [10,2]
+输出: 210
+```
+
+**示例 2:**
+
+```
+输入: [3,30,34,5,9]
+输出: 9534330
+```
+
+**说明:** 输出结果可能非常大，所以你需要返回一个字符串而不是整数。
+
+```java
+class Solution {
+    public String largestNumber(int[] nums) {
+        if(nums == null || nums.length == 0)    return "";
+
+        String[] s = new String[nums.length];
+        for(int i = 0; i < nums.length; i++){
+            s[i] = String.valueOf(nums[i]);
+        }
+
+        Arrays.sort(s, (s1, s2)->(s2 + s1).compareTo(s1 + s2));
+        if(s[0].equals("0"))
+            return  "0";
+
+        StringBuilder sb = new StringBuilder();
+        for(String str : s){
+            sb.append(str);
+        }
+
+        return sb.toString();
+    }
+}
+```
+
+
+
 #### [329. 矩阵中的最长递增路径(DFS)](https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix/)
 
 难度困难132收藏分享切换为英文关注反馈
@@ -10098,6 +10146,186 @@ class Solution {
         }
             
         return count;
+    }
+}
+```
+
+#### [面试题44. 数字序列中某一位的数字](https://leetcode-cn.com/problems/shu-zi-xu-lie-zhong-mou-yi-wei-de-shu-zi-lcof/)
+
+难度中等8收藏分享切换为英文关注反馈
+
+数字以0123456789101112131415…的格式序列化到一个字符序列中。在这个序列中，第5位（从下标0开始计数）是5，第13位是1，第19位是4，等等。
+
+请写一个函数，求任意第n位对应的数字。
+
+ 
+
+**示例 1：**
+
+```
+输入：n = 3
+输出：3
+```
+
+**示例 2：**
+
+```
+输入：n = 11
+输出：0
+```
+
+ 
+
+**限制：**
+
+- `0 <= n < 2^31`
+
+```java
+public  static int findNthDigit(int n) {
+        int digit = 1;//digit level, we start at one digit.
+        long counts = 9;//the number counts of current digit level,we start at one digit,there are 9 numbers(1-9)which is at one digit.
+        /**
+         * number [1-9] (there are 9 numbers)is of one digit,number[10-99](there are 90 numbers) is
+         * of two digits,number[100-999](there are 900 numbers) is of three digits,so first we should
+         * find what level(i mean which digits(one digit,two digit or so on)  by level) the nth digit locate,
+         * once we find the digit level, we achieve half the process,
+         */
+        /**
+         *if n - digit * counts > 0,it means the nth digit is not at the current digit level,we should
+         * increase digit level to pass more number
+         */
+
+        while (n - digit * counts > 0) {
+            //every time we pass the number at current digit level
+            n -= digit * counts;
+
+            digit++;
+            //counts are grow as follows,9,90,900,9000.....since the counts maybe overflow so i use long type
+            counts *= 10;
+        }
+        //after loop,the n means nth digits from the current baseNumber
+
+        //the base number is 1，10，100，1000，10000 and so on.
+        int baseNumber = (int)Math.pow(10, digit - 1);
+        //find the number where nth digit locate
+        int number  = (n -1) / digit + baseNumber;
+        //find the digit where nth digit locate at the number above
+        int mod = (n - 1 ) % digit;
+        return String.valueOf(number).charAt(mod) - '0';
+    }
+```
+
+#### [面试题15. 二进制中1的个数](https://leetcode-cn.com/problems/er-jin-zhi-zhong-1de-ge-shu-lcof/)
+
+难度简单11收藏分享切换为英文关注反馈
+
+请实现一个函数，输入一个整数，输出该数二进制表示中 1 的个数。例如，把 9 表示成二进制是 1001，有 2 位是 1。因此，如果输入 9，则该函数输出 2。
+
+**示例 1：**
+
+```
+输入：00000000000000000000000000001011
+输出：3
+解释：输入的二进制串 00000000000000000000000000001011 中，共有三位为 '1'。
+```
+
+**示例 2：**
+
+```
+输入：00000000000000000000000010000000
+输出：1
+解释：输入的二进制串 00000000000000000000000010000000 中，共有一位为 '1'。
+```
+
+**示例 3：**
+
+```
+输入：11111111111111111111111111111101
+输出：31
+解释：输入的二进制串 11111111111111111111111111111101 中，共有 31 位为 '1'。
+```
+
+```java
+public class Solution {
+    // you need to treat n as an unsigned value
+    public int hammingWeight(int n) {
+        int sum = 0;
+
+        while (n != 0){
+            sum += (n & 1);
+            //   >>>  无符号右移，右移后最左边的位用0补齐；  
+            //	>> 有符号右移，右移后最左边负数补1，否则补0
+            n = n >>> 1;  
+        }
+        return sum;
+    }
+}
+```
+
+#### [面试题62. 圆圈中最后剩下的数字](https://leetcode-cn.com/problems/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi-lcof/)
+
+难度简单26收藏分享切换为英文关注反馈
+
+0,1,,n-1这n个数字排成一个圆圈，从数字0开始，每次从这个圆圈里删除第m个数字。求出这个圆圈里剩下的最后一个数字。
+
+例如，0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。
+
+ 
+
+**示例 1：**
+
+```
+输入: n = 5, m = 3
+输出: 3
+```
+
+**示例 2：**
+
+```
+输入: n = 10, m = 17
+输出: 2
+```
+
+ 
+
+**限制：**
+
+- `1 <= n <= 10^5`
+- `1 <= m <= 10^6`
+
+```JAVA
+class Solution {
+    //常规解法
+    public int lastRemaining(int n, int m) {
+        List<Integer> list = new ArrayList<>();
+        
+        for(int i = 0; i < n; i++){
+            list.add(i);    
+        }
+
+        int c = (m - 1) % list.size();
+        while(list.size() != 1){
+            list.remove(c);
+            c = (c + m - 1) % list.size();
+        }
+
+        return list.get(0);
+    }
+}
+```
+
+```Java
+//数学方法
+问题：N个人编号为1，2，……，N，依次报数，每报到M时，杀掉那个人，求最后胜利者的编号。
+
+递推公式： f(N,M)=(f(N−1,M)+M)%N
+    
+class Solution {
+    //f(N,M)=(f(N−1,M)+M)%N
+    public int lastRemaining(int n, int m) {
+        if(n <= 0 || m <= 0) return -1;
+
+        return n == 1 ? 0 : (lastRemaining(n - 1, m) + m) % n;
     }
 }
 ```
