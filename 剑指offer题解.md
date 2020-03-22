@@ -9980,6 +9980,256 @@ class Solution {
 }
 ```
 
+
+
+# 贪心
+
+#### [55. 跳跃游戏](https://leetcode-cn.com/problems/jump-game/)
+
+难度中等510收藏分享切换为英文关注反馈
+
+给定一个非负整数数组，你最初位于数组的第一个位置。
+
+数组中的每个元素代表你在该位置可以跳跃的最大长度。
+
+判断你是否能够到达最后一个位置。
+
+**示例 1:**
+
+```
+输入: [2,3,1,1,4]
+输出: true
+解释: 我们可以先跳 1 步，从位置 0 到达 位置 1, 然后再从位置 1 跳 3 步到达最后一个位置。
+```
+
+**示例 2:**
+
+```
+输入: [3,2,1,0,4]
+输出: false
+解释: 无论怎样，你总会到达索引为 3 的位置。但该位置的最大跳跃长度是 0 ， 所以你永远不可能到达最后一个位置。
+```
+
+```java
+class Solution {
+    public boolean canJump(int[] nums) {
+        int lastPos = nums.length - 1;
+        for (int i = nums.length - 1; i >= 0 ; i--) {
+            if (i + nums[i] >= lastPos) lastPos = i;
+        }
+        return lastPos == 0;
+    }
+}
+```
+
+```java
+//	解题思路：
+//	1.如果某一个作为 起跳点 的格子可以跳跃的距离是 3，那么表示后面 3 个格子都可以作为 起跳点。
+//	2.可以对每一个能作为 起跳点 的格子都尝试跳一次，把 能跳到最远的距离 不断更新。
+//	3.如果可以一直跳到最后，就成功了。
+
+class Solution {
+    public boolean canJump(int[] nums) {
+        int k = 0;
+        for(int i = 0; i < nums.length; i++){
+            if(i > k) return false;
+            k = Math.max(i+nums[i], k);
+        }
+
+        return true;
+    }
+}
+```
+
+#### [45. 跳跃游戏 II](https://leetcode-cn.com/problems/jump-game-ii/)
+
+难度困难392收藏分享切换为英文关注反馈
+
+给定一个非负整数数组，你最初位于数组的第一个位置。
+
+数组中的每个元素代表你在该位置可以跳跃的最大长度。
+
+你的目标是使用最少的跳跃次数到达数组的最后一个位置。
+
+**示例:**
+
+```
+输入: [2,3,1,1,4]
+输出: 2
+解释: 跳到最后一个位置的最小跳跃数是 2。
+     从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。
+```
+
+**说明:**
+
+假设你总是可以到达数组的最后一个位置。
+
+```java
+class Solution {
+    public int jump(int[] nums) {
+        int steps = 0;
+        int end = 0; //当前能够跳跃边界
+        int maxEnd = 0; //本次跳跃可以达到的最远的位置
+
+        for(int i = 0; i < nums.length - 1; i++){
+            //找能跳的最远的
+            maxEnd = Math.max(i + nums[i], maxEnd);
+
+            //遇到边界，就更新边界，并且步数加一
+            if(i == end){//一进来就会加1
+                end = maxEnd;
+                steps++;
+
+                if(maxEnd >= nums.length - 1)  
+                    break;
+            }
+        }
+
+        return steps;
+    }
+}
+```
+
+
+
+#### [134. 加油站](https://leetcode-cn.com/problems/gas-station/)
+
+难度中等241收藏分享切换为英文关注反馈
+
+在一条环路上有 *N* 个加油站，其中第 *i* 个加油站有汽油 `gas[i]` 升。
+
+你有一辆油箱容量无限的的汽车，从第 *i* 个加油站开往第 *i+1* 个加油站需要消耗汽油 `cost[i]` 升。你从其中的一个加油站出发，开始时油箱为空。
+
+如果你可以绕环路行驶一周，则返回出发时加油站的编号，否则返回 -1。
+
+**说明:** 
+
+- 如果题目有解，该答案即为唯一答案。
+- 输入数组均为非空数组，且长度相同。
+- 输入数组中的元素均为非负数。
+
+**示例 1:**
+
+```
+输入: 
+gas  = [1,2,3,4,5]
+cost = [3,4,5,1,2]
+
+输出: 3
+
+解释:
+从 3 号加油站(索引为 3 处)出发，可获得 4 升汽油。此时油箱有 = 0 + 4 = 4 升汽油
+开往 4 号加油站，此时油箱有 4 - 1 + 5 = 8 升汽油
+开往 0 号加油站，此时油箱有 8 - 2 + 1 = 7 升汽油
+开往 1 号加油站，此时油箱有 7 - 3 + 2 = 6 升汽油
+开往 2 号加油站，此时油箱有 6 - 4 + 3 = 5 升汽油
+开往 3 号加油站，你需要消耗 5 升汽油，正好足够你返回到 3 号加油站。
+因此，3 可为起始索引。
+```
+
+**示例 2:**
+
+```
+输入: 
+gas  = [2,3,4]
+cost = [3,4,3]
+
+输出: -1
+
+解释:
+你不能从 0 号或 1 号加油站出发，因为没有足够的汽油可以让你行驶到下一个加油站。
+我们从 2 号加油站出发，可以获得 4 升汽油。 此时油箱有 = 0 + 4 = 4 升汽油
+开往 0 号加油站，此时油箱有 4 - 3 + 2 = 3 升汽油
+开往 1 号加油站，此时油箱有 3 - 3 + 3 = 3 升汽油
+你无法返回 2 号加油站，因为返程需要消耗 4 升汽油，但是你的油箱只有 3 升汽油。
+因此，无论怎样，你都不可能绕环路行驶一周。
+```
+
+```java
+class Solution {
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        //determine if we have a solution
+        int total = 0;
+        for (int i = 0; i < gas.length; i++) {
+            total += gas[i] - cost[i];
+        }
+        if (total < 0) {
+            return -1;
+        }
+   
+        // find out where to start
+        int tank = 0;
+        int start = 0;
+        for (int i = 0; i < gas.length;i++) {
+            tank += gas[i] - cost[i];
+            if (tank < 0) {
+                start = i + 1;
+                tank = 0;
+            }
+        }
+        return start;
+    }
+}
+```
+
+#### [135. 分发糖果](https://leetcode-cn.com/problems/candy/)
+
+难度困难179收藏分享切换为英文关注反馈
+
+老师想给孩子们分发糖果，有 *N* 个孩子站成了一条直线，老师会根据每个孩子的表现，预先给他们评分。
+
+你需要按照以下要求，帮助老师给这些孩子分发糖果：
+
+- 每个孩子至少分配到 1 个糖果。
+- 相邻的孩子中，评分高的孩子必须获得更多的糖果。
+
+那么这样下来，老师至少需要准备多少颗糖果呢？
+
+**示例 1:**
+
+```
+输入: [1,0,2]
+输出: 5
+解释: 你可以分别给这三个孩子分发 2、1、2 颗糖果。
+```
+
+**示例 2:**
+
+```
+输入: [1,2,2]
+输出: 4
+解释: 你可以分别给这三个孩子分发 1、2、1 颗糖果。
+     第三个孩子只得到 1 颗糖果，这已满足上述两个条件。
+```
+
+```java
+class Solution {
+    public int candy(int[] ratings) {
+        int n = ratings.length;
+        int[] res = new int[n];
+
+        Arrays.fill(res, 1);
+
+        for(int i = 1; i < n; i++){
+            if(ratings[i] > ratings[i - 1])
+                res[i] = res[i - 1] + 1;
+        }
+
+        for(int i = n - 1; i >= 1; i--){
+            if(ratings[i - 1] > ratings[i])
+                res[i - 1] = Math.max(res[i - 1], res[i] + 1);
+        }
+
+        int sum = 0;
+        for(int r : res)   sum += r;
+
+        return sum;
+    }
+}
+```
+
+
+
 # 数学方法
 
 #### [836. 矩形重叠](https://leetcode-cn.com/problems/rectangle-overlap/)
