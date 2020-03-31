@@ -2,6 +2,208 @@
 [TOC]
 # 剑指offer题解
 
+#### [820. 单词的压缩编码](https://leetcode-cn.com/problems/short-encoding-of-words/)
+
+难度中等140收藏分享切换为英文关注反馈
+
+给定一个单词列表，我们将这个列表编码成一个索引字符串 `S` 与一个索引列表 `A`。
+
+例如，如果这个列表是 `["time", "me", "bell"]`，我们就可以将其表示为 `S = "time#bell#"` 和 `indexes = [0, 2, 5]`。
+
+对于每一个索引，我们可以通过从字符串 `S` 中索引的位置开始读取字符串，直到 "#" 结束，来恢复我们之前的单词列表。
+
+那么成功对给定单词列表进行编码的最小字符串长度是多少呢？
+
+ 
+
+**示例：**
+
+```
+输入: words = ["time", "me", "bell"]
+输出: 10
+说明: S = "time#bell#" ， indexes = [0, 2, 5] 。
+```
+
+ 
+
+**提示：**
+
+1. `1 <= words.length <= 2000`
+2. `1 <= words[i].length <= 7`
+3. 每个单词都是小写字母 。
+
+```java
+class Solution {
+   public int minimumLengthEncoding(String[] words) {
+        int N = words.length;
+        
+        Comparator<String> cmp = (s1, s2) -> {
+            int N1 = s1.length();
+            int N2 = s2.length();
+            for (int i = 0; i < Math.min(N1, N2); i++) {
+                char c1 = s1.charAt(N1 - 1 - i);
+                char c2 = s2.charAt(N2 - 1 - i);
+                int c = Character.compare(c1, c2);
+                if (c != 0) {
+                    return c;
+                }
+            }
+            return Integer.compare(N1, N2);
+        };
+        // 逆序字典序排序    
+        Arrays.sort(words, cmp);
+
+        int res = 0;
+        for (int i = 0; i < N; i++) {
+            if (i+1 < N && words[i+1].endsWith(words[i])) {
+                // 当前单词是下一个单词的后缀，丢弃
+            } else {
+                res += words[i].length() + 1; // 单词加上一个 '#' 的长度
+            }
+        }
+        return res;
+    }
+}
+```
+
+```java
+//字典树
+class Solution {
+    public int minimumLengthEncoding(String[] words) {
+        TrieNode trie = new TrieNode();
+        Map<TrieNode, Integer> nodes = new HashMap();
+
+        for (int i = 0; i < words.length; ++i) {
+            String word = words[i];
+            TrieNode cur = trie;
+            for (int j = word.length() - 1; j >= 0; --j)
+                cur = cur.get(word.charAt(j));
+            nodes.put(cur, i);
+        }
+
+        int ans = 0;
+        for (TrieNode node: nodes.keySet()) {
+            if (node.count == 0)
+                ans += words[nodes.get(node)].length() + 1;
+        }
+        return ans;
+
+    }
+}
+
+class TrieNode {
+    TrieNode[] children;
+    int count;
+    TrieNode() {
+        children = new TrieNode[26];
+        count = 0;
+    }
+    public TrieNode get(char c) {
+        if (children[c - 'a'] == null) {
+            children[c - 'a'] = new TrieNode();
+            count++;
+        }
+        return children[c - 'a'];
+    }
+}
+```
+
+
+
+
+
+#### [999. 车的可用捕获量](https://leetcode-cn.com/problems/available-captures-for-rook/)
+
+难度简单33收藏分享切换为英文关注反馈
+
+在一个 8 x 8 的棋盘上，有一个白色车（rook）。也可能有空方块，白色的象（bishop）和黑色的卒（pawn）。它们分别以字符 “R”，“.”，“B” 和 “p” 给出。大写字符表示白棋，小写字符表示黑棋。
+
+车按国际象棋中的规则移动：它选择四个基本方向中的一个（北，东，西和南），然后朝那个方向移动，直到它选择停止、到达棋盘的边缘或移动到同一方格来捕获该方格上颜色相反的卒。另外，车不能与其他友方（白色）象进入同一个方格。
+
+返回车能够在一次移动中捕获到的卒的数量。
+
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/23/1253_example_1_improved.PNG)
+
+```
+输入：[[".",".",".",".",".",".",".","."],[".",".",".","p",".",".",".","."],[".",".",".","R",".",".",".","p"],[".",".",".",".",".",".",".","."],[".",".",".",".",".",".",".","."],[".",".",".","p",".",".",".","."],[".",".",".",".",".",".",".","."],[".",".",".",".",".",".",".","."]]
+输出：3
+解释：
+在本例中，车能够捕获所有的卒。
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/23/1253_example_2_improved.PNG)
+
+```
+输入：[[".",".",".",".",".",".",".","."],[".","p","p","p","p","p",".","."],[".","p","p","B","p","p",".","."],[".","p","B","R","B","p",".","."],[".","p","p","B","p","p",".","."],[".","p","p","p","p","p",".","."],[".",".",".",".",".",".",".","."],[".",".",".",".",".",".",".","."]]
+输出：0
+解释：
+象阻止了车捕获任何卒。
+```
+
+**示例 3：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/23/1253_example_3_improved.PNG)
+
+```
+输入：[[".",".",".",".",".",".",".","."],[".",".",".","p",".",".",".","."],[".",".",".","p",".",".",".","."],["p","p",".","R",".","p","B","."],[".",".",".",".",".",".",".","."],[".",".",".","B",".",".",".","."],[".",".",".","p",".",".",".","."],[".",".",".",".",".",".",".","."]]
+输出：3
+解释： 
+车可以捕获位置 b5，d6 和 f5 的卒。
+```
+
+ 
+
+**提示：**
+
+1. `board.length == board[i].length == 8`
+2. `board[i][j]` 可以是 `'R'`，`'.'`，`'B'` 或 `'p'`
+3. 只有一个格子上存在 `board[i][j] == 'R'`
+
+```java
+class Solution {
+    public int numRookCaptures(char[][] board) {
+        if(board == null || board.length == 0) return 0;
+        int m = board.length;
+        int n = board[0].length;
+
+        int res = 0;
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                if(board[i][j] == 'R')
+                    //以R 为原点建立坐标系
+                    //依次向上找,向下找,向右找,向左找
+                    return cap(board,i,j,0,1)+cap(board,i,j,0,-1)+cap(board,i,j,1,0)+cap(board,i,j,-1,0);
+            }
+        }
+
+        return 0; 
+    }
+
+     public int cap(char[][] a,int x,int y,int dx,int dy){
+        /*参数说明 
+         *a为原数组矩阵
+         *x,y为R的坐标
+         *dx,dy为增长步长
+        */
+        while(x>=0 && x<a.length && y>=0 && y<a[x].length && a[x][y]!='B'){
+            if(a[x][y]=='p'){
+                return 1;
+            }
+            x+=dx;
+            y+=dy;
+        }
+        return 0;
+    }
+}
+```
+
+
+
 #### [179. 最大数](https://leetcode-cn.com/problems/largest-number/)
 
 难度中等240收藏分享切换为英文关注反馈
@@ -345,6 +547,27 @@ class Solution {
 #### kmp算法dp
 
 ```java
+//字符串匹配问题
+//先介绍暴力解法
+// 暴⼒匹配（伪码）		
+int search(String pat, String txt) {
+	int M = pat.length();
+	int N = txt.length();
+	for (int i = 0; i <= N - M; i++) {
+		for (int j = 0; j < M; j++) {
+			if (pat[j] != txt[i+j])
+			break;
+		} 
+        // pat 全都匹配了
+		if (j == M) return i;
+	} 
+    // txt 中不存在 pat ⼦串
+	return -1;
+}
+//缺点：如果pat是比较长而且比较多重复的情况，那么暴力法会做很多重复比对操作
+```
+
+```java
 package LeetcodeAlgorithm.KMP;
 
 /**
@@ -364,13 +587,17 @@ public class KMP {
         dp[0][pat.charAt(0)] = 1;
         // 影⼦状态 X 初始为 0
         int X = 0;
-        // 构建状态转移图（稍改的更紧凑了）
+        // 当前状态 j 从 1 开始
         for (int j = 1; j < M; j++) {
-            for (int c = 0; c < 256; c++)
-                dp[j][c] = dp[X][c];
-            dp[j][pat.charAt(j)] = j + 1;
-            // 更新影⼦状态
-            X = dp[X][pat.charAt(j)];
+        	for (int c = 0; c < 256; c++) {
+        		if (pat.charAt(j) == c)
+        			dp[j][c] = j + 1;
+        		else
+        			dp[j][c] = dp[X][c];
+        	} 
+            // 更新影⼦状态--影子表示公共的状态
+            //如果X发生了更新，表示新出现的 char元素 和之前公共串 位置的下一个元素相同
+        	X = dp[X][pat.charAt(j)];
         }
     }
 
@@ -382,7 +609,7 @@ public class KMP {
         for (int i = 0; i < N; i++) {
             // 计算 pat 的下⼀个状态
             j = dp[j][txt.charAt(i)];
-            // 到达终⽌态， 返回结果
+            // 到达终⽌态， 返回结果 在txt串中开始匹配的位置
             if (j == M) return i - M + 1;
         }
         //没到达终⽌态，匹配失败
@@ -500,7 +727,7 @@ public class Solution{
 }
 ```
 
-#### [面试题22. 链表中倒数第k个节点(快慢指针)](https://leetcode-cn.com/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
+#### [面试题22. 链表中倒数第k个节点(滑动窗口)](https://leetcode-cn.com/problems/lian-biao-zhong-dao-shu-di-kge-jie-dian-lcof/)
 
 输入一个链表，输出该链表中倒数第k个节点。为了符合大多数人的习惯，本题从1开始计数，即链表的尾节点是倒数第1个节点。例如，一个链表有6个节点，从头节点开始，它们的值依次是1、2、3、4、5、6。这个链表的倒数第3个节点是值为4的节点。
 
@@ -1167,12 +1394,13 @@ public class Solution {
 [2,3]
 ```
 
-
-
 ```java
 class Solution {
     public List<Integer> findDuplicates(int[] nums) {
+        // when find a number i, flip the number at position i-1 to negative. 
+    	// if the number at position i-1 is already negative, i is the number that occurs twice.
         if (nums == null) return null;
+        
         List<Integer> res = new ArrayList<>();
         for (int i = 0; i < nums.length; i++) {
             int index = Math.abs(nums[i]) - 1;
@@ -1182,6 +1410,7 @@ class Solution {
                 res.add(Math.abs(nums[i]));
             }
         }
+        
         return res;
     }
 }
@@ -1245,7 +1474,7 @@ public class Solution2 {
 }
 ```
 
-ASCII可显示字符：ASCII码对应的十进制从32-126，说明都在256之内。
+ASCII可显示字符：ASCII码对应的十进制从32-126，说明都在128之内。
 
 
 
@@ -8436,36 +8665,22 @@ public class Solution {
 输出: 99
 ```
 
-
+[谷歌面试题：又双叒叕是位运算，最详细的自动机推导过程](https://mp.weixin.qq.com/s/FQ22S0aR_J7uLnRRU0S96w)
 
 ```java
-public class Solution {
-    /**
-     * 假设有一个数为x,那么则有如下规律：
-     * 0 ^ x = x,
-     * x ^ x = 0；
-     * x & ~x = 0,
-     * x & ~0 =x;
-     *
-     * -那么就是很好解释上面的代码了。一开始a = 0, b = 0;
-     *
-     * x第一次出现后，a = (a ^ x) & ~b的结果为 a = x, b = (b ^ x) & ~a的结果为此时因为a = x了，所以b = 0。
-     *
-     * x第二次出现：a = (a ^ x) & ~b, a = (x ^ x) & ~0, a = 0; b = (b ^ x) & ~a 化简， b = (0 ^ x) & ~0 ,b = x;
-     *
-     * x第三次出现：a = (a ^ x) & ~b， a = (0 ^ x) & ~x ,a = 0; b = (b ^ x) & ~a 化简， b = (x ^ x) & ~0 , b = 0;所以出现三次同一个数，a和b最终都变回了0.
-     *
-     * 只出现一次的数，按照上面x第一次出现的规律可知a = x, b = 0;因此最后返回a.
-     */
+class Solution {
     public int singleNumber(int[] nums) {
-        int a = 0, b = 0;
+        int ones = 0, twos = 0;
         for(int num : nums){
-            a = (a ^ num) & ~ b;
-            b = (b ^ num) & ~ a;
+            ones = (ones ^ num) & ~twos;//把数看成二级制，ones记录的所有位出现1的次数在状态1
+            twos = (twos ^ num) & ~ones;
         }
-        return a;
+        return ones;
     }
 }
+// 			^ 优先级为 9
+//			& 优先级为 8
+//			~ 优先级为 2
 ```
 
 ```java
@@ -10622,7 +10837,177 @@ class Solution {
 }
 ```
 
+#### [892. 三维形体的表面积](https://leetcode-cn.com/problems/surface-area-of-3d-shapes/)
 
+难度简单100收藏分享切换为英文关注反馈
+
+在 `N * N` 的网格上，我们放置一些 `1 * 1 * 1 ` 的立方体。
+
+每个值 `v = grid[i][j]` 表示 `v` 个正方体叠放在对应单元格 `(i, j)` 上。
+
+请你返回最终形体的表面积。
+
+ 
+
+
+
+**示例 1：**
+
+```
+输入：[[2]]
+输出：10
+```
+
+**示例 2：**
+
+```
+输入：[[1,2],[3,4]]
+输出：34
+```
+
+**示例 3：**
+
+```
+输入：[[1,0],[0,2]]
+输出：16
+```
+
+**示例 4：**
+
+```
+输入：[[1,1,1],[1,0,1],[1,1,1]]
+输出：32
+```
+
+**示例 5：**
+
+```
+输入：[[2,2,2],[2,1,2],[2,2,2]]
+输出：46
+```
+
+ 
+
+**提示：**
+
+- `1 <= N <= 50`
+- `0 <= grid[i][j] <= 50`
+
+```java
+class Solution {
+    public int surfaceArea(int[][] grid) {
+        int n = grid.length, area = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                // 先把grid[i][j]赋值给level，省掉了bound check，可以略微略微略微优化一下耗时。。。
+                int level = grid[i][j];
+                if (level > 0) {
+                    // 一个柱体中：2个底面 + 所有的正方体都贡献了4个侧表面积 
+                    area += (level << 2) + 2;
+                    // 减掉 i 与 i-1 相贴的两份表面积
+                    area -= i > 0? Math.min(level, grid[i - 1][j]) << 1: 0; 
+                    // 减掉 j 与 j-1 相贴的两份表面积
+                    area -= j > 0? Math.min(level, grid[i][j - 1]) << 1: 0;
+                }  
+            }
+        }
+        return area;
+    }
+}
+//	补充运算符优先级   -=  level  14   
+//					？： level  13
+//					>   level  6
+//					<<  level  5
+```
+
+#### [914. 卡牌分组(找最大公约数)](https://leetcode-cn.com/problems/x-of-a-kind-in-a-deck-of-cards/)
+
+难度简单94收藏分享切换为英文关注反馈
+
+给定一副牌，每张牌上都写着一个整数。
+
+此时，你需要选定一个数字 `X`，使我们可以将整副牌按下述规则分成 1 组或更多组：
+
+- 每组都有 `X` 张牌。
+- 组内所有的牌上都写着相同的整数。
+
+仅当你可选的 `X >= 2` 时返回 `true`。
+
+**示例 1：**
+
+```
+输入：[1,2,3,4,4,3,2,1]
+输出：true
+解释：可行的分组是 [1,1]，[2,2]，[3,3]，[4,4]
+```
+
+**示例 2：**
+
+```
+输入：[1,1,1,2,2,2,3,3]
+输出：false
+解释：没有满足要求的分组。
+```
+
+**示例 3：**
+
+```
+输入：[1]
+输出：false
+解释：没有满足要求的分组。
+```
+
+**示例 4：**
+
+```
+输入：[1,1]
+输出：true
+解释：可行的分组是 [1,1]
+```
+
+**示例 5：**
+
+```
+输入：[1,1,2,2,2,2]
+输出：true
+解释：可行的分组是 [1,1]，[2,2]，[2,2]
+```
+
+**提示：**
+
+1. `1 <= deck.length <= 10000`
+2. `0 <= deck[i] < 10000`
+
+```java
+class Solution {
+    public boolean hasGroupsSizeX(int[] deck) {
+        //表示最小公倍数，初始化为0
+        int res = 0; 
+
+        Map<Integer, Integer> count = new HashMap<>();
+        for(int i = 0; i < deck.length; i++)
+            count.put(deck[i], count.getOrDefault(deck[i], 0) + 1);
+
+        for(int value : count.values())   res = GCD(value, res);
+
+        return res > 1;
+    }
+
+    private int GCD(int a, int b){
+        return b > 0 ? GCD(b, a % b) : a;
+    }
+}
+```
+
+# TOP K问题
+
+[6天通吃树结构—— 第五天 Trie树](https://www.cnblogs.com/huangxincheng/archive/2012/11/25/2788268.html)
+
+[【动画】看动画轻松理解「Trie树」](https://juejin.im/post/5c2c096251882579717db3d2)
+
+[经典面试问题: Top K 之 ---- 海量数据找出现次数最多或，不重复的。](https://www.cnblogs.com/linguanh/p/8532641.html)
+
+[教你如何迅速秒杀掉99%的海量数据处理面试题](https://juejin.im/entry/5a27cb796fb9a045104a5e8c)
 
 # 多线程
 
