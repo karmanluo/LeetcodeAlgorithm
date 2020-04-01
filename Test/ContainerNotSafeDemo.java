@@ -12,7 +12,6 @@ public class ContainerNotSafeDemo {
     public static void main(String[] args) {
         List<String> list = new CopyOnWriteArrayList<>();
         Set<String> list1 = new CopyOnWriteArraySet<>();
-        HashSet
 
         for (int i = 1; i <= 30; i++) {
             new Thread(()->{
