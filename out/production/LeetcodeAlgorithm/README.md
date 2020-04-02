@@ -1,2 +1,0 @@
-# LeetcodeAlgorithm
-daily leetcode
