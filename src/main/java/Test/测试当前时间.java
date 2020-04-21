@@ -38,9 +38,13 @@ public class 测试当前时间 {
         ca.add(Calendar.MONTH, -1);// 月份减1
         //ca.add(Calendar.DATE, -1);// 日期减1
         Date resultDate = ca.getTime(); // 结果
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         System.out.println(sdf.format(resultDate));
 
+
+        //------------------获取当前时间戳--------------
+        System.out.println(System.currentTimeMillis());
+        System.out.println(sdf.format(System.currentTimeMillis()));
 
     }
 }
