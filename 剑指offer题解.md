@@ -3147,6 +3147,250 @@ public double findMedianSortedArrays(int[] nums1, int[] nums2) {
 
 # JAVA程序设计题目
 
+
+
+#### [208. 实现 Trie (前缀树)](https://leetcode-cn.com/problems/implement-trie-prefix-tree/)
+
+难度中等282收藏分享切换为英文关注反馈
+
+实现一个 Trie (前缀树)，包含 `insert`, `search`, 和 `startsWith` 这三个操作。
+
+**示例:**
+
+```
+Trie trie = new Trie();
+
+trie.insert("apple");
+trie.search("apple");   // 返回 true
+trie.search("app");     // 返回 false
+trie.startsWith("app"); // 返回 true
+trie.insert("app");   
+trie.search("app");     // 返回 true
+```
+
+**说明:**
+
+- 你可以假设所有的输入都是由小写字母 `a-z` 构成的。
+- 保证所有输入均为非空字符串。
+
+```java
+class Trie {
+    private boolean isString = false;
+    private Trie next[] = new Trie[26];
+
+    public Trie() {
+    }
+
+    public void insert(String word) {
+        Trie root = this;
+        char[] chars = word.toCharArray();
+        for (char c : chars) {
+            if (root.next[c - 'a'] == null) root.next[c - 'a'] = new Trie();
+            root = root.next[c - 'a'];
+        }
+
+        root.isString = true;
+    }
+
+    public boolean search(String word) {
+        Trie root = this;
+        char[] chars = word.toCharArray();
+        for (char c : chars) {
+            if (root.next[c - 'a'] == null) return false;
+            root = root.next[c - 'a'];
+        }
+
+        return root.isString;
+    }
+
+    public boolean startsWith(String prefix) {
+        Trie root = this;
+        char[] chars = prefix.toCharArray();
+        for (char c : chars) {
+            if (root.next[c - 'a'] == null) return false;
+            root = root.next[c - 'a'];
+        }
+
+        return true;
+    }
+}
+```
+
+
+
+#### [211. 添加与搜索单词 - 数据结构设计](https://leetcode-cn.com/problems/add-and-search-word-data-structure-design/)
+
+难度中等116收藏分享切换为英文关注反馈
+
+设计一个支持以下两种操作的数据结构：
+
+```
+void addWord(word)
+bool search(word)
+```
+
+search(word) 可以搜索文字或正则表达式字符串，字符串只包含字母 `.` 或 `a-z` 。 `.` 可以表示任何一个字母。
+
+**示例:**
+
+```
+addWord("bad")
+addWord("dad")
+addWord("mad")
+search("pad") -> false
+search("bad") -> true
+search(".ad") -> true
+search("b..") -> true
+```
+
+**说明:**
+
+你可以假设所有单词都是由小写字母 `a-z` 组成的。
+
+```java
+class WordDictionary {
+
+    private class Trie{
+        private boolean isString = false;
+        private Trie[] next = new Trie[26];
+    }
+    Trie root = new Trie();
+
+    public WordDictionary() {
+    }
+
+    public void addWord(String word) {
+        Trie node = root;
+        for (char c : word.toCharArray()) {
+            if (node.next[c -'a'] == null) node.next[c - 'a'] = new Trie();
+            node = node.next[c - 'a'];
+        }
+        node.isString = true;
+    }
+
+    public boolean search(String word) {
+        return match(word.toCharArray(), 0, root);
+    }
+
+    private boolean match(char[] chars, int index, Trie node) {
+        if (index == chars.length) return node.isString;
+        if (chars[index] != '.') {
+            return node.next[chars[index] - 'a'] != null &&
+                    match(chars, index + 1, node.next[chars[index] - 'a']);
+        }else {
+            for (int j = 0; j < node.next.length; j++) {
+                if (node.next[j] != null){
+                    if (match(chars, index + 1, node.next[j]))
+                        return true;
+                }
+            }
+        }
+
+
+        return false;
+    }
+}
+```
+
+
+
+#### [212. 单词搜索 II](https://leetcode-cn.com/problems/word-search-ii/)
+
+难度困难150收藏分享切换为英文关注反馈
+
+给定一个二维网格 **board** 和一个字典中的单词列表 **words**，找出所有同时在二维网格和字典中出现的单词。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母在一个单词中不允许被重复使用。
+
+**示例:**
+
+```
+输入: 
+words = ["oath","pea","eat","rain"] and board =
+[
+  ['o','a','a','n'],
+  ['e','t','a','e'],
+  ['i','h','k','r'],
+  ['i','f','l','v']
+]
+
+输出: ["eat","oath"]
+```
+
+**说明:**
+你可以假设所有输入都由小写字母 `a-z` 组成。
+
+**提示:**
+
+- 你需要优化回溯算法以通过更大数据量的测试。你能否早点停止回溯？
+- 如果当前单词不存在于所有单词的前缀中，则可以立即停止回溯。什么样的数据结构可以有效地执行这样的操作？散列表是否可行？为什么？ 前缀树如何？如果你想学习如何实现一个基本的前缀树，请先查看这个问题： [实现Trie（前缀树）](https://leetcode-cn.com/problems/implement-trie-prefix-tree/description/)。
+
+```java
+public class Solution {
+    class TrieNode {
+        private String val = "";
+        private TrieNode[] next = new TrieNode[26];
+    }
+
+    int rows, cols;
+    List<String> res = new ArrayList<>();
+
+    public List<String> findWords(char[][] board, String[] words) {
+        rows = board.length;
+        cols = board[0].length;
+        if (rows == 0 || cols == 0) return res;
+
+        //建立字典树的模板
+        TrieNode root = new TrieNode();
+        for (String word : words) {
+            TrieNode curr = root;
+            for (char ch : word.toCharArray()) {
+                if (curr.next[ch - 'a'] == null) curr.next[ch - 'a'] = new TrieNode();
+                curr = curr.next[ch - 'a'];
+            }
+            curr.val = word;
+        }
+
+        //DFS模板
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                dfs(board, root, i, j);
+            }
+        }
+
+        return res;
+    }
+
+    private void dfs(char[][] board, TrieNode root, int x, int y) {
+        if (x < 0 || y < 0 || x >= rows || y >= cols)   return;
+
+        char c = board[x][y];
+
+        if (c == '.' || root.next[c - 'a'] == null) return;
+
+        root = root.next[c - 'a'];
+        if (root.val != ""){
+            res.add(root.val);
+            root.val = "";          //防止结果出现相同集合
+        }
+
+        board[x][y] = '.'; //表示已经访问
+
+        dfs(board, root, x - 1, y);
+        dfs(board, root, x + 1, y);
+        dfs(board, root, x, y - 1);
+        dfs(board, root, x, y + 1);
+
+        board[x][y] = c;    //dfs做完之后恢复原值
+    }
+
+}
+```
+
+
+
+
+
 #### 设计一个泛型的获取数组最小值的函数.
 
 并且这个方法只能接受Number的子类并且实现了Comparable接口。
