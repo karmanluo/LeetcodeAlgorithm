@@ -2,6 +2,116 @@
 [TOC]
 # 剑指offer题解
 
+# 并查集
+
+#### [547. 朋友圈](https://leetcode-cn.com/problems/friend-circles/)
+
+难度中等236收藏分享切换为英文关注反馈
+
+班上有 **N** 名学生。其中有些人是朋友，有些则不是。他们的友谊具有是传递性。如果已知 A 是 B 的朋友，B 是 C 的朋友，那么我们可以认为 A 也是 C 的朋友。所谓的朋友圈，是指所有朋友的集合。
+
+给定一个 **N \* N** 的矩阵 **M**，表示班级中学生之间的朋友关系。如果M[i][j] = 1，表示已知第 i 个和 j 个学生**互为**朋友关系，否则为不知道。你必须输出所有学生中的已知的朋友圈总数。
+
+**示例 1:**
+
+```
+输入: 
+[[1,1,0],
+ [1,1,0],
+ [0,0,1]]
+输出: 2 
+说明：已知学生0和学生1互为朋友，他们在一个朋友圈。
+第2个学生自己在一个朋友圈。所以返回2。
+```
+
+**示例 2:**
+
+```
+输入: 
+[[1,1,0],
+ [1,1,1],
+ [0,1,1]]
+输出: 1
+说明：已知学生0和学生1互为朋友，学生1和学生2互为朋友，所以学生0和学生2也是朋友，所以他们三个在一个朋友圈，返回1。
+```
+
+**注意：**
+
+1. N 在[1,200]的范围内。
+2. 对于所有学生，有M[i][i] = 1。
+3. 如果有M[i][j] = 1，则有M[j][i] = 1。
+
+```java
+class Solution {
+    public int findCircleNum(int[][] M) {
+        int n = M.length;
+        BCJ bcj = new BCJ(n);
+        
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < i; j++){
+                if(M[i][j] == 1)
+                    bcj.Union(i, j);
+            }
+        }
+
+        return bcj.count();
+    }
+
+    class BCJ{
+        private int[] size;
+        private int[] parent;
+        private int count; //有多少个集合
+
+        public BCJ(int n){
+            this.count = n;
+            parent = new int[n];
+            size = new int[n];
+            for(int i = 0; i < n; i++){
+                parent[i] = i;
+                size[i] = 1;
+            }
+        }
+
+        public void Union(int p, int q){
+            int rootP = find(p);
+            int rootQ = find(q);
+            
+            if(rootP == rootQ) return;
+
+            if(size[rootP] > size[rootQ]){
+                parent[rootQ] = rootP;
+                size[rootP] += size[rootQ];
+            }else{
+                parent[rootP] = rootQ;
+                size[rootQ] += size[rootP];
+            }
+            count--;
+        }
+
+        public int find(int x){
+            if(parent[x] == x)  return x;
+
+            return parent[x] = find(parent[x]);
+        }
+
+        public boolean isConnected(int p, int q){
+            int rootP = find(p);
+            int rootQ = find(q);
+            return rootP == rootQ;
+        }
+
+        public int count(){
+            return count;
+        }
+
+    }
+}
+```
+
+
+
+
+
 #### [820. 单词的压缩编码](https://leetcode-cn.com/problems/short-encoding-of-words/)
 
 难度中等140收藏分享切换为英文关注反馈
@@ -6394,6 +6504,173 @@ class Solution {
 }
 ```
 
+#### [307. 区域和检索 - 数组可修改](https://leetcode-cn.com/problems/range-sum-query-mutable/)
+
+难度中等131收藏分享切换为英文关注反馈
+
+给定一个整数数组  *nums*，求出数组从索引 *i* 到 *j* (*i* ≤ *j*) 范围内元素的总和，包含 *i, j* 两点。
+
+*update(i, val)* 函数可以通过将下标为 *i* 的数值更新为 *val*，从而对数列进行修改。
+
+**示例:**
+
+```
+Given nums = [1, 3, 5]
+
+sumRange(0, 2) -> 9
+update(1, 2)
+sumRange(0, 2) -> 8
+```
+
+**说明:**
+
+1. 数组仅可以在 *update* 函数下进行修改。
+2. 你可以假设 *update* 函数与 *sumRange* 函数的调用次数是均匀分布的。
+
+```java
+//方法一：使用树状数组
+class NumArray {
+
+    private int[] nums;
+    private int n;
+    private int[] BIT;
+
+    public NumArray(int[] nums) {
+        this.nums = nums;
+
+        n = nums.length;
+        BIT = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            updateBIT(i, nums[i]);
+        }
+
+    }
+
+    private void updateBIT(int i, int addVal) {
+        i++;
+        while (i <= n){
+            BIT[i] += addVal;
+            i += (i & -i);
+        }
+    }
+
+    /**
+     *  求出sum(i)的和 目标数据前i项的和
+     * @param i
+     * @return
+     */
+    private int getSum(int i){
+        int sum = 0;
+        i++;
+        while (i > 0){
+            sum += BIT[i];
+            i -= (i & -i);
+        }
+
+        return sum;
+    }
+
+    public void update(int i, int val) {
+        int addVal = val - nums[i];
+        nums[i] = val;
+        updateBIT(i, addVal);
+    }
+
+    public int sumRange(int i, int j) {
+        return getSum(j) - getSum(i - 1);
+    }
+}
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
+```
+
+```java
+//方法二：线段树方法
+public class NumArray {
+
+    private int[] nums;
+    private int len;    //nums的长度
+    private int[] segmentTree;
+
+    public NumArray(int[] nums) {
+        if (nums.length == 0) return;
+
+        this.nums = nums;
+        int height = (int) Math.ceil(Math.log(nums.length) / Math.log(2));
+        segmentTree = new int[2 * (int) Math.pow(2, height) - 1];
+        len = nums.length;
+
+        buildST(0, len - 1, 0);
+    }
+
+    private void buildST(int start, int end, int nodeIndex) {
+        if (start == end) {
+            segmentTree[nodeIndex] = nums[start];
+            return;
+        }
+
+        int mid = start + ((end - start) >> 1);
+        int leftNode = 2 * nodeIndex + 1;
+        int rightNode = 2 * nodeIndex + 2;
+
+        buildST(start, mid, leftNode);
+        buildST(mid + 1, end, rightNode);
+
+        segmentTree[nodeIndex] = segmentTree[leftNode] + segmentTree[rightNode];
+    }
+
+
+    private void updateST(int start, int end, int nodeIndex, int updateIndex, int val) {
+        if (start == end) {
+            nums[updateIndex] = val;
+            segmentTree[nodeIndex] = val;
+            return;
+        }
+
+        int mid = start + ((end - start) >> 1);
+        int leftNode = nodeIndex * 2 + 1;
+        int rightNode = nodeIndex * 2 + 2;
+        if (updateIndex >= start && updateIndex <= mid) {
+            updateST(start, mid, leftNode, updateIndex, val);
+        } else {
+            updateST(mid + 1, end, rightNode, updateIndex, val);
+        }
+
+        segmentTree[nodeIndex] = segmentTree[leftNode] + segmentTree[rightNode];
+    }
+
+    private int queryST(int start, int end, int nodeIndex, int L, int R) {
+        if (end < L || start > R) return 0;
+        else if (start == end) return segmentTree[nodeIndex];
+        else if (start >= L && end <= R) return segmentTree[nodeIndex];
+
+        int mid = start + ((end - start) >> 1);
+        int leftNode = nodeIndex * 2 + 1;
+        int rightNode = nodeIndex * 2 + 2;
+
+        int sumLeft = queryST(start, mid, leftNode, L, R);
+        int sumRight = queryST(mid + 1, end, rightNode, L, R);
+
+        return sumLeft + sumRight;
+    }
+
+    public void update(int i, int val) {
+        updateST(0, len -1 , 0, i, val);
+    }
+
+    public int sumRange(int i, int j) {
+        return queryST(0, len - 1, 0, i, j);
+    }
+}
+```
+
+
+
 # 回溯法
 
 #### [494. 目标和](https://leetcode-cn.com/problems/target-sum/)
@@ -8829,6 +9106,99 @@ class Solution {
     }
 }
 ```
+
+#### [1143. 最长公共子序列](https://leetcode-cn.com/problems/longest-common-subsequence/)
+
+难度中等124收藏分享切换为英文关注反馈
+
+给定两个字符串 `text1` 和 `text2`，返回这两个字符串的最长公共子序列的长度。
+
+一个字符串的 *子序列* 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。
+
+若这两个字符串没有公共子序列，则返回 0。
+
+ 
+
+**示例 1:**
+
+```
+输入：text1 = "abcde", text2 = "ace" 
+输出：3  
+解释：最长公共子序列是 "ace"，它的长度为 3。
+```
+
+**示例 2:**
+
+```
+输入：text1 = "abc", text2 = "abc"
+输出：3
+解释：最长公共子序列是 "abc"，它的长度为 3。
+```
+
+**示例 3:**
+
+```
+输入：text1 = "abc", text2 = "def"
+输出：0
+解释：两个字符串没有公共子序列，返回 0。
+```
+
+ 
+
+**提示:**
+
+- `1 <= text1.length <= 1000`
+- `1 <= text2.length <= 1000`
+- 输入的字符串只含有小写英文字符。
+
+```java
+// 未优化之前
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int len1 = text1.length(), len2 = text2.length();
+
+        int[][] dp = new int[len1 + 1][len2 + 1];
+
+        for(int i = 1; i <= len1; i++){
+            for(int j = 1; j <= len2; j++){
+                if(text1.charAt(i-1) == text2.charAt(j - 1))    dp[i][j] = dp[i - 1][j - 1] + 1;
+                else
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j - 1]);
+            }
+        }
+
+        return dp[len1][len2];
+    }
+}
+```
+
+```java
+//优化后可以进一步降低空间复杂度
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int len1 = text1.length(), len2 = text2.length();
+
+        int[] dp = new int[len2 + 1];
+
+        for(int i = 1; i <= len1; i++){
+            int tmp = 0;
+            for(int j = 1; j <= len2; j++){
+                int pre = tmp;  //每一行开始的时候，pre为0
+                tmp = dp[j];    //每次dp[j]会参与运算的时候，记录老的值
+                //需要排查左边的dp[j-1]发生变化的情况，这种情况需要记录dp[j-1]的old版本
+                if(text1.charAt(i-1) == text2.charAt(j - 1))    dp[j] = pre + 1;
+
+                else    dp[j] = Math.max(dp[j - 1], dp[j]);
+            }
+        }
+
+        return dp[len2];
+    }
+}
+```
+
+
 
 
 
