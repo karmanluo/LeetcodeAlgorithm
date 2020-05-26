@@ -1,4 +1,4 @@
-package LeetcodeAlgorithm.N1444;
+package LeetcodeAlgorithm.N1444NumberofWaysofCuttingaPizza;
 
 public class Solution {
     private int MOD = 1_000_000_007, m, n;

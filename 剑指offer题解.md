@@ -4175,8 +4175,105 @@ public class LRU缓存 {
 
 
 
-
 # 中位数/滑动窗口
+
+
+
+#### [76. 最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+
+难度困难553收藏分享切换为英文关注反馈
+
+给你一个字符串 S、一个字符串 T，请在字符串 S 里面找出：包含 T 所有字符的最小子串。
+
+**示例：**
+
+```
+输入: S = "ADOBECODEBANC", T = "ABC"
+输出: "BANC"
+```
+
+**说明：**
+
+- 如果 S 中不存这样的子串，则返回空字符串 `""`。
+- 如果 S 中存在这样的子串，我们保证它是唯一的答案。
+
+```java
+package LeetcodeAlgorithm.N0___100.N76_MinimumWindowSubstring;
+
+public class Solution2 {
+    public String minWindow(String s, String t) {
+        //winFreq   表示S的字串词频数组  会变化
+        //tFreq     表示T词频数组
+        //distance  表示滑动窗口内部包含T中的字符的个数
+        int sLen = s.length();
+        int tLen = t.length();
+
+        if (sLen == 0 || tLen == 0 || sLen < tLen) return "";
+
+        char[] charArrayS = s.toCharArray();
+        char[] charArrayT = t.toCharArray();
+
+        //ascii('z') = 122
+        int[] winFreq = new int[128];
+        int[] tFreq = new int[128];
+
+        for (char c : charArrayT) {
+            tFreq[c]++;
+        }
+
+        //滑动窗口内部包含多少T中的字符，对应字符频数超过不重复计算
+        int count = 0;
+        int minLen = sLen + 1;
+        int begin = 0;
+
+        int left = 0;
+        int right = 0;
+        // [left, right)
+        while (right < sLen) {
+            char r = charArrayS[right];
+            if (tFreq[r] == 0) {    //当前字符在t中没有出现过，右移
+                right++;
+                continue;   //不执行后面的逻辑, 直接开始下一次
+            }
+
+            if (winFreq[r] < tFreq[r]){
+                count++;
+            }
+            winFreq[r]++;
+            right++;
+
+            while (count == tLen){
+
+                if (right - left < minLen){
+                     minLen = right - left;
+                     begin = left;
+                }
+
+                char l = charArrayS[left];
+                if (tFreq[l] == 0){
+                    left++;
+                    continue;
+                }
+
+                //执行这里相当于left在里面
+                if (winFreq[l] == tFreq[l]){
+                    count--;
+                }
+                winFreq[l]--;
+                left++;
+            }
+        }
+
+        if (minLen == sLen + 1) return "";
+
+        return s.substring(begin, begin + minLen);
+    }
+}
+```
+
+
+
+
 
 #### [295. 数据流的中位数(大小堆)](https://leetcode-cn.com/problems/find-median-from-data-stream/)
 
@@ -8494,6 +8591,67 @@ class Solution {
 }
 ```
 
+#### [304. 二维区域和检索 - 矩阵不可变](https://leetcode-cn.com/problems/range-sum-query-2d-immutable/)
+
+难度中等82收藏分享切换为英文关注反馈
+
+给定一个二维矩阵，计算其子矩形范围内元素的总和，该子矩阵的左上角为 (*row*1, *col*1) ，右下角为 (*row*2, *col*2)。
+
+![Range Sum Query 2D](https://assets.leetcode-cn.com/aliyun-lc-upload/images/304.png)
+上图子矩阵左上角 (row1, col1) = **(2, 1)** ，右下角(row2, col2) = **(4, 3)，**该子矩形内元素的总和为 8。
+
+**示例:**
+
+```
+给定 matrix = [
+  [3, 0, 1, 4, 2],
+  [5, 6, 3, 2, 1],
+  [1, 2, 0, 1, 5],
+  [4, 1, 0, 1, 7],
+  [1, 0, 3, 0, 5]
+]
+
+sumRegion(2, 1, 4, 3) -> 8
+sumRegion(1, 1, 2, 2) -> 11
+sumRegion(1, 2, 2, 4) -> 12
+```
+
+**说明:**
+
+1. 你可以假设矩阵不可变。
+2. 会多次调用 *sumRegion* 方法*。*
+3. 你可以假设 *row*1 ≤ *row*2 且 *col*1 ≤ *col*2。
+
+```java
+package LeetcodeAlgorithm.N304RangeSumQuery2D;
+
+class NumMatrix {
+    private int[][] dp;
+
+    public NumMatrix(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) return;
+
+        int m = matrix.length;
+        int n = matrix[0].length;
+        dp = new int[m + 1][n + 1];
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                dp[i][j] = dp[i][j - 1] + dp[i - 1][j] - dp[i - 1][j - 1] + matrix[i - 1][j - 1];
+            }
+        }
+    }
+
+    public int sumRegion(int row1, int col1, int row2, int col2) {
+        return dp[row2 + 1][col2 + 1] - dp[row2 + 1][col1] - dp[row1][col2 + 1] + dp[row1][col1];
+    }
+}
+```
+
+
+
+
+
 #### [354. 俄罗斯套娃信封问题(最长上升子序问题延伸)](https://leetcode-cn.com/problems/russian-doll-envelopes/)
 
 难度困难108收藏分享切换为英文关注反馈
@@ -9194,6 +9352,278 @@ class Solution {
         }
 
         return dp[len2];
+    }
+}
+```
+
+#### [1444. 切披萨的方案数](https://leetcode-cn.com/problems/number-of-ways-of-cutting-a-pizza/)
+
+难度困难18收藏分享切换为英文关注反馈
+
+给你一个 `rows x cols` 大小的矩形披萨和一个整数 `k` ，矩形包含两种字符： `'A'` （表示苹果）和 `'.'` （表示空白格子）。你需要切披萨 `k-1` 次，得到 `k` 块披萨并送给别人。
+
+切披萨的每一刀，先要选择是向垂直还是水平方向切，再在矩形的边界上选一个切的位置，将披萨一分为二。如果垂直地切披萨，那么需要把左边的部分送给一个人，如果水平地切，那么需要把上面的部分送给一个人。在切完最后一刀后，需要把剩下来的一块送给最后一个人。
+
+请你返回确保每一块披萨包含 **至少** 一个苹果的切披萨方案数。由于答案可能是个很大的数字，请你返回它对 10^9 + 7 取余的结果。
+
+ 
+
+**示例 1：**
+
+**![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/05/10/ways_to_cut_apple_1.png)**
+
+```
+输入：pizza = ["A..","AAA","..."], k = 3
+输出：3 
+解释：上图展示了三种切披萨的方案。注意每一块披萨都至少包含一个苹果。
+```
+
+**示例 2：**
+
+```
+输入：pizza = ["A..","AA.","..."], k = 3
+输出：1
+```
+
+**示例 3：**
+
+```
+输入：pizza = ["A..","A..","..."], k = 1
+输出：1
+```
+
+ 
+
+**提示：**
+
+- `1 <= rows, cols <= 50`
+- `rows == pizza.length`
+- `cols == pizza[i].length`
+- `1 <= k <= 10`
+- `pizza` 只包含字符 `'A'` 和 `'.'` 。
+
+```java
+package LeetcodeAlgorithm.N1444NumberofWaysofCuttingaPizza;
+
+public class Solution {
+    private int MOD = 1_000_000_007, m, n;
+    private Integer dp[][][];
+    private int preSum[][];
+
+    public int ways(String[] pizza, int k) {
+        m = pizza.length;
+        n = pizza[0].length();
+        dp = new Integer[k][m][n];
+        preSum = new int[m + 1][n + 1];
+
+        //这个直接就是以为i,j为左上角的时候，其和为多少
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                preSum[i][j] = preSum[i][j + 1] + preSum[i + 1][j] - preSum[i + 1][j + 1] + (pizza[i].charAt(j) == 'A' ? 1 : 0);
+            }
+        }
+
+        return dfs(0, 0, k - 1);
+    }
+
+    private int dfs(int x, int y, int cut) {
+        if (cut == 0 && preSum[x][y] > 0)   return 1;
+        if (preSum[x][y] == 0)  return 0;
+
+        if (dp[cut][x][y] != null)  return dp[cut][x][y];
+
+        int ans = 0;
+        //Cut horizontal
+        for (int i = x + 1; i < m; i++) {
+            if (preSum[x][y] - preSum[i][y] > 0){
+                ans = (ans + dfs(i, y, cut - 1)) % MOD;
+            }
+        }
+
+        //Cut vertical
+        for (int j = y + 1; j < n; j++) {
+            if (preSum[x][y] - preSum[x][j] > 0){
+                ans = (ans + dfs(x, j, cut - 1)) % MOD;
+            }
+        }
+
+        dp[cut][x][y] = ans;
+        return ans;
+    }
+}
+```
+
+#### [1449. 数位成本和为目标值的最大数字](https://leetcode-cn.com/problems/form-largest-integer-with-digits-that-add-up-to-target/)
+
+难度困难11收藏分享切换为英文关注反馈
+
+给你一个整数数组 `cost` 和一个整数 `target` 。请你返回满足如下规则可以得到的 **最大** 整数：
+
+- 给当前结果添加一个数位（`i + 1`）的成本为 `cost[i]` （`cost` 数组下标从 0 开始）。
+- 总成本必须恰好等于 `target` 。
+- 添加的数位中没有数字 0 。
+
+由于答案可能会很大，请你以字符串形式返回。
+
+如果按照上述要求无法得到任何整数，请你返回 "0" 。
+
+ 
+
+**示例 1：**
+
+```
+输入：cost = [4,3,2,5,6,7,2,5,5], target = 9
+输出："7772"
+解释：添加数位 '7' 的成本为 2 ，添加数位 '2' 的成本为 3 。所以 "7772" 的代价为 2*3+ 3*1 = 9 。 "997" 也是满足要求的数字，但 "7772" 是较大的数字。
+ 数字     成本
+  1  ->   4
+  2  ->   3
+  3  ->   2
+  4  ->   5
+  5  ->   6
+  6  ->   7
+  7  ->   2
+  8  ->   5
+  9  ->   5
+```
+
+**示例 2：**
+
+```
+输入：cost = [7,6,5,5,5,6,8,7,8], target = 12
+输出："85"
+解释：添加数位 '8' 的成本是 7 ，添加数位 '5' 的成本是 5 。"85" 的成本为 7 + 5 = 12 。
+```
+
+**示例 3：**
+
+```
+输入：cost = [2,4,6,2,4,6,4,4,4], target = 5
+输出："0"
+解释：总成本是 target 的条件下，无法生成任何整数。
+```
+
+**示例 4：**
+
+```
+输入：cost = [6,10,15,40,40,40,40,40,40], target = 47
+输出："32211"
+```
+
+ **提示：**
+
+- `cost.length == 9`
+- `1 <= cost[i] <= 5000`
+- `1 <= target <= 5000`
+
+```java
+package LeetcodeAlgorithm.N1449FormLargestIntegerWithDigitsThatAdduptoTarget;
+
+public class Solution {
+    public String largestNumber(int[] cost, int target) {
+        if(target == 0) return "";
+        int[] dp = new int[target + 1];
+
+        //baseCase dp[0] = 0, 其他地方的值，应该从dp[0]开始
+        //如果不是从dp[0]开始，那么其值总会为负数
+        for (int t = 1; t <= target; t++) {
+            dp[t] = Integer.MIN_VALUE;      //这里很关键，思考下为-1会出现什么情况？
+            for (int i = 0; i < 9; i++) {
+                if (t >= cost[i]){
+                    dp[t] = Math.max(dp[t], 1 + dp[t - cost[i]]);
+                }
+            }
+        }
+
+        if (dp[target] < 0){
+            return "0";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 8; i >= 0; i--) {
+            while (target >= cost[i] && dp[target] == dp[target - cost[i]] + 1){
+                sb.append(i + 1);
+                target -= cost[i];
+            }
+        }
+
+        return sb.toString();
+    }
+}
+```
+
+#### [1458. 两个子序列的最大点积](https://leetcode-cn.com/problems/max-dot-product-of-two-subsequences/)
+
+难度困难17收藏分享切换为英文关注反馈
+
+给你两个数组 `nums1` 和 `nums2` 。
+
+请你返回 `nums1` 和 `nums2` 中两个长度相同的 **非空** 子序列的最大点积。
+
+数组的非空子序列是通过删除原数组中某些元素（可能一个也不删除）后剩余数字组成的序列，但不能改变数字间相对顺序。比方说，`[2,3,5]` 是 `[1,2,3,4,5]` 的一个子序列而 `[1,5,3]` 不是。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums1 = [2,1,-2,5], nums2 = [3,0,-6]
+输出：18
+解释：从 nums1 中得到子序列 [2,-2] ，从 nums2 中得到子序列 [3,-6] 。
+它们的点积为 (2*3 + (-2)*(-6)) = 18 。
+```
+
+**示例 2：**
+
+```
+输入：nums1 = [3,-2], nums2 = [2,-6,7]
+输出：21
+解释：从 nums1 中得到子序列 [3] ，从 nums2 中得到子序列 [7] 。
+它们的点积为 (3*7) = 21 。
+```
+
+**示例 3：**
+
+```
+输入：nums1 = [-1,-1], nums2 = [1,1]
+输出：-1
+解释：从 nums1 中得到子序列 [-1] ，从 nums2 中得到子序列 [1] 。
+它们的点积为 -1 。
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums1.length, nums2.length <= 500`
+- `-1000 <= nums1[i], nums2[i] <= 100`
+
+ 
+
+```java
+package LeetcodeAlgorithm.N1458MaxDotProductofTwoSubsequences;
+
+public class Solution2 {
+    public int maxDotProduct(int[] nums1, int[] nums2) {
+
+        //注意：本道题 maxDotProduct 最大点乘，必须是自己算出来的值。
+        //所以[-1, -1], [1, 1]这个题算出来的值为 -1; 而不能是 0
+
+        int len1 = nums1.length;
+        int len2 = nums2.length;
+
+        int[][] dp = new int[len1][len2];
+
+        for (int i = 0; i < len1; i++) {
+            for (int j = 0; j < len2; j++) {
+                dp[i][j] = nums1[i] * nums2[j];
+                if (i > 0 && j > 0) dp[i][j] += Math.max(0, dp[i - 1][j - 1]);
+                if (i > 0) dp[i][j] = Math.max(dp[i][j], dp[i - 1][j]);
+                if (j > 0) dp[i][j] = Math.max(dp[i][j], dp[i][j - 1]);
+            }
+        }
+
+        return dp[len1 - 1][len2 - 1];
     }
 }
 ```
