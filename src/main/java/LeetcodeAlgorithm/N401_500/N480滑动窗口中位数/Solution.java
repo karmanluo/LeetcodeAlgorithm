@@ -1,4 +1,4 @@
-package LeetcodeAlgorithm.N480滑动窗口中位数;
+package LeetcodeAlgorithm.N401_500.N480滑动窗口中位数;
 
 import java.util.PriorityQueue;
 

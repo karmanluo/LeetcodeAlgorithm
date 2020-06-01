@@ -1,4 +1,4 @@
-package LeetcodeAlgorithm.N412_FizzBuzz;
+package LeetcodeAlgorithm.N401_500.N412_FizzBuzz;
 
 import java.util.ArrayList;
 import java.util.List;

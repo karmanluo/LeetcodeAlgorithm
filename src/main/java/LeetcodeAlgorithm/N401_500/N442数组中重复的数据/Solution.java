@@ -1,4 +1,4 @@
-package LeetcodeAlgorithm.N442数组中重复的数据;
+package LeetcodeAlgorithm.N401_500.N442数组中重复的数据;
 
 import java.util.ArrayList;
 import java.util.List;

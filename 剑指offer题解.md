@@ -4363,6 +4363,252 @@ public class Solution2 {
 }
 ```
 
+#### [133. 克隆图](https://leetcode-cn.com/problems/clone-graph/)
+
+难度中等148
+
+给你无向 **[连通](https://baike.baidu.com/item/连通图/6460995?fr=aladdin)** 图中一个节点的引用，请你返回该图的 [**深拷贝**](https://baike.baidu.com/item/深拷贝/22785317?fr=aladdin)（克隆）。
+
+图中的每个节点都包含它的值 `val`（`int`） 和其邻居的列表（`list[Node]`）。
+
+```
+class Node {
+    public int val;
+    public List<Node> neighbors;
+}
+```
+
+ 
+
+**测试用例格式：**
+
+简单起见，每个节点的值都和它的索引相同。例如，第一个节点值为 1（`val = 1`），第二个节点值为 2（`val = 2`），以此类推。该图在测试用例中使用邻接列表表示。
+
+**邻接列表** 是用于表示有限图的无序列表的集合。每个列表都描述了图中节点的邻居集。
+
+给定节点将始终是图中的第一个节点（值为 1）。你必须将 **给定节点的拷贝** 作为对克隆图的引用返回。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/01/133_clone_graph_question.png)
+
+```
+输入：adjList = [[2,4],[1,3],[2,4],[1,3]]
+输出：[[2,4],[1,3],[2,4],[1,3]]
+解释：
+图中有 4 个节点。
+节点 1 的值是 1，它有两个邻居：节点 2 和 4 。
+节点 2 的值是 2，它有两个邻居：节点 1 和 3 。
+节点 3 的值是 3，它有两个邻居：节点 2 和 4 。
+节点 4 的值是 4，它有两个邻居：节点 1 和 3 。
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/01/graph.png)
+
+```
+输入：adjList = [[]]
+输出：[[]]
+解释：输入包含一个空列表。该图仅仅只有一个值为 1 的节点，它没有任何邻居。
+```
+
+**示例 3：**
+
+```
+输入：adjList = []
+输出：[]
+解释：这个图是空的，它不含任何节点。
+```
+
+**示例 4：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/01/graph-1.png)
+
+```
+输入：adjList = [[2],[1]]
+输出：[[2],[1]]
+```
+
+ 
+
+**提示：**
+
+1. 节点数不超过 100 。
+2. 每个节点值 `Node.val` 都是唯一的，`1 <= Node.val <= 100`。
+3. 无向图是一个[简单图](https://baike.baidu.com/item/简单图/1680528?fr=aladdin)，这意味着图中没有重复的边，也没有自环。
+4. 由于图是无向的，如果节点 *p* 是节点 *q* 的邻居，那么节点 *q* 也必须是节点 *p* 的邻居。
+5. 图是连通图，你可以从给定节点访问到所有节点。
+
+```JAVA
+class Node {
+    public int val;
+    public List<Node> neighbors;
+
+    public Node() {
+        val = 0;
+        neighbors = new ArrayList<Node>();
+    }
+
+    public Node(int _val) {
+        val = _val;
+        neighbors = new ArrayList<Node>();
+    }
+
+    public Node(int _val, ArrayList<Node> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+}
+
+public class Solution {
+    public Node cloneGraph(Node node) {
+        Map<Node, Node> visited = new HashMap<>();
+        return dfs(node, visited);
+    }
+
+    //DFS 遍历图
+    private Node dfs(Node node, Map<Node, Node> visited) {
+        if (node == null) return node;
+
+        if (visited.containsKey(node)) return visited.get(node);
+
+        // Create a clone for the given node.
+        // Note that we don't have cloned neighbors as of now, hence [].
+        Node clone = new Node(node.val, new ArrayList<>());
+
+        // The key is original node and value being the clone node.
+        visited.put(node, clone);
+
+        // Iterate through the neighbors to generate their clones
+        // and prepare a list of cloned neighbors to be added to the cloned node.
+        for (Node n : node.neighbors) {
+            clone.neighbors.add(dfs(n, visited));
+        }
+
+        return clone;
+    }
+}
+```
+
+```JAVA
+//BFS
+public class Solution2 {
+    public Node cloneGraph(Node node) {
+        if (node == null) return node;
+
+        Map<Node, Node> visited = new HashMap<>();
+        Node clone = new Node(node.val, new ArrayList<>());
+        visited.put(node, clone);
+
+        Deque<Node> queue = new LinkedList<>();
+        queue.offer(node);
+        while (!queue.isEmpty()) {
+            Node tmp = queue.poll();
+            for (Node neighbor : tmp.neighbors) {
+                if (!visited.containsKey(neighbor)) {
+                    visited.put(neighbor, new Node(neighbor.val, new ArrayList<>()));
+                    queue.offer(neighbor);
+                }
+                visited.get(tmp).neighbors.add(visited.get(neighbor));
+            }
+        }
+
+        return clone;
+    }
+}
+```
+
+#### [417. 太平洋大西洋水流问题](https://leetcode-cn.com/problems/pacific-atlantic-water-flow/)
+
+给定一个 `m x n` 的非负整数矩阵来表示一片大陆上各个单元格的高度。“太平洋”处于大陆的左边界和上边界，而“大西洋”处于大陆的右边界和下边界。
+
+规定水流只能按照上、下、左、右四个方向流动，且只能从高到低或者在同等高度上流动。
+
+请找出那些水流既可以流动到“太平洋”，又能流动到“大西洋”的陆地单元的坐标。
+
+ **提示：**
+
+1. 输出坐标的顺序不重要
+2. *m* 和 *n* 都小于150
+
+ **示例：**
+
+ 
+
+```
+给定下面的 5x5 矩阵:
+
+  太平洋 ~   ~   ~   ~   ~ 
+       ~  1   2   2   3  (5) *
+       ~  3   2   3  (4) (4) *
+       ~  2   4  (5)  3   1  *
+       ~ (6) (7)  1   4   5  *
+       ~ (5)  1   1   2   4  *
+          *   *   *   *   * 大西洋
+
+返回:
+
+[[0, 4], [1, 3], [1, 4], [2, 2], [3, 0], [3, 1], [4, 0]] (上图中带括号的单元).
+```
+
+```java
+//DFS 解法
+public class Solution {
+    public List<List<Integer>> pacificAtlantic(int[][] matrix) {
+        List<List<Integer>> res = new ArrayList<>();
+        int m = matrix.length;
+        if (m == 0) {
+            return res;
+        }
+
+        int n = matrix[0].length;
+        boolean[][] pac = new boolean[m][n];
+        boolean[][] atl = new boolean[m][n];
+        int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1 ,0}};
+        for (int i = 0; i < m; i++) {
+            dfs(matrix, dir, pac, i, 0);    //第一列
+            dfs(matrix, dir, atl, i, n - 1);    //最后一列
+        }
+
+        for (int i = 0; i < n; i++) {
+            dfs(matrix, dir, pac, 0, i);        //  第一行
+            dfs(matrix, dir, atl, m - 1, i);    //  最后一行
+        }
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pac[i][j] && atl[i][j]) {
+                    res.add(Arrays.asList(i, j));
+                }
+            }
+        }
+
+        return res;
+    }
+
+    private void dfs(int[][] matrix, int[][] dir, boolean[][] visited, int i, int j) {
+        int m = matrix.length, n = matrix[0].length;
+        visited[i][j] = true;
+        for (int[] d : dir) {
+            int x = i + d[0];
+            int y = j + d[1];
+            if (x < 0 || y < 0 || x >= m || y >= n || visited[x][y] || matrix[i][j] > matrix[x][y]) {
+                continue;
+            }
+            dfs(matrix, dir, visited, x, y);
+        }
+    }
+}
+```
+
+```java
+//BFS
+
+```
+
 
 
 # 中位数/滑动窗口
