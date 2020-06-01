@@ -2443,7 +2443,7 @@ public class Solution2 {
 
 
 
-#### [532逆序对](https://www.lintcode.com/problem/reverse-pairs/description)
+#### [LintCode532逆序对](https://www.lintcode.com/problem/reverse-pairs/description)
 
 在数组中的两个数字如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。给你一个数组，求出这个数组中逆序对的总数。
 概括：如果a[i] > a[j] 且 i < j， a[i] 和 a[j] 构成一个逆序对。
@@ -2512,7 +2512,85 @@ public class Solution {
 }
 ```
 
+```java
+package 剑指offer.N51数组中的逆序对;
 
+public class Solution {
+    public int reversePairs(int[] nums) {
+        int len = nums.length;
+
+        if (len < 2) {
+            return 0;
+        }
+
+        int[] copy = new int[len];
+        for (int i = 0; i < len; i++) {
+            copy[i] = nums[i];
+        }
+
+        int[] temp = new int[len];
+        return reversePairs(copy, 0, len - 1, temp);
+    }
+
+    /**
+     * 在nums[left...right]之间计算逆序对的个数
+     *
+     * @param nums
+     * @param left
+     * @param right
+     * @param temp
+     * @return
+     */
+    private int reversePairs(int[] nums, int left, int right, int[] temp) {
+        if (left == right) {
+            return 0;
+        }
+
+        int mid = left + ((right - left) >>> 1);
+        int leftPairs = reversePairs(nums, left, mid, temp);
+        int rightPairs = reversePairs(nums, mid + 1, right, temp);
+
+        if (nums[mid] <= nums[mid + 1]) {
+            return leftPairs + rightPairs;
+        }
+
+        int crossPairs = mergeAndCount(nums, left, mid, right, temp);
+
+        return leftPairs + rightPairs + crossPairs;
+    }
+
+    private int mergeAndCount(int[] nums, int left, int mid, int right, int[] temp) {
+        //全局使用一个辅助数组，为了避免反复创建数组增加空间开销，创建销毁需要占用资源
+        for (int i = left; i <= right; i++) {
+            temp[i] = nums[i];
+        }
+
+        int i = left;
+        int j = mid + 1;
+
+        int count = 0;
+        for (int k = left; k <= right; k++) {
+
+            if (i == mid + 1) {
+                nums[k] = temp[j];
+                j++;
+            } else if (j == right + 1) {
+                nums[k] = temp[i];
+                i++;
+            } else if (temp[i] <= temp[j]) { //这里相等保证的是归并排序的稳定
+                nums[k] = temp[i];
+                i++;
+            } else {
+                nums[k] = temp[j];
+                j++;
+                count += (mid - i + 1);
+            }
+        }
+
+        return count;
+    }
+}
+```
 
 
 
@@ -4171,7 +4249,119 @@ public class LRU缓存 {
 }
 ```
 
+# 图
 
+#### [802. 找到最终的安全状态](https://leetcode-cn.com/problems/find-eventual-safe-states/)
+
+难度中等47
+
+在有向图中, 我们从某个节点和每个转向处开始, 沿着图的有向边走。 如果我们到达的节点是终点 (即它没有连出的有向边), 我们停止。
+
+现在, 如果我们最后能走到终点，那么我们的起始节点是*最终安全*的。 更具体地说, 存在一个自然数 `K`, 无论选择从哪里开始行走, 我们走了不到 `K` 步后必能停止在一个终点。
+
+哪些节点最终是安全的？ 结果返回一个有序的数组。
+
+该有向图有 `N` 个节点，标签为 `0, 1, ..., N-1`, 其中 `N` 是 `graph` 的节点数. 图以以下的形式给出: `graph[i]` 是节点 `j` 的一个列表，满足 `(i, j)` 是图的一条有向边。
+
+```
+示例：
+输入：graph = [[1,2],[2,3],[5],[0],[5],[],[]]
+输出：[2,4,5,6]
+这里是上图的示意图。
+```
+
+![Illustration of graph](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/03/17/picture1.png)
+
+**提示：**
+
+- `graph` 节点数不超过 `10000`.
+- 图的边数不会超过 `32000`.
+- 每个 `graph[i]` 被排序为不同的整数列表， 在区间 `[0, graph.length - 1]` 中选取。
+
+```java
+public class Solution {
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        int n = graph.length;
+        boolean[] safe = new boolean[n];
+        List<HashSet<Integer>> copyG = new ArrayList<>();
+        List<HashSet<Integer>> reverseG = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            copyG.add(new HashSet<>());
+            reverseG.add(new HashSet<>());
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (graph[i].length == 0) {
+                queue.offer(i);
+            }
+            for (int j : graph[i]) {
+                copyG.get(i).add(j);
+                reverseG.get(j).add(i);
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            int j = queue.poll();
+            safe[j] = true;
+            for (int i : reverseG.get(j)) {
+                copyG.get(i).remove(j);
+                if (copyG.get(i).isEmpty()) {
+                    queue.offer(i);
+                }
+            }
+        }
+
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (safe[i]){
+                res.add(i);
+            }
+        }
+
+        return res;
+    }
+}
+```
+
+```java
+//package LeetcodeAlgorithm.N801_N900.N802找到最终安全的状态;
+public class Solution2 {
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        int len = graph.length;
+        int[] color = new int[len];
+
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < len; i++) {
+            if (dfs(i, color, graph)){
+                res.add(i);
+            }
+        }
+
+        return res;
+    }
+
+    private boolean dfs(int node, int[] color, int[][] graph) {
+        if (color[node] > 0){
+            return color[node] == 2;
+        }
+
+        color[node] = 1;
+        for (int neighbor : graph[node]) {
+            if (color[neighbor] == 2){
+                continue;
+            }
+            if (color[neighbor] == 1 || !dfs(neighbor, color, graph)){
+                return false;
+            }
+        }
+
+        color[node] = 2;
+        return true;
+    }
+}
+```
 
 
 
