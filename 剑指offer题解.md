@@ -496,53 +496,39 @@ class Solution {
 ```
 
 ```java
-public class Solution {
+class Solution {
+    private static final int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
-	public int longestIncreasingPath(int[][] matrix) {
+    public int longestIncreasingPath(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) return 0;
 
-		if (matrix == null || matrix.length < 1 || matrix[0].length < 1)
-			return 0;
+        int m = matrix.length, n = matrix[0].length;
+        int[][] cache = new int[m][n];
+        int max = 1;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int len = dfs(matrix, i, j, m, n, cache);
+                max = Math.max(len, max);
+            }
+        }
+        
+        return max;
+    }
 
-		int max = 0, n = matrix.length, m = matrix[0].length;
+    private int dfs(int[][] matrix, int i, int j, int m, int n, int[][] cache) {
+        if (cache[i][j] != 0) return cache[i][j];
 
-		// create a cache matrix
-		int[][] cache = new int[n][m];//cache存在i,j开始的矩阵最长递增路径
-
-		// dfs search on every element in matrix
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < m; j++) {
-				max = Math.max(dfs(matrix, Integer.MIN_VALUE, i, j, cache), max);
-			}
-		}
-		return max;
-	}
-
-	int dfs(int[][] matrix, int min, int i, int j, int[][] cache) {
-
-		// check boundary limits
-		if (i < 0 || j < 0 || i >= matrix.length || j >= matrix[0].length)
-			return 0;
-
-		// check min condition
-		if (matrix[i][j] <= min)
-			return 0;
-
-		// check into cache
-		if (cache[i][j] != 0)
-			return cache[i][j];
-
-		// update min
-		min = matrix[i][j];
-
-		// run dfs in all four directions
-		int a = dfs(matrix, min, i - 1, j, cache) + 1;
-		int b = dfs(matrix, min, i + 1, j, cache) + 1;
-		int c = dfs(matrix, min, i, j - 1, cache) + 1;
-		int d = dfs(matrix, min, i, j + 1, cache) + 1;
-
-		// find max and update cache
-		return  cache[i][j] = Math.max(a, Math.max(b, Math.max(c, d)));
-	}
+        int maxlen = 1;
+        for (int[] dir : dirs) {
+            int x = i + dir[0], y = j + dir[1];
+            if (x < 0 || x >= m || y < 0 || y >= n || matrix[x][y] <= matrix[i][j]) continue;
+            int len = 1 + dfs(matrix, x, y, m, n, cache);
+            maxlen = Math.max(maxlen, len);
+        }
+        
+        cache[i][j] = maxlen;
+        return maxlen;
+    }
 }
 ```
 
