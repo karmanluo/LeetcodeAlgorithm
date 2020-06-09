@@ -1,4 +1,4 @@
-package LeetcodeAlgorithm.N201_300.N207课程表;
+package LeetcodeAlgorithm.N201_300.N210课程表2;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Queue;
 
 public class Solution {
-    public boolean canFinish(int numCourses, int[][] prerequisites) {
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
         List<Integer>[] neigh = new List[numCourses];
         int[] indegree = new int[numCourses];
         for (int i = 0; i < numCourses; i++) neigh[i] = new ArrayList<>();
@@ -20,14 +20,18 @@ public class Solution {
             if (indegree[i] == 0) queue.offer(i);
         }
 
+        int[] res = new int[numCourses];
         int cnt = 0;
         for (; !queue.isEmpty(); cnt++) {
             int node = queue.poll();
+            res[cnt] = node;
             for (Integer neiNode : neigh[node]) {
                 if (--indegree[neiNode] == 0) queue.offer(neiNode);
             }
         }
+        if (cnt == numCourses)
+            return res;
 
-        return cnt == numCourses;
+        return new int[0];
     }
 }
