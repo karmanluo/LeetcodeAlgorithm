@@ -1,6 +1,7 @@
 package LeetcodeAlgorithm.N201_300.N207课程表;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 class Solution2 {
     public int[] findOrder(int numCourses, int[][] prerequisites) {
