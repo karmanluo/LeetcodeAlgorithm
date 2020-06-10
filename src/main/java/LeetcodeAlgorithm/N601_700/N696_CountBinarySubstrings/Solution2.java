@@ -1,4 +1,4 @@
-package LeetcodeAlgorithm.N696_CountBinarySubstrings;
+package LeetcodeAlgorithm.N601_700.N696_CountBinarySubstrings;
 
 public class Solution2 {
     public int countBinarySubstrings(String s) {
