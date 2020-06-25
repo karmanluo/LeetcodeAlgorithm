@@ -9362,7 +9362,6 @@ sumRegion(1, 2, 2, 4) -> 12
 3. 你可以假设 *row*1 ≤ *row*2 且 *col*1 ≤ *col*2。
 
 ```java
-package LeetcodeAlgorithm.N304RangeSumQuery2D;
 
 class NumMatrix {
     private int[][] dp;

@@ -1,5 +1,3 @@
-package LeetcodeAlgorithm.N304RangeSumQuery2D;
-
 class NumMatrix {
     private int[][] dp;
 
