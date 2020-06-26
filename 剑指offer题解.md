@@ -2954,17 +2954,15 @@ class Solution {
 ```java
 class Solution {
     public int searchInsert(int[] nums, int target) {
-        int start = 0, end = nums.length - 1;
-        
-        while(start <= end){
-            int mid = start + ((end - start) >>> 1);
-
-            if(nums[mid] == target)		return mid;
-            else if(nums[mid] > target)		end = mid - 1;
-            else	 start = mid + 1;
+        int len = nums.length;
+        int lo = 0, hi = len;
+        while (lo < hi) {
+            int mid = lo + (hi -lo) / 2;
+            if (nums[mid] >= target) hi = mid;
+            else lo = mid + 1;
         }
-		
-        return start;
+
+        return lo;
     }
 }
 ```
@@ -2995,41 +2993,30 @@ class Solution {
 
 ```java
 class Solution {
-    // returns leftmost (or rightmost) index at which `target` should be
-    // inserted in sorted array `nums` via binary search.
-    private int extremeInsertionIndex(int[] nums, int target, boolean left) {
-        int lo = 0;
-        int hi = nums.length;
-
-        while (lo < hi) {
-            int mid = (lo + hi) / 2;
-            if (nums[mid] > target || (left && target == nums[mid])) {
-                hi = mid;
-            }
-            else {
-                lo = mid+1;
-            }
-        }
-
-        return lo;
-    }
-
     public int[] searchRange(int[] nums, int target) {
         int[] targetRange = {-1, -1};
+        
+        int leftIndex = searchRangeBinarySearch(nums, target, true);
+        if (leftIndex == nums.length || nums[leftIndex] != target) return targetRange;
 
-        int leftIdx = extremeInsertionIndex(nums, target, true);
-
-        // assert that `leftIdx` is within the array bounds and that `target`
-        // is actually in `nums`.
-        if (leftIdx == nums.length || nums[leftIdx] != target) {
-            return targetRange;
-        }
-
-        targetRange[0] = leftIdx;
-        targetRange[1] = extremeInsertionIndex(nums, target, false)-1;
-
+        targetRange[0] = leftIndex;
+        targetRange[1] = searchRangeBinarySearch(nums, target, false) - 1;
         return targetRange;
     }
+
+    //该插入此数的第一个位置 true
+    //该插入此数的最后一个位置 false
+    public int searchRangeBinarySearch(int[] nums, int target, boolean flag) {
+        int lo = 0, hi = nums.length;
+
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (nums[mid] > target || (flag && nums[mid] == target)) hi = mid;
+            else lo = mid + 1;
+        }
+        return lo;
+    }
+    
 }
 ```
 
@@ -3069,16 +3056,16 @@ class Solution {
 ```java
 public class Solution {
     public int findPeakElement(int[] nums) {
-        int l = 0, r = nums.length - 1;
-        while (l < r) {
-            int mid = (l + r) / 2;
-            //哪个大，就把边界放在哪边，每次mid都是为了缩小边界
-            if (nums[mid] > nums[mid + 1])
-                r = mid;
-            else
-                l = mid + 1;
+        if (nums == null || nums.length == 0) return -1;
+
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (nums[mid] < nums[mid + 1]) lo = mid + 1;
+            else hi = mid;
         }
-        return l;
+        
+        return lo;
     }
 }
 ```
@@ -3134,6 +3121,24 @@ class Solution {
         }
 
         return false;
+    }
+}
+```
+
+```java
+public class Solution2 {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return false;
+        int m = matrix.length, n = matrix[0].length;
+        int lo = 0, hi = m * n - 1;
+
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (target > matrix[mid / n][mid % n]) lo = mid + 1;
+            else hi = mid;
+        }
+        //这里多了个判断，因此需要注意n的值不能为0，负责回出现by zero
+        return target == matrix[lo / n][lo % n] ? true : false;
     }
 }
 ```
@@ -9362,7 +9367,6 @@ sumRegion(1, 2, 2, 4) -> 12
 3. 你可以假设 *row*1 ≤ *row*2 且 *col*1 ≤ *col*2。
 
 ```java
-package LeetcodeAlgorithm.N304RangeSumQuery2D;
 
 class NumMatrix {
     private int[][] dp;
