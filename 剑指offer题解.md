@@ -3056,16 +3056,16 @@ class Solution {
 ```java
 public class Solution {
     public int findPeakElement(int[] nums) {
-        int l = 0, r = nums.length - 1;
-        while (l < r) {
-            int mid = (l + r) / 2;
-            //哪个大，就把边界放在哪边，每次mid都是为了缩小边界
-            if (nums[mid] > nums[mid + 1])
-                r = mid;
-            else
-                l = mid + 1;
+        if (nums == null || nums.length == 0) return -1;
+
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (nums[mid] < nums[mid + 1]) lo = mid + 1;
+            else hi = mid;
         }
-        return l;
+        
+        return lo;
     }
 }
 ```
@@ -3121,6 +3121,24 @@ class Solution {
         }
 
         return false;
+    }
+}
+```
+
+```java
+public class Solution2 {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return false;
+        int m = matrix.length, n = matrix[0].length;
+        int lo = 0, hi = m * n - 1;
+
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (target > matrix[mid / n][mid % n]) lo = mid + 1;
+            else hi = mid;
+        }
+        //这里多了个判断，因此需要注意n的值不能为0，负责回出现by zero
+        return target == matrix[lo / n][lo % n] ? true : false;
     }
 }
 ```
