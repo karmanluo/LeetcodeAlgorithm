@@ -3306,23 +3306,21 @@ class Solution {
 ```java
 class Solution {
     public int search(int[] nums, int target) {
-        int lo = 0, hi = nums.length - 1;
+        if (nums == null || nums.length == 0) return -1;
 
-        while(lo <= hi){//可能出现target不在数组中的时候，需要加上等号
-            int mid = lo + ((hi -lo) >>> 1);
-            
-            if(target == nums[mid]) return mid;
-            else if(nums[mid] < nums[hi]) {//中间小于右边，说明右半边有序
-                if(target > nums[mid] && target <= nums[hi])    lo = mid + 1;
-                else    hi = mid - 1;
-            }
-            else{//说明左边有序
-                if(target < nums[mid] && target >= nums[lo])    hi = mid - 1;
-                else    lo = mid + 1;
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >>> 1);
+            if (nums[mid] < nums[hi]) { //右边有序
+                if (target > nums[mid] && target <= nums[hi]) lo = mid + 1;
+                else hi = mid;
+            } else { //左边有序
+                if (target <= nums[mid] && target >= nums[lo]) hi = mid;
+                else lo = mid + 1; 
             }
         }
 
-        return -1;
+        return nums[lo] == target ? lo : -1;
     }
 }
 ```
@@ -3357,26 +3355,22 @@ class Solution {
 ```java
 class Solution {
     public boolean search(int[] nums, int target) {
-        int lo = 0, hi = nums.length - 1;
+        if (nums == null || nums.length == 0) return false;
 
-        while(lo <= hi){//可能出现target不在数组中的时候，需要加上等号
-            int mid = lo + ((hi -lo) >>> 1);
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >>> 1);
             
-            if(target == nums[mid]) return true;
-            else if(nums[mid] < nums[hi]) {//中间小于右边，说明右半边有序
-                if(target > nums[mid] && target <= nums[hi])    lo = mid + 1;
-                else    hi = mid - 1;
-            }
-            else if(nums[mid] > nums[hi]){//说明左边有序
-                if(target < nums[mid] && target >= nums[lo])    hi = mid - 1;
-                else    lo = mid + 1;
-            }else{
-                //太牛皮了，无法判断的情况转化为可判断的情况即可
-                hi--;
-            }
+            if(nums[mid] > nums[hi]) { //左边有序
+                if (target >= nums[lo] && target <= nums[mid]) hi = mid;
+                else lo = mid + 1;
+            } else if (nums[mid] < nums[hi]) { //右边有序
+                if (target > nums[mid] && target <= nums[hi]) lo = mid + 1;
+                else hi = mid;
+            } else  hi--;
         }
 
-        return false;
+        return nums[lo] == target;
     }
 }
 ```
