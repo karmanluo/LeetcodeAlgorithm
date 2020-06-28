@@ -2084,46 +2084,42 @@ public class Solution {
 ```
 
 ```java
-public class Solution3 {
-    //堆排序
-    public void heapSort(int[] arr) {
-        //将待排序的序列排成一个大顶堆
-        for (int i = arr.length / 2 - 1; i >= 0 ; i--) {
-            heapAdjust(arr, i, arr.length);//调整的节点i以后的树的变化
+class Solution {
+    public int[] sortArray(int[] nums) {
+        int len = nums.length;
+        //调整为大顶堆
+        int start = (len - 1) / 2;
+        for (int i = start; i >= 0; i--) {
+            heapify(nums, len, i);
         }
-        // 逐步将每个最大值的根节点与末尾元素交换，并且再调整二叉树，使其成为大顶堆
-        for (int i = arr.length - 1; i > 0; i--) {
-            swap(arr, i, 0); // 将堆顶记录和当前未经排序子序列的最后一个记录交换
-            heapAdjust(arr, 0, i);
+
+        //取最大放最后，重新调整
+        for (int i = len - 1; i >= 0; i--) {
+            swap(nums, 0, i);
+            heapify(nums, i, 0);
         }
+
+        return nums;
     }
 
-    private void swap(int[] arr, int index1, int index2) {
-        int tmp = arr[index1];
-        arr[index1] = arr[index2];
-        arr[index2] = tmp;
-    }
-
-    private void heapAdjust(int[] arr, int i, int n) {
-        int father;
-        int childIndex;
-        for (father = arr[i]; leftChild(i) < n; i = childIndex){
-            childIndex = leftChild(i);
-            if (childIndex != n - 1 && arr[childIndex] < arr[childIndex + 1]){
-                childIndex++;
-            }
-            if (arr[childIndex] > arr[i]){
-                arr[i] = arr[childIndex];
-            }else {
-                break;
-            }
-            arr[childIndex] = father;
+    //n 数组长度  i index为i
+    public void heapify(int[] nums, int n, int i) { 
+        int c1 = 2 * i + 1, c2 = 2 * i + 2;
+        int max = i;
+        if (c1 < n && nums[c1] > nums[max]) max = c1;
+        if (c2 < n && nums[c2] > nums[max]) max = c2;
+        if (max != i) {
+            swap(nums, i, max);
+            heapify(nums, n, max);
         }
     }
 
-    private int leftChild(int i) {
-        return 2 * i + 1;
+    public void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
     }
+
 }
 ```
 
