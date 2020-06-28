@@ -1,35 +1,20 @@
 package LeetcodeAlgorithm.N0___100.N84_LargestRectangleInHistogram;
-
+//暴力法
 class Solution {
     public int largestRectangleArea(int[] heights) {
-        if (heights == null || heights.length == 0)
-            return 0;
-        int[] lessFromLeft = new int[heights.length];
-        int[] lessFromRight = new int[heights.length];
-        lessFromLeft[0] = -1;
-        lessFromRight[heights.length - 1] = heights.length;
-        int max = 0;
+        int maxArea = 0;
+        int len = heights.length;
 
-        for (int i = 1; i < heights.length; i++) {
-            int p = i - 1;
-            while (p >= 0 && heights[p] >= heights[i]){
-                p = lessFromLeft[p];
-            }
-            lessFromLeft[i] = p;
+        for (int i = 0; i < len; i++) {
+            int h = heights[i], w = 1;
+            int j = i;
+            while (++j < len && heights[j] >= h) w++;
+            j = i;
+            while (--j >= 0 && heights[j] >= h) w++;
+            maxArea = Math.max(maxArea, h * w);
         }
 
-        for (int i = heights.length - 2; i >= 0; i--) {
-            int p = i + 1;
-            while (p < heights.length && heights[p] >= heights[i]){
-                p = lessFromRight[p];
-            }
-            lessFromRight[i] = p;
-        }
-
-        for (int i = 0; i < heights.length; i++) {
-            max = Math.max(max, heights[i] * (lessFromRight[i] - lessFromLeft[i] - 1));
-        }
-        return max;
+        return maxArea;
     }
 }
 
