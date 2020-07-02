@@ -84,6 +84,6 @@ public class prodConsumer_BlockingQueueDemo {
         try { TimeUnit.SECONDS.sleep(5); } catch (InterruptedException e) {  e.printStackTrace(); }
         System.out.println();
         System.out.println(Thread.currentThread().getName()+"\t5秒钟时间到，主线程叫停");
-        myResource.stop();
+        //myResource.stop();
     }
 }
