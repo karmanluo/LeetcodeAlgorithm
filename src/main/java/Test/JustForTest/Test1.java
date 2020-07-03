@@ -24,5 +24,7 @@ public class Test1 {
         map.put(1, 2);
         System.out.println(map.get(1));
 
+        double a = 3.14;
+        System.out.println(a / 2);
     }
 }
