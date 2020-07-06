@@ -33,6 +33,7 @@ public class test {
         map.put(1, 3);
         map.put(1, 4);
         map.put(2, 2);
+
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
             System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
         }
