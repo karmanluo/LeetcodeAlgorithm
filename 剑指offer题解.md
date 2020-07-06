@@ -2,6 +2,105 @@
 [TOC]
 # 剑指offer题解
 
+
+
+# 字符串
+
+#### [8. 字符串转换整数 (atoi)](https://leetcode-cn.com/problems/string-to-integer-atoi/)
+
+难度中等711
+
+请你来实现一个 `atoi` 函数，使其能将字符串转换成整数。
+
+首先，该函数会根据需要丢弃无用的开头空格字符，直到寻找到第一个非空格的字符为止。接下来的转化规则如下：
+
+- 如果第一个非空字符为正或者负号时，则将该符号与之后面尽可能多的连续数字字符组合起来，形成一个有符号整数。
+- 假如第一个非空字符是数字，则直接将其与之后连续的数字字符组合起来，形成一个整数。
+- 该字符串在有效的整数部分之后也可能会存在多余的字符，那么这些字符可以被忽略，它们对函数不应该造成影响。
+
+注意：假如该字符串中的第一个非空格字符不是一个有效整数字符、字符串为空或字符串仅包含空白字符时，则你的函数不需要进行转换，即无法进行有效转换。
+
+在任何情况下，若函数不能进行有效的转换时，请返回 0 。
+
+**提示：**
+
+- 本题中的空白字符只包括空格字符 `' '` 。
+- 假设我们的环境只能存储 32 位大小的有符号整数，那么其数值范围为 [−231, 231 − 1]。如果数值超过这个范围，请返回  INT_MAX (231 − 1) 或 INT_MIN (−231) 。
+
+ 
+
+**示例 1:**
+
+```
+输入: "42"
+输出: 42
+```
+
+**示例 2:**
+
+```
+输入: "   -42"
+输出: -42
+解释: 第一个非空白字符为 '-', 它是一个负号。
+     我们尽可能将负号与后面所有连续出现的数字组合起来，最后得到 -42 。
+```
+
+**示例 3:**
+
+```
+输入: "4193 with words"
+输出: 4193
+解释: 转换截止于数字 '3' ，因为它的下一个字符不为数字。
+```
+
+**示例 4:**
+
+```
+输入: "words and 987"
+输出: 0
+解释: 第一个非空字符是 'w', 但它不是数字或正、负号。
+     因此无法执行有效的转换。
+```
+
+**示例 5:**
+
+```
+输入: "-91283472332"
+输出: -2147483648
+解释: 数字 "-91283472332" 超过 32 位有符号整数范围。 
+     因此返回 INT_MIN (−231) 。
+```
+
+```java
+class Solution {
+    public int myAtoi(String str) {
+        if (str == null || str.isEmpty())   return 0;
+        
+        int i = 0, factor = 1, sum = 0;
+        while (i < str.length() && str.charAt(i) == ' ')                    i++;
+        if(i == str.length())   return 0;
+        
+        if (str.charAt(i) == '-' || str.charAt(i) == '+') {
+            factor = (str.charAt(i) == '-' ? -1 : 1);
+            i++;
+        }
+        
+        while(i < str.length() && str.charAt(i) >= '0' && str.charAt(i) <= '9') {
+            if (sum > Integer.MAX_VALUE / 10 || (sum == Integer.MAX_VALUE / 10 && str.charAt(i) - '0' > 
+                                                Integer.MAX_VALUE % 10)) {
+                return factor == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            }
+            sum = sum * 10 + (str.charAt(i) - '0');
+            i++;
+        }
+        
+        return factor * sum;
+    }
+}
+```
+
+
+
 # 并查集
 
 #### [547. 朋友圈](https://leetcode-cn.com/problems/friend-circles/)
@@ -397,53 +496,39 @@ class Solution {
 ```
 
 ```java
-public class Solution {
+class Solution {
+    private static final int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
-	public int longestIncreasingPath(int[][] matrix) {
+    public int longestIncreasingPath(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) return 0;
 
-		if (matrix == null || matrix.length < 1 || matrix[0].length < 1)
-			return 0;
+        int m = matrix.length, n = matrix[0].length;
+        int[][] cache = new int[m][n];
+        int max = 1;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int len = dfs(matrix, i, j, m, n, cache);
+                max = Math.max(len, max);
+            }
+        }
+        
+        return max;
+    }
 
-		int max = 0, n = matrix.length, m = matrix[0].length;
+    private int dfs(int[][] matrix, int i, int j, int m, int n, int[][] cache) {
+        if (cache[i][j] != 0) return cache[i][j];
 
-		// create a cache matrix
-		int[][] cache = new int[n][m];//cache存在i,j开始的矩阵最长递增路径
-
-		// dfs search on every element in matrix
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < m; j++) {
-				max = Math.max(dfs(matrix, Integer.MIN_VALUE, i, j, cache), max);
-			}
-		}
-		return max;
-	}
-
-	int dfs(int[][] matrix, int min, int i, int j, int[][] cache) {
-
-		// check boundary limits
-		if (i < 0 || j < 0 || i >= matrix.length || j >= matrix[0].length)
-			return 0;
-
-		// check min condition
-		if (matrix[i][j] <= min)
-			return 0;
-
-		// check into cache
-		if (cache[i][j] != 0)
-			return cache[i][j];
-
-		// update min
-		min = matrix[i][j];
-
-		// run dfs in all four directions
-		int a = dfs(matrix, min, i - 1, j, cache) + 1;
-		int b = dfs(matrix, min, i + 1, j, cache) + 1;
-		int c = dfs(matrix, min, i, j - 1, cache) + 1;
-		int d = dfs(matrix, min, i, j + 1, cache) + 1;
-
-		// find max and update cache
-		return  cache[i][j] = Math.max(a, Math.max(b, Math.max(c, d)));
-	}
+        int maxlen = 1;
+        for (int[] dir : dirs) {
+            int x = i + dir[0], y = j + dir[1];
+            if (x < 0 || x >= m || y < 0 || y >= n || matrix[x][y] <= matrix[i][j]) continue;
+            int len = 1 + dfs(matrix, x, y, m, n, cache);
+            maxlen = Math.max(maxlen, len);
+        }
+        
+        cache[i][j] = maxlen;
+        return maxlen;
+    }
 }
 ```
 
@@ -1999,51 +2084,40 @@ public class Solution {
 [堆排序参考链接，博客详细原文](//https://blog.csdn.net/zdp072/article/details/44227317)
 
 ```java
-public class Solution {
-    public void heapSort(int[] arr) {
-        //将待排序的序列排成一个大顶堆
-        buildHeap(arr, arr.length);
-
-        // 逐步将每个最大值的根节点与末尾元素交换，并且再调整二叉树，使其成为大顶堆
-        for (int i = arr.length - 1; i > 0; i--) {
-            swap(arr, i, 0); // 将堆顶记录和当前未经排序子序列的最后一个记录交换
-            heapify(arr, 0, i);
+class Solution {
+    public int[] sortArray(int[] nums) {
+        int len = nums.length;
+        //调整为大顶堆
+        int start = (len - 1) / 2;
+        for (int i = start; i >= 0; i--) {
+            heapify(nums, len, i);
         }
+
+        //取最大放最后，重新调整
+        for (int i = len - 1; i >= 0; i--) {
+            swap(nums, 0, i);
+            heapify(nums, i, 0);
+        }
+        return nums;
     }
 
-    private void buildHeap(int[] arr, int n){
-        int lastIndex = n - 1;
-        int parent = (lastIndex - 1) / 2;
-
-        for (int i = parent; i >= 0; i--) {
-            heapify(arr, i, n);
-        }
-    }
-
-    private void heapify(int[] arr, int i, int n) {
-        if (i >= n)  return;
-
+    //n 数组长度  i index为i
+    public void heapify(int[] nums, int n, int i) { 
+        int c1 = 2 * i + 1, c2 = 2 * i + 2;
         int max = i;
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
-        if (left < n && arr[left] > arr[max]){
-            max = left;
-        }
-        if (right < n && arr[right] > arr[max]){
-            max = right;
-        }
-        if (max != i){
-            swap(arr, i, max);
-            heapify(arr, max, n);
+        if (c1 < n && nums[c1] > nums[max]) max = c1;
+        if (c2 < n && nums[c2] > nums[max]) max = c2;
+        if (max != i) {
+            swap(nums, i, max);
+            heapify(nums, n, max);
         }
     }
 
-    private void swap(int[] arr, int index1, int index2) {
-        int tmp = arr[index1];
-        arr[index1] = arr[index2];
-        arr[index2] = tmp;
+    public void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
     }
-
 }
 ```
 
@@ -2448,7 +2522,7 @@ public class Solution2 {
 
 
 
-#### [532逆序对](https://www.lintcode.com/problem/reverse-pairs/description)
+#### [LintCode532逆序对](https://www.lintcode.com/problem/reverse-pairs/description)
 
 在数组中的两个数字如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。给你一个数组，求出这个数组中逆序对的总数。
 概括：如果a[i] > a[j] 且 i < j， a[i] 和 a[j] 构成一个逆序对。
@@ -2517,7 +2591,85 @@ public class Solution {
 }
 ```
 
+```java
+package 剑指offer.N51数组中的逆序对;
 
+public class Solution {
+    public int reversePairs(int[] nums) {
+        int len = nums.length;
+
+        if (len < 2) {
+            return 0;
+        }
+
+        int[] copy = new int[len];
+        for (int i = 0; i < len; i++) {
+            copy[i] = nums[i];
+        }
+
+        int[] temp = new int[len];
+        return reversePairs(copy, 0, len - 1, temp);
+    }
+
+    /**
+     * 在nums[left...right]之间计算逆序对的个数
+     *
+     * @param nums
+     * @param left
+     * @param right
+     * @param temp
+     * @return
+     */
+    private int reversePairs(int[] nums, int left, int right, int[] temp) {
+        if (left == right) {
+            return 0;
+        }
+
+        int mid = left + ((right - left) >>> 1);
+        int leftPairs = reversePairs(nums, left, mid, temp);
+        int rightPairs = reversePairs(nums, mid + 1, right, temp);
+
+        if (nums[mid] <= nums[mid + 1]) {
+            return leftPairs + rightPairs;
+        }
+
+        int crossPairs = mergeAndCount(nums, left, mid, right, temp);
+
+        return leftPairs + rightPairs + crossPairs;
+    }
+
+    private int mergeAndCount(int[] nums, int left, int mid, int right, int[] temp) {
+        //全局使用一个辅助数组，为了避免反复创建数组增加空间开销，创建销毁需要占用资源
+        for (int i = left; i <= right; i++) {
+            temp[i] = nums[i];
+        }
+
+        int i = left;
+        int j = mid + 1;
+
+        int count = 0;
+        for (int k = left; k <= right; k++) {
+
+            if (i == mid + 1) {
+                nums[k] = temp[j];
+                j++;
+            } else if (j == right + 1) {
+                nums[k] = temp[i];
+                i++;
+            } else if (temp[i] <= temp[j]) { //这里相等保证的是归并排序的稳定
+                nums[k] = temp[i];
+                i++;
+            } else {
+                nums[k] = temp[j];
+                j++;
+                count += (mid - i + 1);
+            }
+        }
+
+        return count;
+    }
+}
+```
 
 
 
@@ -2654,33 +2806,106 @@ class Solution {
 //拓扑排序
 class Solution {
     public boolean canFinish(int numCourses, int[][] prerequisites) {
+        List<Integer>[] neigh = new List[numCourses];
         int[] indegree = new int[numCourses];
-        Queue<Integer> queue = new LinkedList<Integer>();
+        for (int i = 0; i < numCourses; i++) neigh[i] = new ArrayList<>();
         for (int[] pair : prerequisites) {
+            neigh[pair[1]].add(pair[0]);
             indegree[pair[0]]++;
         }
-        for (int i = 0; i < indegree.length; i++) {
-            if (indegree[i] == 0) {
-                queue.add(i);
+        
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) queue.offer(i);
+        }
+        
+        int cnt = 0;
+        for (; !queue.isEmpty(); cnt++) {
+            int node = queue.poll();
+            for (Integer neiNode : neigh[node]) {
+                if (--indegree[neiNode] == 0) queue.offer(neiNode);
             }
         }
-        int select = 0;
-        while (!queue.isEmpty()) {
-            select++;
-            int course = queue.poll();
-            for (int[] pair : prerequisites) {
-                if (pair[1] == course) {
-                    indegree[pair[0]]--;
-                    if (indegree[pair[0]] == 0) {
-                        queue.add(pair[0]);
-                    }
-                }
-            }
-        }
-        return numCourses == select;
+        
+        return cnt == numCourses;
     }
 }
 ```
+
+#### [210. 课程表 II](https://leetcode-cn.com/problems/course-schedule-ii/)
+
+难度中等208
+
+现在你总共有 *n* 门课需要选，记为 `0` 到 `n-1`。
+
+在选修某些课程之前需要一些先修课程。 例如，想要学习课程 0 ，你需要先完成课程 1 ，我们用一个匹配来表示他们: `[0,1]`
+
+给定课程总量以及它们的先决条件，返回你为了学完所有课程所安排的学习顺序。
+
+可能会有多个正确的顺序，你只要返回一种就可以了。如果不可能完成所有课程，返回一个空数组。
+
+**示例 1:**
+
+```
+输入: 2, [[1,0]] 
+输出: [0,1]
+解释: 总共有 2 门课程。要学习课程 1，你需要先完成课程 0。因此，正确的课程顺序为 [0,1] 。
+```
+
+**示例 2:**
+
+```
+输入: 4, [[1,0],[2,0],[3,1],[3,2]]
+输出: [0,1,2,3] or [0,2,1,3]
+解释: 总共有 4 门课程。要学习课程 3，你应该先完成课程 1 和课程 2。并且课程 1 和课程 2 都应该排在课程 0 之后。
+     因此，一个正确的课程顺序是 [0,1,2,3] 。另一个正确的排序是 [0,2,1,3] 。
+```
+
+**说明:**
+
+1. 输入的先决条件是由**边缘列表**表示的图形，而不是邻接矩阵。详情请参见[图的表示法](http://blog.csdn.net/woaidapaopao/article/details/51732947)。
+2. 你可以假定输入的先决条件中没有重复的边。
+
+**提示:**
+
+1. 这个问题相当于查找一个循环是否存在于有向图中。如果存在循环，则不存在拓扑排序，因此不可能选取所有课程进行学习。
+2. [通过 DFS 进行拓扑排序](https://www.coursera.org/specializations/algorithms) - 一个关于Coursera的精彩视频教程（21分钟），介绍拓扑排序的基本概念。
+3. 拓扑排序也可以通过 [BFS](https://baike.baidu.com/item/宽度优先搜索/5224802?fr=aladdin&fromid=2148012&fromtitle=广度优先搜索) 完成。
+
+```java
+class Solution {
+     public int[] findOrder(int numCourses, int[][] prerequisites) {
+        List<Integer>[] neigh = new List[numCourses];
+        int[] indegree = new int[numCourses];
+        for (int i = 0; i < numCourses; i++) neigh[i] = new ArrayList<>();
+        for (int[] pair : prerequisites) {
+            neigh[pair[1]].add(pair[0]);
+            indegree[pair[0]]++;
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) queue.offer(i);
+        }
+
+        int[] res = new int[numCourses];
+        int cnt = 0;
+        for (; !queue.isEmpty(); cnt++) {
+            int node = queue.poll();
+            res[cnt] = node;
+            for (Integer neiNode : neigh[node]) {
+                if (--indegree[neiNode] == 0) queue.offer(neiNode);
+            }
+        }
+        if (cnt == numCourses)
+            return res;
+        
+        return new int[0];
+    }
+}
+```
+
+
 
 # 二分
 
@@ -2723,17 +2948,15 @@ class Solution {
 ```java
 class Solution {
     public int searchInsert(int[] nums, int target) {
-        int start = 0, end = nums.length - 1;
-        
-        while(start <= end){
-            int mid = start + ((end - start) >>> 1);
-
-            if(nums[mid] == target)		return mid;
-            else if(nums[mid] > target)		end = mid - 1;
-            else	 start = mid + 1;
+        int len = nums.length;
+        int lo = 0, hi = len;
+        while (lo < hi) {
+            int mid = lo + (hi -lo) / 2;
+            if (nums[mid] >= target) hi = mid;
+            else lo = mid + 1;
         }
-		
-        return start;
+
+        return lo;
     }
 }
 ```
@@ -2764,41 +2987,30 @@ class Solution {
 
 ```java
 class Solution {
-    // returns leftmost (or rightmost) index at which `target` should be
-    // inserted in sorted array `nums` via binary search.
-    private int extremeInsertionIndex(int[] nums, int target, boolean left) {
-        int lo = 0;
-        int hi = nums.length;
-
-        while (lo < hi) {
-            int mid = (lo + hi) / 2;
-            if (nums[mid] > target || (left && target == nums[mid])) {
-                hi = mid;
-            }
-            else {
-                lo = mid+1;
-            }
-        }
-
-        return lo;
-    }
-
     public int[] searchRange(int[] nums, int target) {
         int[] targetRange = {-1, -1};
+        
+        int leftIndex = searchRangeBinarySearch(nums, target, true);
+        if (leftIndex == nums.length || nums[leftIndex] != target) return targetRange;
 
-        int leftIdx = extremeInsertionIndex(nums, target, true);
-
-        // assert that `leftIdx` is within the array bounds and that `target`
-        // is actually in `nums`.
-        if (leftIdx == nums.length || nums[leftIdx] != target) {
-            return targetRange;
-        }
-
-        targetRange[0] = leftIdx;
-        targetRange[1] = extremeInsertionIndex(nums, target, false)-1;
-
+        targetRange[0] = leftIndex;
+        targetRange[1] = searchRangeBinarySearch(nums, target, false) - 1;
         return targetRange;
     }
+
+    //该插入此数的第一个位置 true
+    //该插入此数的最后一个位置 false
+    public int searchRangeBinarySearch(int[] nums, int target, boolean flag) {
+        int lo = 0, hi = nums.length;
+
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (nums[mid] > target || (flag && nums[mid] == target)) hi = mid;
+            else lo = mid + 1;
+        }
+        return lo;
+    }
+    
 }
 ```
 
@@ -2838,16 +3050,16 @@ class Solution {
 ```java
 public class Solution {
     public int findPeakElement(int[] nums) {
-        int l = 0, r = nums.length - 1;
-        while (l < r) {
-            int mid = (l + r) / 2;
-            //哪个大，就把边界放在哪边，每次mid都是为了缩小边界
-            if (nums[mid] > nums[mid + 1])
-                r = mid;
-            else
-                l = mid + 1;
+        if (nums == null || nums.length == 0) return -1;
+
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (nums[mid] < nums[mid + 1]) lo = mid + 1;
+            else hi = mid;
         }
-        return l;
+        
+        return lo;
     }
 }
 ```
@@ -2903,6 +3115,24 @@ class Solution {
         }
 
         return false;
+    }
+}
+```
+
+```java
+public class Solution2 {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return false;
+        int m = matrix.length, n = matrix[0].length;
+        int lo = 0, hi = m * n - 1;
+
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >> 1);
+            if (target > matrix[mid / n][mid % n]) lo = mid + 1;
+            else hi = mid;
+        }
+        //这里多了个判断，因此需要注意n的值不能为0，负责回出现by zero
+        return target == matrix[lo / n][lo % n] ? true : false;
     }
 }
 ```
@@ -3070,23 +3300,21 @@ class Solution {
 ```java
 class Solution {
     public int search(int[] nums, int target) {
-        int lo = 0, hi = nums.length - 1;
+        if (nums == null || nums.length == 0) return -1;
 
-        while(lo <= hi){//可能出现target不在数组中的时候，需要加上等号
-            int mid = lo + ((hi -lo) >>> 1);
-            
-            if(target == nums[mid]) return mid;
-            else if(nums[mid] < nums[hi]) {//中间小于右边，说明右半边有序
-                if(target > nums[mid] && target <= nums[hi])    lo = mid + 1;
-                else    hi = mid - 1;
-            }
-            else{//说明左边有序
-                if(target < nums[mid] && target >= nums[lo])    hi = mid - 1;
-                else    lo = mid + 1;
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >>> 1);
+            if (nums[mid] < nums[hi]) { //右边有序
+                if (target > nums[mid] && target <= nums[hi]) lo = mid + 1;
+                else hi = mid;
+            } else { //左边有序
+                if (target <= nums[mid] && target >= nums[lo]) hi = mid;
+                else lo = mid + 1; 
             }
         }
 
-        return -1;
+        return nums[lo] == target ? lo : -1;
     }
 }
 ```
@@ -3121,26 +3349,22 @@ class Solution {
 ```java
 class Solution {
     public boolean search(int[] nums, int target) {
-        int lo = 0, hi = nums.length - 1;
+        if (nums == null || nums.length == 0) return false;
 
-        while(lo <= hi){//可能出现target不在数组中的时候，需要加上等号
-            int mid = lo + ((hi -lo) >>> 1);
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >>> 1);
             
-            if(target == nums[mid]) return true;
-            else if(nums[mid] < nums[hi]) {//中间小于右边，说明右半边有序
-                if(target > nums[mid] && target <= nums[hi])    lo = mid + 1;
-                else    hi = mid - 1;
-            }
-            else if(nums[mid] > nums[hi]){//说明左边有序
-                if(target < nums[mid] && target >= nums[lo])    hi = mid - 1;
-                else    lo = mid + 1;
-            }else{
-                //太牛皮了，无法判断的情况转化为可判断的情况即可
-                hi--;
-            }
+            if(nums[mid] > nums[hi]) { //左边有序
+                if (target >= nums[lo] && target <= nums[mid]) hi = mid;
+                else lo = mid + 1;
+            } else if (nums[mid] < nums[hi]) { //右边有序
+                if (target > nums[mid] && target <= nums[hi]) lo = mid + 1;
+                else hi = mid;
+            } else  hi--;
         }
 
-        return false;
+        return nums[lo] == target;
     }
 }
 ```
@@ -3256,7 +3480,42 @@ public double findMedianSortedArrays(int[] nums1, int[] nums2) {
     }
 ```
 
+```java
+//关于i进行左右划分
+class Solution {
+    public double findMedianSortedArrays(int[] A, int[] B) {
+        int m = A.length, n = B.length;
+        if (m > n)  return findMedianSortedArrays(B, A);
 
+        int leftTotal = (m + n + 1) / 2;
+        int iMin = 0, iMax = m; // i 在 [0, m]的取值范围
+        while (iMin <= iMax) {
+            int i = (iMin + iMax) / 2;
+            int j = leftTotal - i;
+            if (j != 0 && i != m && B[j - 1] > A[i]) { // i 需要增大
+                iMin = i + 1;
+            }else if (i != 0 && j != n && A[i - 1] > B[j]) { // i 需要减小
+                iMax = i - 1;
+            }else { //满足要求  或者  进入了边界的情况
+                int maxLeft = 0;
+                if (i == 0) maxLeft = B[j - 1];
+                else if (j == 0) maxLeft = A[i - 1];
+                else maxLeft = Math.max(A[i - 1], B[j - 1]);
+                if ((m + n) % 2 == 1) return maxLeft;
+                
+                int minRight = 0;
+                if (i == m) minRight = B[j];
+                else if (j == n) minRight = A[i];
+                else minRight = Math.min(A[i], B[j]);
+                
+                return (maxLeft + minRight) / 2.0;
+            }
+        }
+        
+        return 0.0;
+    }
+}
+```
 
 
 
@@ -4176,12 +4435,518 @@ public class LRU缓存 {
 }
 ```
 
+# 图
 
+#### [802. 找到最终的安全状态](https://leetcode-cn.com/problems/find-eventual-safe-states/)
 
+难度中等47
+
+在有向图中, 我们从某个节点和每个转向处开始, 沿着图的有向边走。 如果我们到达的节点是终点 (即它没有连出的有向边), 我们停止。
+
+现在, 如果我们最后能走到终点，那么我们的起始节点是*最终安全*的。 更具体地说, 存在一个自然数 `K`, 无论选择从哪里开始行走, 我们走了不到 `K` 步后必能停止在一个终点。
+
+哪些节点最终是安全的？ 结果返回一个有序的数组。
+
+该有向图有 `N` 个节点，标签为 `0, 1, ..., N-1`, 其中 `N` 是 `graph` 的节点数. 图以以下的形式给出: `graph[i]` 是节点 `j` 的一个列表，满足 `(i, j)` 是图的一条有向边。
+
+```
+示例：
+输入：graph = [[1,2],[2,3],[5],[0],[5],[],[]]
+输出：[2,4,5,6]
+这里是上图的示意图。
+```
+
+![Illustration of graph](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/03/17/picture1.png)
+
+**提示：**
+
+- `graph` 节点数不超过 `10000`.
+- 图的边数不会超过 `32000`.
+- 每个 `graph[i]` 被排序为不同的整数列表， 在区间 `[0, graph.length - 1]` 中选取。
+
+```java
+public class Solution {
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        int n = graph.length;
+        boolean[] safe = new boolean[n];
+        List<HashSet<Integer>> copyG = new ArrayList<>();
+        List<HashSet<Integer>> reverseG = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            copyG.add(new HashSet<>());
+            reverseG.add(new HashSet<>());
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (graph[i].length == 0) {
+                queue.offer(i);
+            }
+            for (int j : graph[i]) {
+                copyG.get(i).add(j);
+                reverseG.get(j).add(i);
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            int j = queue.poll();
+            safe[j] = true;
+            for (int i : reverseG.get(j)) {
+                copyG.get(i).remove(j);
+                if (copyG.get(i).isEmpty()) {
+                    queue.offer(i);
+                }
+            }
+        }
+
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (safe[i]){
+                res.add(i);
+            }
+        }
+
+        return res;
+    }
+}
+```
+
+```java
+//package LeetcodeAlgorithm.N801_N900.N802找到最终安全的状态;
+public class Solution2 {
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        int len = graph.length;
+        int[] color = new int[len];
+
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < len; i++) {
+            if (dfs(i, color, graph)){
+                res.add(i);
+            }
+        }
+
+        return res;
+    }
+
+    private boolean dfs(int node, int[] color, int[][] graph) {
+        if (color[node] > 0){
+            return color[node] == 2;
+        }
+
+        color[node] = 1;
+        for (int neighbor : graph[node]) {
+            if (color[neighbor] == 2){
+                continue;
+            }
+            if (color[neighbor] == 1 || !dfs(neighbor, color, graph)){
+                return false;
+            }
+        }
+
+        color[node] = 2;
+        return true;
+    }
+}
+```
+
+#### [133. 克隆图](https://leetcode-cn.com/problems/clone-graph/)
+
+难度中等148
+
+给你无向 **[连通](https://baike.baidu.com/item/连通图/6460995?fr=aladdin)** 图中一个节点的引用，请你返回该图的 [**深拷贝**](https://baike.baidu.com/item/深拷贝/22785317?fr=aladdin)（克隆）。
+
+图中的每个节点都包含它的值 `val`（`int`） 和其邻居的列表（`list[Node]`）。
+
+```
+class Node {
+    public int val;
+    public List<Node> neighbors;
+}
+```
+
+ 
+
+**测试用例格式：**
+
+简单起见，每个节点的值都和它的索引相同。例如，第一个节点值为 1（`val = 1`），第二个节点值为 2（`val = 2`），以此类推。该图在测试用例中使用邻接列表表示。
+
+**邻接列表** 是用于表示有限图的无序列表的集合。每个列表都描述了图中节点的邻居集。
+
+给定节点将始终是图中的第一个节点（值为 1）。你必须将 **给定节点的拷贝** 作为对克隆图的引用返回。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/01/133_clone_graph_question.png)
+
+```
+输入：adjList = [[2,4],[1,3],[2,4],[1,3]]
+输出：[[2,4],[1,3],[2,4],[1,3]]
+解释：
+图中有 4 个节点。
+节点 1 的值是 1，它有两个邻居：节点 2 和 4 。
+节点 2 的值是 2，它有两个邻居：节点 1 和 3 。
+节点 3 的值是 3，它有两个邻居：节点 2 和 4 。
+节点 4 的值是 4，它有两个邻居：节点 1 和 3 。
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/01/graph.png)
+
+```
+输入：adjList = [[]]
+输出：[[]]
+解释：输入包含一个空列表。该图仅仅只有一个值为 1 的节点，它没有任何邻居。
+```
+
+**示例 3：**
+
+```
+输入：adjList = []
+输出：[]
+解释：这个图是空的，它不含任何节点。
+```
+
+**示例 4：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/01/graph-1.png)
+
+```
+输入：adjList = [[2],[1]]
+输出：[[2],[1]]
+```
+
+ 
+
+**提示：**
+
+1. 节点数不超过 100 。
+2. 每个节点值 `Node.val` 都是唯一的，`1 <= Node.val <= 100`。
+3. 无向图是一个[简单图](https://baike.baidu.com/item/简单图/1680528?fr=aladdin)，这意味着图中没有重复的边，也没有自环。
+4. 由于图是无向的，如果节点 *p* 是节点 *q* 的邻居，那么节点 *q* 也必须是节点 *p* 的邻居。
+5. 图是连通图，你可以从给定节点访问到所有节点。
+
+```JAVA
+class Node {
+    public int val;
+    public List<Node> neighbors;
+
+    public Node() {
+        val = 0;
+        neighbors = new ArrayList<Node>();
+    }
+
+    public Node(int _val) {
+        val = _val;
+        neighbors = new ArrayList<Node>();
+    }
+
+    public Node(int _val, ArrayList<Node> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+}
+
+public class Solution {
+    public Node cloneGraph(Node node) {
+        Map<Node, Node> visited = new HashMap<>();
+        return dfs(node, visited);
+    }
+
+    //DFS 遍历图
+    private Node dfs(Node node, Map<Node, Node> visited) {
+        if (node == null) return node;
+
+        if (visited.containsKey(node)) return visited.get(node);
+
+        // Create a clone for the given node.
+        // Note that we don't have cloned neighbors as of now, hence [].
+        Node clone = new Node(node.val, new ArrayList<>());
+
+        // The key is original node and value being the clone node.
+        visited.put(node, clone);
+
+        // Iterate through the neighbors to generate their clones
+        // and prepare a list of cloned neighbors to be added to the cloned node.
+        for (Node n : node.neighbors) {
+            clone.neighbors.add(dfs(n, visited));
+        }
+
+        return clone;
+    }
+}
+```
+
+```JAVA
+//BFS
+public class Solution2 {
+    public Node cloneGraph(Node node) {
+        if (node == null) return node;
+
+        Map<Node, Node> visited = new HashMap<>();
+        Node clone = new Node(node.val, new ArrayList<>());
+        visited.put(node, clone);
+
+        Deque<Node> queue = new LinkedList<>();
+        queue.offer(node);
+        while (!queue.isEmpty()) {
+            Node tmp = queue.poll();
+            for (Node neighbor : tmp.neighbors) {
+                if (!visited.containsKey(neighbor)) {
+                    visited.put(neighbor, new Node(neighbor.val, new ArrayList<>()));
+                    queue.offer(neighbor);
+                }
+                visited.get(tmp).neighbors.add(visited.get(neighbor));
+            }
+        }
+
+        return clone;
+    }
+}
+```
+
+#### [417. 太平洋大西洋水流问题](https://leetcode-cn.com/problems/pacific-atlantic-water-flow/)
+
+给定一个 `m x n` 的非负整数矩阵来表示一片大陆上各个单元格的高度。“太平洋”处于大陆的左边界和上边界，而“大西洋”处于大陆的右边界和下边界。
+
+规定水流只能按照上、下、左、右四个方向流动，且只能从高到低或者在同等高度上流动。
+
+请找出那些水流既可以流动到“太平洋”，又能流动到“大西洋”的陆地单元的坐标。
+
+ **提示：**
+
+1. 输出坐标的顺序不重要
+2. *m* 和 *n* 都小于150
+
+ **示例：**
+
+ 
+
+```
+给定下面的 5x5 矩阵:
+
+  太平洋 ~   ~   ~   ~   ~ 
+       ~  1   2   2   3  (5) *
+       ~  3   2   3  (4) (4) *
+       ~  2   4  (5)  3   1  *
+       ~ (6) (7)  1   4   5  *
+       ~ (5)  1   1   2   4  *
+          *   *   *   *   * 大西洋
+
+返回:
+
+[[0, 4], [1, 3], [1, 4], [2, 2], [3, 0], [3, 1], [4, 0]] (上图中带括号的单元).
+```
+
+```java
+//DFS 解法
+public class Solution {
+    public List<List<Integer>> pacificAtlantic(int[][] matrix) {
+        List<List<Integer>> res = new ArrayList<>();
+        int m = matrix.length;
+        if (m == 0) {
+            return res;
+        }
+
+        int n = matrix[0].length;
+        boolean[][] pac = new boolean[m][n];
+        boolean[][] atl = new boolean[m][n];
+        int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1 ,0}};
+        for (int i = 0; i < m; i++) {
+            dfs(matrix, dir, pac, i, 0);    //第一列
+            dfs(matrix, dir, atl, i, n - 1);    //最后一列
+        }
+
+        for (int i = 0; i < n; i++) {
+            dfs(matrix, dir, pac, 0, i);        //  第一行
+            dfs(matrix, dir, atl, m - 1, i);    //  最后一行
+        }
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pac[i][j] && atl[i][j]) {
+                    res.add(Arrays.asList(i, j));
+                }
+            }
+        }
+
+        return res;
+    }
+
+    private void dfs(int[][] matrix, int[][] dir, boolean[][] visited, int i, int j) {
+        int m = matrix.length, n = matrix[0].length;
+        visited[i][j] = true;
+        for (int[] d : dir) {
+            int x = i + d[0];
+            int y = j + d[1];
+            if (x < 0 || y < 0 || x >= m || y >= n || visited[x][y] || matrix[i][j] > matrix[x][y]) {
+                continue;
+            }
+            dfs(matrix, dir, visited, x, y);
+        }
+    }
+}
+```
+
+```java
+//BFS
+public class Solution2 {
+    int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    public List<List<Integer>> pacificAtlantic(int[][] matrix) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (matrix == null || matrix.length == 0) return res;
+
+        int m = matrix.length, n = matrix[0].length;
+        boolean[][] pac = new boolean[m][n];
+        boolean[][] atl = new boolean[m][n];
+        Queue<int[]> pQueue = new LinkedList<>();
+        Queue<int[]> aQueue = new LinkedList<>();
+        for (int i = 0; i < m; i++) {
+            pQueue.offer(new int[]{i, 0});
+            aQueue.offer(new int[]{i, n - 1});
+            pac[i][0] = true;
+            atl[i][n - 1] = true;
+        }
+        for (int i = 0; i < n; i++) {
+            pQueue.offer(new int[]{0, i});
+            aQueue.offer(new int[]{m - 1, i});
+            pac[0][i] = true;
+            atl[m - 1][i] = true;
+        }
+        bfs(matrix, pQueue, pac);
+        bfs(matrix, aQueue, atl);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pac[i][j] && atl[i][j])
+                    res.add(Arrays.asList(i, j));
+            }
+        }
+
+        return res;
+    }
+
+    private void bfs(int[][] matrix, Queue<int[]> queue, boolean[][] visited) {
+        int m = matrix.length, n = matrix[0].length;
+        while (!queue.isEmpty()) {
+            int[] curr = queue.poll();
+            for (int[] d : dir) {
+                int x = curr[0] + d[0];
+                int y = curr[1] + d[1];
+                if (x < 0 || x >= m || y < 0 || y >= n || visited[x][y] ||
+                       matrix[x][y] < matrix[curr[0]][curr[1]]) {
+                    continue;
+                }
+                visited[x][y] = true;
+                queue.offer(new int[]{x, y});
+            }
+        }
+    }
+}
+```
 
 
 
 # 中位数/滑动窗口
+
+
+
+#### [76. 最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+
+难度困难553收藏分享切换为英文关注反馈
+
+给你一个字符串 S、一个字符串 T，请在字符串 S 里面找出：包含 T 所有字符的最小子串。
+
+**示例：**
+
+```
+输入: S = "ADOBECODEBANC", T = "ABC"
+输出: "BANC"
+```
+
+**说明：**
+
+- 如果 S 中不存这样的子串，则返回空字符串 `""`。
+- 如果 S 中存在这样的子串，我们保证它是唯一的答案。
+
+```java
+package LeetcodeAlgorithm.N0___100.N76_MinimumWindowSubstring;
+
+public class Solution2 {
+    public String minWindow(String s, String t) {
+        //winFreq   表示S的字串词频数组  会变化
+        //tFreq     表示T词频数组
+        //distance  表示滑动窗口内部包含T中的字符的个数
+        int sLen = s.length();
+        int tLen = t.length();
+
+        if (sLen == 0 || tLen == 0 || sLen < tLen) return "";
+
+        char[] charArrayS = s.toCharArray();
+        char[] charArrayT = t.toCharArray();
+
+        //ascii('z') = 122
+        int[] winFreq = new int[128];
+        int[] tFreq = new int[128];
+
+        for (char c : charArrayT) {
+            tFreq[c]++;
+        }
+
+        //滑动窗口内部包含多少T中的字符，对应字符频数超过不重复计算
+        int count = 0;
+        int minLen = sLen + 1;
+        int begin = 0;
+
+        int left = 0;
+        int right = 0;
+        // [left, right)
+        while (right < sLen) {
+            char r = charArrayS[right];
+            if (tFreq[r] == 0) {    //当前字符在t中没有出现过，右移
+                right++;
+                continue;   //不执行后面的逻辑, 直接开始下一次
+            }
+
+            if (winFreq[r] < tFreq[r]){
+                count++;
+            }
+            winFreq[r]++;
+            right++;
+
+            while (count == tLen){
+
+                if (right - left < minLen){
+                     minLen = right - left;
+                     begin = left;
+                }
+
+                char l = charArrayS[left];
+                if (tFreq[l] == 0){
+                    left++;
+                    continue;
+                }
+
+                //执行这里相当于left在里面
+                if (winFreq[l] == tFreq[l]){
+                    count--;
+                }
+                winFreq[l]--;
+                left++;
+            }
+        }
+
+        if (minLen == sLen + 1) return "";
+
+        return s.substring(begin, begin + minLen);
+    }
+}
+```
+
+
+
+
 
 #### [295. 数据流的中位数(大小堆)](https://leetcode-cn.com/problems/find-median-from-data-stream/)
 
@@ -7749,7 +8514,66 @@ class Solution {
 
 
 
-# DP解法
+# 动态规划
+
+
+
+#### [面试题60. n个骰子的点数](https://leetcode-cn.com/problems/nge-tou-zi-de-dian-shu-lcof/)
+
+把n个骰子扔在地上，所有骰子朝上一面的点数之和为s。输入n，打印出s的所有可能的值出现的概率。
+
+ 你需要用一个浮点数数组返回答案，其中第 i 个元素代表这 n 个骰子所能掷出的点数集合中第 i 小的那个的概率。
+
+ **示例 1:**
+
+```
+输入: 1
+输出: [0.16667,0.16667,0.16667,0.16667,0.16667,0.16667]
+```
+
+**示例 2:**
+
+```
+输入: 2
+输出: [0.02778,0.05556,0.08333,0.11111,0.13889,0.16667,0.13889,0.11111,0.08333,0.05556,0.02778]
+```
+
+ **限制：**
+
+```
+1 <= n <= 11
+```
+
+```java
+class Solution {
+    public double[] twoSum(int n) {
+        int[][] dp = new int[n + 1][6 * n + 1];
+
+        for (int s = 1; s <= 6; s++) {
+            dp[1][s] = 1;
+        }
+
+        for (int i = 2; i <= n; i++) {
+            for (int s = i; s <= 6 * i; s++) {
+                for (int d = 1; d <= 6; d++) {
+                    if (s - d < i - 1)  break;
+                    dp[i][s] += dp[i - 1][s - d];
+                }
+            }
+        }
+
+        double total = Math.pow(6.0, n);
+        double[] ans = new double[5 * n + 1];
+        for (int i = n; i <= 6 * n; i++) {
+            ans[i - n] = (double)dp[n][i] / total;
+        }
+
+        return ans;
+    }
+}
+```
+
+
 
 #### [53. 最大子序和](https://leetcode-cn.com/problems/maximum-subarray/)
 
@@ -8499,6 +9323,66 @@ class Solution {
 }
 ```
 
+#### [304. 二维区域和检索 - 矩阵不可变](https://leetcode-cn.com/problems/range-sum-query-2d-immutable/)
+
+难度中等82收藏分享切换为英文关注反馈
+
+给定一个二维矩阵，计算其子矩形范围内元素的总和，该子矩阵的左上角为 (*row*1, *col*1) ，右下角为 (*row*2, *col*2)。
+
+![Range Sum Query 2D](https://assets.leetcode-cn.com/aliyun-lc-upload/images/304.png)
+上图子矩阵左上角 (row1, col1) = **(2, 1)** ，右下角(row2, col2) = **(4, 3)，**该子矩形内元素的总和为 8。
+
+**示例:**
+
+```
+给定 matrix = [
+  [3, 0, 1, 4, 2],
+  [5, 6, 3, 2, 1],
+  [1, 2, 0, 1, 5],
+  [4, 1, 0, 1, 7],
+  [1, 0, 3, 0, 5]
+]
+
+sumRegion(2, 1, 4, 3) -> 8
+sumRegion(1, 1, 2, 2) -> 11
+sumRegion(1, 2, 2, 4) -> 12
+```
+
+**说明:**
+
+1. 你可以假设矩阵不可变。
+2. 会多次调用 *sumRegion* 方法*。*
+3. 你可以假设 *row*1 ≤ *row*2 且 *col*1 ≤ *col*2。
+
+```java
+
+class NumMatrix {
+    private int[][] dp;
+
+    public NumMatrix(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) return;
+
+        int m = matrix.length;
+        int n = matrix[0].length;
+        dp = new int[m + 1][n + 1];
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                dp[i][j] = dp[i][j - 1] + dp[i - 1][j] - dp[i - 1][j - 1] + matrix[i - 1][j - 1];
+            }
+        }
+    }
+
+    public int sumRegion(int row1, int col1, int row2, int col2) {
+        return dp[row2 + 1][col2 + 1] - dp[row2 + 1][col1] - dp[row1][col2 + 1] + dp[row1][col1];
+    }
+}
+```
+
+
+
+
+
 #### [354. 俄罗斯套娃信封问题(最长上升子序问题延伸)](https://leetcode-cn.com/problems/russian-doll-envelopes/)
 
 难度困难108收藏分享切换为英文关注反馈
@@ -9199,6 +10083,278 @@ class Solution {
         }
 
         return dp[len2];
+    }
+}
+```
+
+#### [1444. 切披萨的方案数](https://leetcode-cn.com/problems/number-of-ways-of-cutting-a-pizza/)
+
+难度困难18收藏分享切换为英文关注反馈
+
+给你一个 `rows x cols` 大小的矩形披萨和一个整数 `k` ，矩形包含两种字符： `'A'` （表示苹果）和 `'.'` （表示空白格子）。你需要切披萨 `k-1` 次，得到 `k` 块披萨并送给别人。
+
+切披萨的每一刀，先要选择是向垂直还是水平方向切，再在矩形的边界上选一个切的位置，将披萨一分为二。如果垂直地切披萨，那么需要把左边的部分送给一个人，如果水平地切，那么需要把上面的部分送给一个人。在切完最后一刀后，需要把剩下来的一块送给最后一个人。
+
+请你返回确保每一块披萨包含 **至少** 一个苹果的切披萨方案数。由于答案可能是个很大的数字，请你返回它对 10^9 + 7 取余的结果。
+
+ 
+
+**示例 1：**
+
+**![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/05/10/ways_to_cut_apple_1.png)**
+
+```
+输入：pizza = ["A..","AAA","..."], k = 3
+输出：3 
+解释：上图展示了三种切披萨的方案。注意每一块披萨都至少包含一个苹果。
+```
+
+**示例 2：**
+
+```
+输入：pizza = ["A..","AA.","..."], k = 3
+输出：1
+```
+
+**示例 3：**
+
+```
+输入：pizza = ["A..","A..","..."], k = 1
+输出：1
+```
+
+ 
+
+**提示：**
+
+- `1 <= rows, cols <= 50`
+- `rows == pizza.length`
+- `cols == pizza[i].length`
+- `1 <= k <= 10`
+- `pizza` 只包含字符 `'A'` 和 `'.'` 。
+
+```java
+package LeetcodeAlgorithm.N1444NumberofWaysofCuttingaPizza;
+
+public class Solution {
+    private int MOD = 1_000_000_007, m, n;
+    private Integer dp[][][];
+    private int preSum[][];
+
+    public int ways(String[] pizza, int k) {
+        m = pizza.length;
+        n = pizza[0].length();
+        dp = new Integer[k][m][n];
+        preSum = new int[m + 1][n + 1];
+
+        //这个直接就是以为i,j为左上角的时候，其和为多少
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                preSum[i][j] = preSum[i][j + 1] + preSum[i + 1][j] - preSum[i + 1][j + 1] + (pizza[i].charAt(j) == 'A' ? 1 : 0);
+            }
+        }
+
+        return dfs(0, 0, k - 1);
+    }
+
+    private int dfs(int x, int y, int cut) {
+        if (cut == 0 && preSum[x][y] > 0)   return 1;
+        if (preSum[x][y] == 0)  return 0;
+
+        if (dp[cut][x][y] != null)  return dp[cut][x][y];
+
+        int ans = 0;
+        //Cut horizontal
+        for (int i = x + 1; i < m; i++) {
+            if (preSum[x][y] - preSum[i][y] > 0){
+                ans = (ans + dfs(i, y, cut - 1)) % MOD;
+            }
+        }
+
+        //Cut vertical
+        for (int j = y + 1; j < n; j++) {
+            if (preSum[x][y] - preSum[x][j] > 0){
+                ans = (ans + dfs(x, j, cut - 1)) % MOD;
+            }
+        }
+
+        dp[cut][x][y] = ans;
+        return ans;
+    }
+}
+```
+
+#### [1449. 数位成本和为目标值的最大数字](https://leetcode-cn.com/problems/form-largest-integer-with-digits-that-add-up-to-target/)
+
+难度困难11收藏分享切换为英文关注反馈
+
+给你一个整数数组 `cost` 和一个整数 `target` 。请你返回满足如下规则可以得到的 **最大** 整数：
+
+- 给当前结果添加一个数位（`i + 1`）的成本为 `cost[i]` （`cost` 数组下标从 0 开始）。
+- 总成本必须恰好等于 `target` 。
+- 添加的数位中没有数字 0 。
+
+由于答案可能会很大，请你以字符串形式返回。
+
+如果按照上述要求无法得到任何整数，请你返回 "0" 。
+
+ 
+
+**示例 1：**
+
+```
+输入：cost = [4,3,2,5,6,7,2,5,5], target = 9
+输出："7772"
+解释：添加数位 '7' 的成本为 2 ，添加数位 '2' 的成本为 3 。所以 "7772" 的代价为 2*3+ 3*1 = 9 。 "997" 也是满足要求的数字，但 "7772" 是较大的数字。
+ 数字     成本
+  1  ->   4
+  2  ->   3
+  3  ->   2
+  4  ->   5
+  5  ->   6
+  6  ->   7
+  7  ->   2
+  8  ->   5
+  9  ->   5
+```
+
+**示例 2：**
+
+```
+输入：cost = [7,6,5,5,5,6,8,7,8], target = 12
+输出："85"
+解释：添加数位 '8' 的成本是 7 ，添加数位 '5' 的成本是 5 。"85" 的成本为 7 + 5 = 12 。
+```
+
+**示例 3：**
+
+```
+输入：cost = [2,4,6,2,4,6,4,4,4], target = 5
+输出："0"
+解释：总成本是 target 的条件下，无法生成任何整数。
+```
+
+**示例 4：**
+
+```
+输入：cost = [6,10,15,40,40,40,40,40,40], target = 47
+输出："32211"
+```
+
+ **提示：**
+
+- `cost.length == 9`
+- `1 <= cost[i] <= 5000`
+- `1 <= target <= 5000`
+
+```java
+package LeetcodeAlgorithm.N1449FormLargestIntegerWithDigitsThatAdduptoTarget;
+
+public class Solution {
+    public String largestNumber(int[] cost, int target) {
+        if(target == 0) return "";
+        int[] dp = new int[target + 1];
+
+        //baseCase dp[0] = 0, 其他地方的值，应该从dp[0]开始
+        //如果不是从dp[0]开始，那么其值总会为负数
+        for (int t = 1; t <= target; t++) {
+            dp[t] = Integer.MIN_VALUE;      //这里很关键，思考下为-1会出现什么情况？
+            for (int i = 0; i < 9; i++) {
+                if (t >= cost[i]){
+                    dp[t] = Math.max(dp[t], 1 + dp[t - cost[i]]);
+                }
+            }
+        }
+
+        if (dp[target] < 0){
+            return "0";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 8; i >= 0; i--) {
+            while (target >= cost[i] && dp[target] == dp[target - cost[i]] + 1){
+                sb.append(i + 1);
+                target -= cost[i];
+            }
+        }
+
+        return sb.toString();
+    }
+}
+```
+
+#### [1458. 两个子序列的最大点积](https://leetcode-cn.com/problems/max-dot-product-of-two-subsequences/)
+
+难度困难17收藏分享切换为英文关注反馈
+
+给你两个数组 `nums1` 和 `nums2` 。
+
+请你返回 `nums1` 和 `nums2` 中两个长度相同的 **非空** 子序列的最大点积。
+
+数组的非空子序列是通过删除原数组中某些元素（可能一个也不删除）后剩余数字组成的序列，但不能改变数字间相对顺序。比方说，`[2,3,5]` 是 `[1,2,3,4,5]` 的一个子序列而 `[1,5,3]` 不是。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums1 = [2,1,-2,5], nums2 = [3,0,-6]
+输出：18
+解释：从 nums1 中得到子序列 [2,-2] ，从 nums2 中得到子序列 [3,-6] 。
+它们的点积为 (2*3 + (-2)*(-6)) = 18 。
+```
+
+**示例 2：**
+
+```
+输入：nums1 = [3,-2], nums2 = [2,-6,7]
+输出：21
+解释：从 nums1 中得到子序列 [3] ，从 nums2 中得到子序列 [7] 。
+它们的点积为 (3*7) = 21 。
+```
+
+**示例 3：**
+
+```
+输入：nums1 = [-1,-1], nums2 = [1,1]
+输出：-1
+解释：从 nums1 中得到子序列 [-1] ，从 nums2 中得到子序列 [1] 。
+它们的点积为 -1 。
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums1.length, nums2.length <= 500`
+- `-1000 <= nums1[i], nums2[i] <= 100`
+
+ 
+
+```java
+package LeetcodeAlgorithm.N1458MaxDotProductofTwoSubsequences;
+
+public class Solution2 {
+    public int maxDotProduct(int[] nums1, int[] nums2) {
+
+        //注意：本道题 maxDotProduct 最大点乘，必须是自己算出来的值。
+        //所以[-1, -1], [1, 1]这个题算出来的值为 -1; 而不能是 0
+
+        int len1 = nums1.length;
+        int len2 = nums2.length;
+
+        int[][] dp = new int[len1][len2];
+
+        for (int i = 0; i < len1; i++) {
+            for (int j = 0; j < len2; j++) {
+                dp[i][j] = nums1[i] * nums2[j];
+                if (i > 0 && j > 0) dp[i][j] += Math.max(0, dp[i - 1][j - 1]);
+                if (i > 0) dp[i][j] = Math.max(dp[i][j], dp[i - 1][j]);
+                if (j > 0) dp[i][j] = Math.max(dp[i][j], dp[i][j - 1]);
+            }
+        }
+
+        return dp[len1 - 1][len2 - 1];
     }
 }
 ```

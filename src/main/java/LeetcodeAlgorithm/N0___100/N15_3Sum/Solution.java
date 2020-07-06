@@ -1,6 +1,9 @@
 package LeetcodeAlgorithm.N0___100.N15_3Sum;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 //Given an array nums of n integers, are there elements a, b, c in nums such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.
 //
@@ -22,22 +25,25 @@ import java.util.*;
 //
 public class Solution {
     public static List<List<Integer>> threeSum(int[] nums) {
-        List<List<Integer>> res = new LinkedList<>();
-        if (nums == null || nums.length < 3) return res;
+        List<List<Integer>> res = new ArrayList<>();
+        int len = nums.length;
+        if (len < 3) return res;
+
         Arrays.sort(nums);
-        for (int i = 0; i < nums.length - 2 && nums[i] <= 0; i++) {
-            if (i == 0 || (i > 0 && nums[i] != nums[i - 1])) {
-                int lo = i + 1, hi = nums.length - 1, target = 0 - nums[i];
-                while (lo < hi) {
-                    if (target == nums[lo] + nums[hi]) {
-                        res.add(Arrays.asList(nums[i], nums[lo], nums[hi]));
-                        while (lo < hi && nums[lo] == nums[lo + 1]) lo++;
-                        while (lo < hi && nums[hi] == nums[hi - 1]) hi--;
-                        lo++;
-                        hi--;
-                    } else if (target > nums[lo] + nums[hi]) lo++;
-                    else hi--;
+
+        for (int k = 0; k < len - 2 && nums[k] <= 0; k++) {
+            if(k > 0 && nums[k - 1] == nums[k]) continue;
+            int target = -nums[k];
+            int i = k + 1, j = len - 1;
+            while (i < j) {
+                if (nums[i] + nums[j] == target) {
+                    res.add(Arrays.asList(nums[k], nums[i], nums[j]));
+                    while (i < j && nums[i + 1] == nums[i]) i++;
+                    while (i < j && nums[j - 1] == nums[j]) j--;
+                    i++; j--;
                 }
+                else if (nums[i] + nums[j] > target) j--;
+                else i++;
             }
         }
 

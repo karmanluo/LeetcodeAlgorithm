@@ -33,7 +33,7 @@ class ShareData{    //资源类   高内聚---提供功能在内部increment dec
         try{
             //1.判断
             while(number == 0){
-                //等待不能生产
+                //等待不能消费
                 condition.await();
             }
             //2.干活

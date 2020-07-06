@@ -31,29 +31,20 @@ package LeetcodeAlgorithm.N0___100.N33_SearchinRotatedSortedArray;
 * */
 class Solution {
     public int search(int[] nums, int target) {
-        if(nums == null || nums.length == 0){
-            return -1;
-        }
-        int left = 0, right = nums.length - 1;
-        while(left <= right){
-            int mid = (left + right) / 2;
-            if (target == nums[mid]) return mid;
-            if (nums[left] <= nums[mid]){//代表左半边的是递增的
-                if(nums[left] <= target && target <= nums[mid]){//target在左半边，不要右半边
-                    right = mid - 1;
-                }
-                else {
-                    left = mid + 1;
-                }
-            }else {//代表右边是递增的
-                if(nums[mid] <= target && target <= nums[right]){//target在右半边，不要左半边
-                    left = mid + 1;
-                }else {
-                    right = mid - 1;
-                }
+        if (nums == null || nums.length == 0) return -1;
+
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + ((hi - lo) >>> 1);
+            if (nums[mid] < nums[hi]) { //右边有序
+                if (target > nums[mid] && target <= nums[hi]) lo = mid + 1;
+                else hi = mid;
+            } else { //左边有序
+                if (target <= nums[mid] && target >= nums[lo]) hi = mid;
+                else lo = mid + 1;
             }
         }
-        return -1;
+
+        return nums[lo] == target ? lo : -1;
     }
 }
-//leetcode submit region end(Prohibit modification and deletion)

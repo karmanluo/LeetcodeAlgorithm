@@ -8,18 +8,38 @@ package LeetcodeAlgorithm.N0___100.N5_LongestPalindromicSubstring;
 
 public class Solution2 {
     public static String longestPalindrome(String s) {
-        String res = "";
-        int n = s.length();
-        boolean[][] dp = new boolean[n][n];
-        for (int i = n - 1; i >= 0 ; i--) {
-            for (int j = i; j < n; j++) {
-                dp[i][j] = s.charAt(i) == s.charAt(j) && (j - i < 2 || dp[i+1][j-1]);
-                if(dp[i][j] && j - i + 1 > res.length()){
-                    res = s.substring(i, j + 1);
+        int len = s.length();
+
+        if (len < 2){
+            return s;
+        }
+        //dp[i][j]表示字串s[i,...,j]是否是回文
+        boolean dp[][] = new boolean[len][len];
+        for (int i = 0; i < len; i++) {
+            dp[i][i] = true;
+        }
+
+        //先竖着填,再横着
+        int maxLen = 1, startIndex = 0;
+        for (int j = 1; j < len; j++) {
+            for (int i = 0; i < j; i++) {
+                if (s.charAt(i) != s.charAt(j)){
+                    dp[i][j] = false;
+                }else {
+                    if (j - i < 3 || dp[i + 1][j - 1]){
+                        dp[i][j] = true;
+                    }
+                }
+
+                if (dp[i][j] && j - i + 1 > maxLen){
+                    maxLen = j - i + 1;
+                    startIndex = i;
                 }
             }
         }
-        return res;
+
+        return s.substring(startIndex, startIndex + maxLen);
+
     }
 
     public static void main(String[] args) {
