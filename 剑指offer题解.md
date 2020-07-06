@@ -11428,33 +11428,34 @@ public static ListNode addTwoNumbers(ListNode l1, ListNode l2){
 ```
 
 ```java
-public class Solution {
+class Solution {
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        Stack<Integer> s1 = new Stack<Integer>();
-        Stack<Integer> s2 = new Stack<Integer>();
-        
-        while(l1 != null) {
+        Deque<Integer> s1 = new ArrayDeque<>();
+        Deque<Integer> s2 = new ArrayDeque<>();
+
+        while (l1 != null) {
             s1.push(l1.val);
             l1 = l1.next;
         }
-        while(l2 != null) {
+        while (l2 != null) {
             s2.push(l2.val);
             l2 = l2.next;
         }
-        
-        int sum = 0;
-        ListNode list = new ListNode(0);
-        while (!s1.empty() || !s2.empty()) {
-            if (!s1.empty()) sum += s1.pop();
-            if (!s2.empty()) sum += s2.pop();
-            list.val = sum % 10;
-            ListNode head = new ListNode(sum / 10);
-            head.next = list;
-            list = head;
-            sum /= 10;
+
+        ListNode dummy = new ListNode(-1);
+        ListNode curr;
+        int carry = 0;
+        while (carry != 0 || !s1.isEmpty() || !s2.isEmpty()) {
+            int x = s1.isEmpty() ? 0 : s1.pop();
+            int y = s2.isEmpty() ? 0 : s2.pop();
+            int sum = x + y + carry;
+            carry = sum / 10;
+            curr = new ListNode(sum % 10);
+            curr.next = dummy.next;
+            dummy.next = curr;
         }
         
-        return list.val == 0 ? list.next : list;
+        return dummy.next == null ? null : dummy.next;
     }
 }
 ```
