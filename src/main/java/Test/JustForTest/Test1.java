@@ -27,4 +27,15 @@ public class Test1 {
         double a = 3.14;
         System.out.println(a / 2);
     }
+
+    @Test
+    public void testTime() {
+        final long firstInTimeMillis = System.currentTimeMillis();
+        final long setHour = 2;
+        int MINUTES = 1;
+        int HOUES = 1;
+        long finishTimeMillis = firstInTimeMillis + setHour * HOUES * 60 * 60 * 1000;
+
+        System.out.println(finishTimeMillis);
+    }
 }

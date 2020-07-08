@@ -1,6 +1,5 @@
 package Test.Lock;
 
-import javax.sound.sampled.FloatControl;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -81,16 +80,18 @@ class ShareResources{
 public class SyncAndReentrantLockDemo {
     public static void main(String[] args) {
         ShareResources shareResources = new ShareResources();
-        new Thread(()->{
-            shareResources.printAA();
-        }, "线程A").start();
+        while (true) {
+            new Thread(()->{
+                shareResources.printAA();
+            }, "线程A").start();
 
-        new Thread(()->{
-            shareResources.printBB();
-        }, "线程B").start();
+            new Thread(()->{
+                shareResources.printBB();
+            }, "线程B").start();
 
-        new Thread(()->{
-            shareResources.printCC();
-        }, "线程C").start();
+            new Thread(()->{
+                shareResources.printCC();
+            }, "线程C").start();
+        }
     }
 }
