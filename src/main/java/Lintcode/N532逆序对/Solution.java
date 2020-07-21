@@ -1,9 +1,7 @@
 package Lintcode.N532逆序对;
 
 public class Solution {
-    public long reversePairs(int[] A) {
-        return mergeSort(A, 0, A.length - 1);
-    }
+    public long reversePairs(int[] A) {return mergeSort(A, 0, A.length - 1);}
 
     private long mergeSort(int[] A, int low, int high) {
         if (low >= high) return 0;
