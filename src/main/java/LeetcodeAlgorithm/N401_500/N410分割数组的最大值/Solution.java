@@ -2,6 +2,7 @@ package LeetcodeAlgorithm.N401_500.N410分割数组的最大值;
 
 import java.util.Arrays;
 
+//官方题解 动态规划
 public class Solution {
     public int splitArray(int[] nums, int m) {
         int n = nums.length;
