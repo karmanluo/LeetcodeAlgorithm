@@ -3,7 +3,7 @@ package AcWing.N4多重背包问题1;
 import java.util.Scanner;
 
 /**
- *          多重背包问题 ： 每个物品可以被选的次数上限是不同的
+ * 多重背包问题 ： 每个物品可以被选的次数上限是不同的
  */
 /*
         有 N 种物品和一个容量是 V 的背包。
@@ -54,9 +54,10 @@ public class Main {
  *              f[j] = max(f[j], f[j - v[i]] + w[i], f[j - 2 * v[i]] + 2 * w[i], ...)
  *          }
  *      }
- */     int[] dp = new int[V + 1];
+ */
+        int[] dp = new int[V + 1];
         for (int i = 1; i <= n; i++) {
-            for (int j = V; j > 0; j--) {
+            for (int j = V; j >= v[i]; j--) {
                 for (int k = 0; k <= s[i] && k * v[i] <= j; k++) {
                     dp[j] = Math.max(dp[j], dp[j - k * v[i]] + k * w[i]);
                 }
