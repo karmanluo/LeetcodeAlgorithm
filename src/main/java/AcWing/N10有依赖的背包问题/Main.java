@@ -1,4 +1,7 @@
 package AcWing.N10有依赖的背包问题;
+
+import java.util.Scanner;
+
 /*
     有 N 个物品和一个容量是 V 的背包。
 
@@ -37,7 +40,28 @@ package AcWing.N10有依赖的背包问题;
     11
  */
 public class Main {
-    public static void main(String[] args) {
-
+    class Graph {
+        int[] h, e, ne; // 对于每个点k，开一个单链表，存储k所有可以走到的点。h[k]存储这个单链表的头结点
+        int idx = 0;    //idx 每一条边上一条边的编号
     }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int V = sc.nextInt();
+
+        int[] v = new int[n + 1];
+        int[] w = new int[n + 1];
+
+        int root;
+        for (int i = 1; i <= n; i++) {
+            int p;
+            v[i] = sc.nextInt();
+            w[i] = sc.nextInt();
+            p = sc.nextInt();
+            if (p == -1) root = i;
+
+        }
+    }
+
 }
