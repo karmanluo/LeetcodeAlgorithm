@@ -1,4 +1,4 @@
-package AcWing.基础算法.N高精度乘法;
+package AcWing.基础算法.N793高精度乘法;
 
 import java.io.BufferedReader;
 import java.io.IOException;
