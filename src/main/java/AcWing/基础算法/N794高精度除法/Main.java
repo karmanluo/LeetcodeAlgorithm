@@ -26,6 +26,8 @@ import java.io.InputStreamReader;
     1
  */
 public class Main {
+
+    static int r = 0;
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -35,13 +37,14 @@ public class Main {
         int[] A = new int[a.length()];
         for (int i = 0; i < a.length(); i++) A[i] = a.charAt(i) - '0';
 
-        div(A, b);
+        int[] res = div(A, b);
+        for (int re : res) System.out.print(re);
+        System.out.println("\n" + r);
     }
 
-    private static void div(int[] A, int b) {
+    private static int[] div(int[] A, int b) {
         int n = A.length;
         int[] C = new int[n];
-        int r = 0;
 
         for (int i = 0; i < n; i++) {
             r = r * 10 + A[i];
@@ -60,7 +63,6 @@ public class Main {
         int[] res = new int[n - index];
         System.arraycopy(C, index, res, 0, n - index);
 
-        for (int re : res) System.out.print(re);
-        System.out.println("\n" + r);
+        return res;
     }
 }
