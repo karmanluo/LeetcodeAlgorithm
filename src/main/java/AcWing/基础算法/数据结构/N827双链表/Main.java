@@ -64,8 +64,8 @@ public class Main {
             }
         }
 
-        for (int i = 0; r[i] != 1; i = r[i]) {
-            System.out.print(e[r[i]] + " ");
+        for (int i = r[0]; i != 1; i = r[i]) {
+            System.out.print(e[i] + " ");
         }
 
     }
