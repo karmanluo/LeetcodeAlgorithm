@@ -1,4 +1,4 @@
-package AcWing.基础算法.N837连通块中点的数量;
+package AcWing.基础算法.数据结构.N837连通块中点的数量;
 
 import java.io.BufferedReader;
 import java.io.IOException;

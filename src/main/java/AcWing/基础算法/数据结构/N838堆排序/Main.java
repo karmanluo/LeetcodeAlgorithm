@@ -1,4 +1,4 @@
-package AcWing.基础算法.N838堆排序;
+package AcWing.基础算法.数据结构.N838堆排序;
 
 import java.util.Scanner;
 

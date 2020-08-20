@@ -1,4 +1,4 @@
-package AcWing.基础算法.N143最大异或对;
+package AcWing.基础算法.数据结构.N143最大异或对;
 
 import java.io.BufferedReader;
 import java.io.IOException;
