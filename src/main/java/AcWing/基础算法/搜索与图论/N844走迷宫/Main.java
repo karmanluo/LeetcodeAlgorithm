@@ -61,6 +61,10 @@ public class Main {
         System.out.println(bfs());
     }
 
+    /*
+          如果想要记录最短的具体路径，可以开一个prev的一个数组，prev[x][y] = pair;
+          在最后从最后一个点输出一下结果就可以了
+     */
     private static int bfs() {
         Queue<Pair> q = new LinkedList<>();
 
