@@ -38,6 +38,7 @@ public class Main {
     static int idx;
     static int n, m;
     static int[] dist = new int[N];
+    // st 用来记录哪些点现在在队列里面，如果在里面不需要重复添加。减少不必要的计算
     static boolean[] st = new boolean[N];
 
     public static void main(String[] args) {
